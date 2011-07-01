@@ -1,4 +1,4 @@
-<?php
+ <?php
 $topo_class = 'cat-colaboradores';
 $titulopagina = htmlentities($colaborador['colaborador']['nome']);
 $ativa = 9;
@@ -11,7 +11,10 @@ include ('includes/topo.php');
 		<div class="principal">
 			<div id="usuario-descricao">
 				<h1 class="midia no-margin-b"><?=$titulopagina;?></h1>
-				<p><a href="/busca_action.php?buscar=1&amp;formatos=9,10&amp;cidades=<?=$colaborador['colaborador']['cod_cidade']?>" title="Listar autores e colaboradores por cidade"><?=$colaborador['colaborador']['cidade']?></a> - <a href="/busca_action.php?buscar=1&amp;formatos=9,10&amp;estados=<?=$colaborador['colaborador']['cod_estado']?>" title="Listar autores e colaboradores por estado"><?=$colaborador['colaborador']['sigla']?></a></p>
+				<p class="caption"><a href="/busca_action.php?buscar=1&amp;formatos=9,10&amp;cidades=<?=$colaborador['colaborador']['cod_cidade']?>" title="Listar autores e colaboradores por cidade"><?=$colaborador['colaborador']['cidade']?></a> - <a href="/busca_action.php?buscar=1&amp;formatos=9,10&amp;estados=<?=$colaborador['colaborador']['cod_estado']?>" title="Listar autores e colaboradores por estado"><?=$colaborador['colaborador']['sigla']?></a>
+                                    <br>
+                                    Cadastrado em: <?php $datacad = strtotime($colaborador['colaborador']['datacadastro']); echo date("d/m/Y",$datacad); ?>
+                                </p>
 				<p><?=nl2br($colaborador['colaborador']['descricao']);?></p>
         </div>
         
@@ -19,7 +22,7 @@ include ('includes/topo.php');
 			<?php if ($colaborador['colaborador']['imagem']): ?>
 			<div class="foto"> <img src="/exibir_imagem.php?img=<?=$colaborador['colaborador']['imagem']?>&amp;tipo=c&amp;s=28" alt="Imagem do colaborador: <?=$titulopagina;?>" /></div>
 			<?php endif; ?>
-			<p><strong><?=$colaborador['colaborador']['num_arquivos_total'];?> Arquivo(s) aprovados</strong></p>
+			<p><strong>Conteúdos aprovados</strong></p>
 			<ul>
 				<li><a href="/busca_action.php?buscar=1&amp;formatos=2&amp;colaborador=<?=$colaborador['colaborador']['cod_usuario'];?>" title="Listar os conteúdos deste colaborador" class="audio"><?=$colaborador['colaborador']['num_audios'];?> &Aacute;udios</a></li>
 				<li><a href="/busca_action.php?buscar=1&amp;formatos=3&amp;colaborador=<?=$colaborador['colaborador']['cod_usuario'];?>" title="Listar os conteúdos deste colaborador" class="video"><?=$colaborador['colaborador']['num_videos'];?> V&iacute;deos</a></li>
@@ -30,11 +33,12 @@ include ('includes/topo.php');
 		
 		<?php if (count($colaborador['colaborador']['autores'])):?>
         <div id="autores-ativos">
-			<h3 class="mais"><span>Lista de</span>Autores mais ativos vinculados a este colaborador</h3>
+			<h3 class="mais"><span>Lista de</span>Autores vinculados a este colaborador</h3>
 <?php
 $temcount = 1;
 $colspan = 3;
 $cont = 0;
+//print_r($colaborador['colaborador']['autores']);
 foreach ($colaborador['colaborador']['autores'] as $key => $value):
 	$temul = false;
 	if ($temcount == 1)
@@ -92,7 +96,9 @@ foreach ($colaborador['colaborador']['mais_acessados'] as $key => $acessado):
 					<div class="capa"><span class="<?=Util::getIconeConteudo($acessado['cod_formato']);?> no-image"><a href="/<?=Util::getFormatoConteudoBusca($acessado['cod_formato']);?>" title="Ir para página do conteudo">Textos</a></span></div>
 				<?php endif; ?>
 			<?php endif; ?>
-			<?=$acessado['canal']?>
+			<?php if ($acessado['canal']): ?>
+			  <div class="tag-canal"><?=$acessado['canal']?></div>
+            <?php endif; ?>
             <strong><a href="/<?=$acessado['url'];?>" title="Ir para página deste conteúdo"><?=Util::cortaTexto($acessado['titulo'], 60);?></a></strong><br />
 			<?=$acessado['autores'];?>
             <div class="hr"><hr /></div>
@@ -140,7 +146,10 @@ if (!$temul)
         <div id="usuario-site">
           <h3 class="mais"><span>Lista de </span> Sites relacionados</h3>
           <ul>
-<?php foreach ($colaborador['colaborador']['links'] as $key => $links): ?>
+<?php foreach ($colaborador['colaborador']['links'] as $key => $links):
+		if(!preg_match("/^http:\/\//i", $links['url']))
+				$links['url'] = 'http://'.$links['url'];
+?>
             <li><strong><?=$links['site']?></strong> - Site: <a href="<?=$links['url']?>" target="_blank"><?=$links['url']?></a></li>
 <?php endforeach; ?>
           </ul>

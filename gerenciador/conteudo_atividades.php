@@ -1,10 +1,14 @@
 <?php
 include('verificalogin.php');
+include_once(ConfigGerenciadorVO::getDirClassesRaiz().'util/Util.php');
 
 $editar = (int)$_POST['editar'];
 $apagar = (int)$_GET["apagar"];
 $palavrachave = strip_tags($_GET["palavrachave"]);
 $codatividade = $_GET["codatividade"];
+
+$pagina = (int)Util::iif($_GET['pagina'], $_GET['pagina'], 1);
+$inicial = ($pagina - 1) * 30;
 
 include_once("classes/bo/AtividadeBO.php");
 $ativbo = new AtividadeBO;
@@ -27,7 +31,9 @@ if ($apagar && !$palavrachave) {
 	exit();
 }
 
-$lista_atividades = $ativbo->getListaAtividades($palavrachave);
+$lista_atividades = $ativbo->getListaAtividades($palavrachave, $inicial);
+Util::paginacaoComplementoUrl("&amp;palavrachave=".stripcslashes(htmlentities($palavrachave)));
+$paginacao = Util::paginacao($pagina, 30, $lista_atividades['total'], 'conteudo_atividades.php?palavrachave='.$palavrachave);
 
 $paginatitulo = 'Atividades';
 $item_menu = "conteudo";
@@ -54,14 +60,19 @@ include('includes/topo.php');
 	<form method="get" id="form-result" action="conteudo_atividades.php">
 	<input type="hidden" name="apagar" value="1" />
 	<input type="hidden" id="acao" name="acao" value="0" />
+	<?php if($_GET['pagina']):?>
+	<input type="hidden" id="pagina" name="pagina" value="<?=$pagina;?>" />
+	<?php endif;?>
 	
 	<p>
     <label for="textfield2">Filtrar atividades </label>
     <br />
     
-      <input name="palavrachave" type="text" class="txt" id="textfield2" />
+      <input name="palavrachave" type="text" class="txt" id="textfield2" /> <input type="submit" value="Buscar" class="bt-buscar" />
   </p>
-	
+
+    <div class="nav">P&aacute;ginas: <?=Util::iif($paginacao['anterior']['num'], "<a href=\"".$paginacao['anterior']['url']."&amp;palavrachave=".stripcslashes(htmlentities($palavrachave))."\">&laquo; Anterior</a>");?> <?=$paginacao['page_string'];?> <?=Util::iif($paginacao['proxima']['num'], "<a href=\"".$paginacao['proxima']['url']."&amp;palavrachave=".stripcslashes(htmlentities($palavrachave))."\">Pr&oacute;xima &raquo;</a>");?></div>
+        <hr class="both" />
   <table width="100%" border="1" cellspacing="0" cellpadding="0" id="table-conteudo">
         <thead>
           <tr>
@@ -93,6 +104,8 @@ include('includes/topo.php');
           </tr>
         </tfoot>
       </table>
+		<div class="nav">P&aacute;ginas: <?=Util::iif($paginacao['anterior']['num'], "<a href=\"".$paginacao['anterior']['url']."\">&laquo; Anterior</a>");?> <?=$paginacao['page_string'];?> <?=Util::iif($paginacao['proxima']['num'], "<a href=\"".$paginacao['proxima']['url']."\">Pr&oacute;xima &raquo;</a>");?></div>
+        <hr class="both" />
       </form>
       <hr class="both" />
     </div>

@@ -111,4 +111,5 @@ abreEdicaoAutorFicha(<?=$cod;?>);
 </form>
 <script language="javascript" type="text/javascript">
 $("#ficha_telefone_edicao").mask("(99) 9999-9999");
+$('#ficha-tecnica').show();
 </script>

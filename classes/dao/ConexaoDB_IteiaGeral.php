@@ -3,8 +3,8 @@
 class ConexaoDB_IteiaGeral {
 
 	const SERVIDOR = "192.168.0.100";
-	const USUARIO  = "";
-	const SENHA    = "";
+	const USUARIO  = "eduardo";
+	const SENHA    = "eduardo";
 	const DATABASE = "iteia_geral";
 
 	static private $instance;

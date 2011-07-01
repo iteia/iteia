@@ -21,19 +21,35 @@ include ('includes/topo.php');
           <p>O Portal iTEIA tem como missão ser o acervo da produção multimidia de centros culturais nacionais e internacionais, integrando e relacionando conteúdos das redes atuais, como por exemplo, o projeto Pontos de Cultura e o programa Casa Brasil.</p>
           <div class="todos"><a href="/projeto.php" title="Conheça o projeto iTEIA"><strong>Saiba mais</strong></a></div>
         </div>
-		<?php include('includes/banners_lateral.php');?>
+        <div id="boletim">
+          <form method="post" action="boletim.php">
+            <input type="hidden" name="editar" value="1" />
+            <fieldset>
+              <legend class="sub">Boletim iTeia</legend>
+              <label for="mail">Cadastre seu e-mail e receba as novidades do portal iteia</label>
+              <input type="text" id="mail" name="mail" class="txt" />
+              <input class="btn" type="image" src="img/botoes/bt_enviar.gif">
+            </fieldset>
+          </form>
+        </div>
+
+		<?php
+            //Banners
+            include('includes/banners_lateral.php');
+            //Banners END
+        ?>
       </div>
 		<div id="jornal" class="principal">
 			<h2 class="midia">Jornal <span class="azul">i</span>T<span class="verde">E</span><span class="amarelo">I</span><span class="preto">A</span></h2>
 			<?=$homebo->getHtmlUltimasNoticias()?>
-			<div class="todos"><a href="/noticias.php" title="Ir para página de notícias"><strong>Mais notícias</strong></a></div>
+			<div class="todos"><a href="/jornal" title="Ir para página de notícias"><strong>Mais notícias</strong></a></div>
 		</div>
       <div id="inferior" class="principal">
         <?=$homebo->getHtmlConteudoCanais()?>
       </div>
       <div class="lateral">
         <div class="eventos-canal">
-          <h3 class="relacionado">Eventos da semana</h3>
+          <h3 class="relacionado">Pr&oacute;ximos eventos</h3>
 		  <?=$homebo->getHtmlAgenda()?>
           <div class="todos"><a href="/eventos" title="Ir para página de eventos"><strong>Mais eventos</strong></a></div>
         </div>

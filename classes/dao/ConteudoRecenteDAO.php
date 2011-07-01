@@ -61,12 +61,18 @@ class ConteudoRecenteDAO {
 			*/
 			
 			switch($row->cod_formato) {
-				case 1: $url_arquivo = "conteudo_edicao_texto.php?cod="; break;
-                case 2: $url_arquivo = "conteudo_edicao_imagem.php?cod="; break;
-                case 3: $url_arquivo = "conteudo_edicao_audio.php?cod="; break;
-                case 4: $url_arquivo = "conteudo_edicao_video.php?cod="; break;
-                case 5: $url_arquivo = "noticia_edicao.php?cod="; break;
-				case 6: $url_arquivo = "agenda_edicao.php?cod="; break;
+//				case 1: $url_arquivo = "conteudo_edicao_texto.php?cod="; break;
+//                case 2: $url_arquivo = "conteudo_edicao_imagem.php?cod="; break;
+//                case 3: $url_arquivo = "conteudo_edicao_audio.php?cod="; break;
+//                case 4: $url_arquivo = "conteudo_edicao_video.php?cod="; break;
+//                case 5: $url_arquivo = "noticia_edicao.php?cod="; break;
+//				case 6: $url_arquivo = "agenda_edicao.php?cod="; break;
+				case 1: $url_arquivo = "conteudo_publicado_texto.php?cod="; break;
+                case 2: $url_arquivo = "conteudo_publicado_imagem.php?cod="; break;
+                case 3: $url_arquivo = "conteudo_publicado_audio.php?cod="; break;
+                case 4: $url_arquivo = "conteudo_publicado_video.php?cod="; break;
+                case 5: $url_arquivo = "noticia_publicado.php?cod="; break;
+				case 6: $url_arquivo = "agenda_publicado.php?cod="; break;
 			}
 			
 			$array[$row->cod_conteudo] = array(

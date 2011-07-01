@@ -1,6 +1,6 @@
 <?php
-include_once("classes/vo/ConfigGerenciadorVO.php");
-include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/CadastroDAO.php");
+include_once('classes/vo/ConfigGerenciadorVO.php');
+include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/CadastroDAO.php');
 
 class CadastroBO {
 

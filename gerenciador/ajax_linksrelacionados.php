@@ -11,16 +11,9 @@ $titulo = trim($_POST['titulo']);
 $endereco = trim($_POST['endereco']);
 $acao = $_GET['acao'];
 
-function VerificaHttp($url){
-	if (substr($url, 0, 6) != 'http://') {
-		$url = 'http://'.$url;
-	}
-	return $url;
-}
-
 if ($acao == 'adicionar') {
 	if ($titulo && $endereco && $endereco != 'http://')
-		$_SESSION['sites_relacionados'][] = array('titulo' => $titulo, 'endereco' => VerificaHttp($endereco));
+		$_SESSION['sites_relacionados'][] = array('titulo' => $titulo, 'endereco' => Util::VerificaHttp($endereco));
 	$acao = 'listar';
 }
 

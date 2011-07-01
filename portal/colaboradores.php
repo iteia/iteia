@@ -56,7 +56,8 @@ endforeach;
 if (!$temul)
 	echo '</ul>';
 ?>
-        <div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=10&amp;ordem=3" title="Listar colaboradores"><strong>Ver todos</strong></a></div>
+        <!--<div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=10&amp;ordem=3" title="Listar colaboradores"><strong>Ver todos</strong></a></div>-->
+		<div class="todos"><a href="/busca_resultado.php?id1=e33fcc724fa76896d002&amp;id10=8ab7b74f2ab8eb479448" title="Listar colaboradores"><strong>Ver todos</strong></a></div>
       </div>
       <div class="lateral">
         <div class="colaborador" id="cadastre"><strong>Ainda não é cadastrado?<br />
@@ -84,7 +85,8 @@ foreach ($usuariosrecentes as $key => $value):
 endforeach;
 ?>
           </ul>
-          <div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=10" title="Listar colaboradores"><strong>Ver todos</strong></a></div>
+          <!--<div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=10" title="Listar colaboradores"><strong>Ver todos</strong></a></div>-->
+		  <div class="todos"><a href="/busca_resultado.php?id1=0c7f4c2bf6f06d444bfb&amp;id10=6b08ebd221999a8e9a7f" title="Listar colaboradores"><strong>Ver todos</strong></a></div>
         </div>
       </div>
 </div>

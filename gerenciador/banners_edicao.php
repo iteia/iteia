@@ -6,6 +6,9 @@ $editar = (int)$_POST['editar'];
 $codbanner = (int)$_GET["cod"];
 $edicaodados = (int)$_POST["edicaodados"];
 
+//print_r($_FILES);
+//exit;
+
 if ($codbanner)
 	$edicaodados = 1;
 
@@ -63,9 +66,9 @@ $codbanner = (int)$bannerbo->getValorCampo("codbanner");
         <br />
         <input type="text" class="txt" id="textfield" <?=$bannerbo->verificaErroCampo("titulo")?> value="<?=htmlentities(stripslashes($bannerbo->getValorCampo("titulo")))?>" name="titulo" size="80" />
         <br />
-        <label for="textfield2">URL</label>
+        <label for="textfield2">Endereço URL<span>*</span></label>
         <br />
-        <input type="text" class="txt" id="textfield2" name="url" value="http://<?=htmlentities(stripslashes($bannerbo->getValorCampo("url")))?>" size="80" />
+        <input type="text" class="txt" id="textfield2" <?=$bannerbo->verificaErroCampo("url")?> name="url" value="http://<?=htmlentities(stripslashes($bannerbo->getValorCampo("url")))?>" size="80" />
         <br />
         
         <label for="select">Prioridade</label>
@@ -77,12 +80,12 @@ $codbanner = (int)$bannerbo->getValorCampo("codbanner");
         </select>
 <?php if ($_SESSION['logado_dados']['nivel'] > 6): ?>
 <p><input type="checkbox" value="1" name="home" id="checkbox" class="checkbox" <?=Util::iif($bannerbo->getValorCampo("home"), 'checked="checked"')?> />
-        <label for="checkbox">Banner da home (administrador)</label>
+        <label for="checkbox">Banner da home</label>
        </p>
 <?php endif; ?>
         
 <div class="box-imagem">
-    	<div class="visualizar-banner" id="div_imagem_exibicao">
+    <div class="visualizar-banner" id="div_imagem_exibicao">
 <?php
 	if ($bannerbo->getValorCampo('imgtemp')) {
 ?>
@@ -103,9 +106,9 @@ $codbanner = (int)$bannerbo->getValorCampo("codbanner");
 		}
 	}
 ?>
-		</div>
-			<a href="trocar_imagem_banner.php?tipo=banner&amp;cod=<?=$codbanner;?>&amp;height=200&amp;width=305" title="Imagem ilustrativa" class="thickbox">Inserir imagem</a>
-    	</div>
+	</div>
+		<a href="trocar_imagem_banner.php?tipo=banner&amp;cod=<?=$codbanner;?>&amp;height=200&amp;width=305" title="Imagem ilustrativa" class="thickbox">Inserir imagem</a>
+</div>
           
         </fieldset>
         <fieldset id="periodo">

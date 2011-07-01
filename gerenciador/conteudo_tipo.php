@@ -7,8 +7,8 @@ $item_submenu = "inserir";
 include('includes/topo.php');
 ?>
 <h2>Conte&uacute;do &gt; Inserir</h2>
-    <p>Voc&ecirc; pode incluir no portal iTEIA qualquer conte&uacute;do de sua autoria relacionado &agrave; cultura de Pernambuco.</p>
-    <h3 class="titulo">O que voc&ecirc; deseja inserir?</h3>
+    <p>Voc&ecirc; pode incluir no portal iTEIA qualquer conte&uacute;do de sua autoria relacionado &agrave; cultura.</p>
+    <h3 class="titulo">O que voc&ecirc; deseja publicar?</h3>
     <div class="box" id="tipos-conteudo">
        <div>
         <ul>
@@ -39,15 +39,13 @@ Formatos permitidos: JPG, GIF ou PNG.  Postado individualmente ou em galeria.  <
 
 		<small>
 		<?php
-		if ($_SESSION['logado_dados']['nivel'] == 2):
+		//if ($_SESSION['logado_dados']['nivel'] == 2):
+		//*As not&iacute;cias não devem ser publicadas aqui. Apenas os colaboradores podem cadastrar not&iacute;cias no Portal.
+		//else:
 		?>
-		*As not&iacute;cias não devem ser postadas aqui. Apenas os colaboradores podem cadastrar not&iacute;cias no Portal.
+		*As not&iacute;cias não devem ser publicadas aqui. Elas possuem um <a href="noticias.php">espa&ccedil;o espec&iacute;fico no portal</a>.
 		<?php
-		else:
-		?>
-		*As not&iacute;cias não devem ser postadas aqui. Elas possuem um <a href="noticias.php">espa&ccedil;o espec&iacute;fico no portal</a>.
-		<?php
-		endif;
+		//endif;
 		?>
 		<br />
 		</small></div>

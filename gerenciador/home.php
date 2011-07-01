@@ -45,7 +45,7 @@ include('includes/topo.php');
 	<input type="hidden" name="ate" value="<?=$playbo->getValorCampo('ate')?>" />
 	<input type="hidden" id="acao" name="acao" value="0" />
     
-    <p class="descricao">Aqui voc&ecirc; pode escolher conte&uacute;dos para aparecerem na capa do portal iTEIA. Para isso, <a href="home_playlist.php">insira listas de destaque</a> e defina a data e a hora para que ela apare&ccedil;a para os visitantes.</p>
+    <div class="descricao">Aqui voc&ecirc; pode escolher conte&uacute;dos para aparecerem na capa do portal iTEIA. Para isso, <a href="home_playlist.php">insira listas de destaque</a> e defina a data e a hora para que ela apare&ccedil;a para os visitantes.</div>
     <h3 class="titulo">Lista de destaques em exibi&ccedil;&atilde;o</h3>
     <div id="resultado" class="box">
       <table width="100%" border="1" cellspacing="0" cellpadding="0" id="table-conteudo">

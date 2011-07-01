@@ -33,5 +33,5 @@ function executaAcaoHomeSelecionados(num) {
 		if ((item.type == "checkbox") && item.checked && parseInt(item.value))
 			lista_marcados.push(item.value);
 	}
-	$("#mostra_selecionadas_homeconteudo").load("home_ajax.php?get=executa_acao&numacao=" + num + "&itens=" + lista_marcados.join(",") + "&codplaylist=" + cod_playlist);
+	$("#mostra_selecionadas_homeconteudo").load("home_ajax.php?get=executa_acao&numacao=" + num + "&itens=" + lista_marcados.join(",") + "&codplaylist=" + cod_playlist);	
 }

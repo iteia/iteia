@@ -10,7 +10,7 @@ class BannerDAO {
 	}
 
 	public function cadastrar(&$banvo) {
-		$query = $this->banco->sql_insert('Banners', array('cod_usuario' => $_SESSION['logado_dados']['cod_colaborador'], 'cod_sistema' => ConfigVO::getCodSistema(), 'titulo' => $banvo->getTitulo(), 'link' => $banvo->getUrl(), 'peso' => $banvo->getPrioridade(), 'data_inicial' => $banvo->getDataInicial(), 'data_final' => $banvo->getDataFinal(), 'home' => $banvo->getHome(), 'situacao' => '1'));
+		$query = $this->banco->sql_insert('Banners', array('cod_usuario' => $_SESSION['logado_dados']['cod'], 'cod_sistema' => ConfigVO::getCodSistema(), 'titulo' => $banvo->getTitulo(), 'link' => $banvo->getUrl(), 'peso' => $banvo->getPrioridade(), 'data_inicial' => $banvo->getDataInicial(), 'data_final' => $banvo->getDataFinal(), 'home' => $banvo->getHome(), 'situacao' => '1'));
 		return $this->banco->insertId();
 	}
 
@@ -20,7 +20,7 @@ class BannerDAO {
 	}
 
 	public function getBannerVO(&$codbanner) {
-		$sql = "SELECT t1.*, t2.nome, t3.titulo AS url FROM Banners AS t1 LEFT JOIN Usuarios AS t2 ON (t1.cod_usuario=t2.cod_usuario) INNER JOIN Urls AS t3 ON (t2.cod_usuario=t3.cod_item) WHERE t1.cod_banner='".$codbanner."' AND t3.tipo='1'";
+		$sql = "SELECT t1.*, t2.nome, t3.titulo AS url FROM Banners AS t1 LEFT JOIN Usuarios AS t2 ON (t1.cod_usuario=t2.cod_usuario) INNER JOIN Urls AS t3 ON (t2.cod_usuario=t3.cod_item) WHERE t1.cod_banner='".$codbanner."' AND (t3.tipo >= '1' AND t3.tipo <='3')";
 		$sql_result = $this->banco->executaQuery($sql);
 		$sql_row = $this->banco->fetchArray();
 
@@ -33,8 +33,8 @@ class BannerDAO {
 		$banvo->setPrioridade($sql_row["peso"]);
 		$banvo->setDataInicial($sql_row["data_inicial"]);
 		$banvo->setDataFinal($sql_row["data_final"]);
-		$banvo->setCodColaborador($sql_row["cod_colaborador"]);
-		$banvo->setColaborador("<a href=\"".ConfigVO::URL_SITE.$sql_row['url']."\" target=\"_blank\" class=\"ext\" title=\"Visite a página deste colaborador\">".$sql_row['nome']."</a>");
+		$banvo->setCodUsuario($sql_row["cod_usuario"]);
+		$banvo->setColaborador("<a href=\"".ConfigVO::URL_SITE.$sql_row['url']."\" target=\"_blank\" class=\"ext\" title=\"Visite a pÃ¡gina deste colaborador\">".$sql_row['nome']."</a>");
 		return $banvo;
 	}
 
@@ -50,8 +50,14 @@ class BannerDAO {
 		$array['link'] = "banners.php?buscar=$buscar&amp;palavrachave=$palavrachave&amp;buscarpor=$buscarpor&amp;situacao=$situacao&amp;de=$de&amp;ate=$ate";
 		$where = "WHERE t1.excluido='0' AND t1.cod_sistema='".ConfigVO::getCodSistema()."'";
 
-		if (($_SESSION['logado_dados']['nivel'] == 5) || ($_SESSION['logado_dados']['nivel'] == 6))
-		    $where .= " AND t1.cod_usuario='".$_SESSION['logado_dados']['cod_colaborador']."'";
+		if (($_SESSION['logado_dados']['nivel'] >= 5) && ($_SESSION['logado_dados']['nivel'] <= 7))
+		    $where .= " AND (t1.cod_usuario='".$_SESSION['logado_dados']['cod']."'";
+
+		if ($_SESSION['logado_dados']['cod_colaborador'] && $_SESSION['logado_dados']['nivel']!=8)
+		    $where .= " || t1.cod_usuario='".$_SESSION['logado_dados']['cod_colaborador']."'";
+
+                if ($_SESSION['logado_dados']['nivel'] !=8)
+                    $where .= ")";
 
 		if ($buscar) {
 			if ($palavrachave && $palavrachave != 'Buscar') {
@@ -86,11 +92,8 @@ class BannerDAO {
 		}
 
 		$sql = "SELECT t1.cod_banner, t1.titulo, t1.peso, t1.situacao, t2.nome FROM Banners AS t1 LEFT JOIN Usuarios AS t2 ON (t1.cod_usuario=t2.cod_usuario) $where";
-
-		$pesoArray = array(1 => 'Alta', 2 => 'Média', 3 => 'Baixa');
+		$pesoArray = array(1 => 'Alta', 2 => 'MÃ©dia', 3 => 'Baixa');
 		$array['total'] = $this->banco->numRows($this->banco->executaQuery("$sql"));
-
-		//echo $sql;
 
 		$query = $this->banco->executaQuery("$sql ORDER BY cod_banner DESC LIMIT $inicial,$mostrar");
 		while ($row = $this->banco->fetchArray($query)) {
@@ -134,15 +137,21 @@ class BannerDAO {
 		}
 	}
 
-	public function mostrarBanner($home=0) {
-		if ($home)
-			$and = " AND home='1'";
-		$sql_banners_geral = "SELECT * FROM Banners WHERE excluido='0' AND situacao='1' AND (data_inicial = '0000-00-00' OR (data_inicial != '0000-00-00' AND data_inicial <= '".date("Y-m-d")."')) AND (data_final = '0000-00-00' OR (data_final != '0000-00-00' and data_final >= '".date("Y-m-d")."')) and cod_sistema='".ConfigVO::getCodSistema()."' $and";
+	public function mostrarBanner($banbo, $dados) {
+		if($dados['pagina'] == 'index')
+            $and .= " AND home='1'";
+//		else
+//            $and .= " AND home='0'";
+            
+        if(!empty($dados['codigos']))
+            $and .= " AND cod_usuario IN (".implode(", ", $dados['codigos']).")";
+		
+        $sql_banners_geral = "SELECT * FROM Banners WHERE excluido='0' AND situacao='1' AND (data_inicial = '0000-00-00' OR (data_inicial != '0000-00-00' AND data_inicial <= '".date("Y-m-d")."')) AND (data_final = '0000-00-00' OR (data_final != '0000-00-00' and data_final >= '".date("Y-m-d")."')) and cod_sistema='".ConfigVO::getCodSistema()."' $and";
 
-		if (!count($GLOBALS["banners_exibidos"]))
-			$GLOBALS["banners_exibidos"] = array(0);
+		if (!count($banbo->getBannersExibidos()))
+			$banbo->setBannersExibidos(0);
 
-		$banner_selecionado = $this->getBannerAleatorio($sql_banners_geral." AND cod_banner NOT IN (".implode(", ", $GLOBALS["banners_exibidos"]).")");
+		$banner_selecionado = $this->getBannerAleatorio($sql_banners_geral." AND cod_banner NOT IN (".implode(", ", $banbo->getBannersExibidos()).")");
 
 		if (!$banner_selecionado)
 			$banner_selecionado = $this->getBannerAleatorio($sql_banners_geral);
@@ -166,4 +175,18 @@ class BannerDAO {
 		return (int)$banners[$indice_selecionado - 1];
 	}
 
+    public function countBanners($dados){
+        if($dados['pagina'] == 'index')
+            $and .= " AND home='1'";
+        //else
+        //    $and .= " AND home='0'";
+            
+        if(!empty($dados['codigos']))
+            $and .= " AND cod_usuario IN (".implode(", ", $dados['codigos']).")";
+            
+        $sql = "SELECT count(*) FROM Banners WHERE excluido='0' AND situacao='1' AND (data_inicial = '0000-00-00' OR (data_inicial != '0000-00-00' AND data_inicial <= '".date("Y-m-d")."')) AND (data_final = '0000-00-00' OR (data_final != '0000-00-00' and data_final >= '".date("Y-m-d")."')) and cod_sistema='".ConfigVO::getCodSistema()."' $and";
+        $sql_result = $this->banco->executaQuery($sql);
+        $sql_row = $this->banco->fetchArray($sql_result);
+        return $sql_row[0];
+    }
 }

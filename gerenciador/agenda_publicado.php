@@ -44,7 +44,7 @@ include('includes/topo.php');
 	}
 ?>
       </div>
-      <div id="autores" class="separador"><strong>Publicado por:</strong> <a href="<?=ConfigVO::URL_SITE.$colaborador['titulo']?>" target="_blank" class="ext" title="Visite a p&aacute;gina deste colaborador"><?=$colaborador['nome']?></a></div>
+      <!--<div id="autores" class="separador"><strong>Publicado por:</strong> <a href="<?=ConfigVO::URL_SITE.$colaborador['titulo']?>" target="_blank" class="ext" title="Visite a p&aacute;gina deste colaborador"><?=$colaborador['nome']?></a></div>-->
 
       <div class="separador"><strong>Conte&uacute;dos relacionados: </strong>
         <ul>

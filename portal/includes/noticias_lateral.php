@@ -12,7 +12,12 @@ foreach ($noticias_datas as $not) {
 	}
 	//if ($conteudo['conteudo']['cod_conteudo'] != $not['cod']) {
 ?>
-<li<?=(($cont == $totalnot)?' class="no-border no-margin-b no-padding-b"':'')?>><p><small><?=$not['periodo']?></small> <br /><a href="/<?=$not['url'];?>"<?=(($cont == $totalnot)?' class="ultimas"':'')?>><?=$not['titulo'];?></a></p>
+<li<?=(($cont == $totalnot)?' class="no-border no-margin-b no-padding-b"':'')?>>
+<p>
+	<small><?=$not['periodo']?></small>
+	<br />
+	<a href="/<?=$not['url'];?>"<?=(($cont == $totalnot)?' class="ultimas"':'')?>><?=$not['titulo'];?></a>
+</p>
 <?php
 	//}
 	$cont++;

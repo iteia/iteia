@@ -1,5 +1,5 @@
 <?php
-include_once('classes/vo/ConfigPortalVO.php');
+include_once(dirname(__file__).'/../vo/ConfigPortalVO.php');
 include_once(ConfigPortalVO::getDirClassesRaiz().'vo/ConfigVO.php');
 include_once(ConfigPortalVO::getDirClassesRaiz().'vo/BuscaDadosVO.php');
 include_once(ConfigPortalVO::getDirClassesRaiz().'dao/BuscaCacheDAO.php');
@@ -17,7 +17,8 @@ abstract class BuscaCacheBO {
 	protected $obriga_palavra = false;
 	protected $pagina = 0;
 	protected $paginas = 0;
-	protected $total = 0;
+    protected $autor = 0;
+    protected $total = 0;
 	protected $palavrachave = '';
 	protected $data1_quandovazio = '2007-01-01';
 	protected $limite_meses = 0;
@@ -38,15 +39,17 @@ abstract class BuscaCacheBO {
 			if ($this->resultado_busca = $this->buscadao->getBuscaCache($this->id, $this->pagina)) {
 				$this->total = $this->resultado_busca[0]['total'];
 				$this->palavrachave = $this->resultado_busca[0]['palavra'];
+                $this->autor = $this->resultado_busca[0]['autor'];
 			}
 		}
 	}
 
 	public function efetuaBusca(&$dados) {
 		if ($result = $this->getResultadoBusca($dados)) {
-			$this->id = Util::gera_randomico('str', 20);
-			$this->buscadao->setBuscaCache($this->id, $result['resultado'], $result['total'], $this->buscavo->getPalavraChave(), (time() + $this->expiracao));
-			return $this->id;
+			//$this->id = Util::gera_randomico('str', 20);
+			$id = ($this->id ? $this->id : Util::gera_randomico('str', 20));
+			$this->buscadao->setBuscaCache($id, $result['resultado'], $result['total'], $this->buscavo->getPalavraChave(), $this->autor, (time() + $this->expiracao));
+			return $id;
 		}
 		return 0;
 	}
@@ -121,6 +124,10 @@ abstract class BuscaCacheBO {
 				$this->buscavo->setCodCidade((int)$dados['codcidade']);
 				$this->autoriza_busca = true;
 			}
+			if ((int)$dados['codpais']) {
+				$this->buscavo->setCodEstado((int)$dados['codpais']);
+				$this->autoriza_busca = true;
+			}
 			if ((int)$dados['formato']) {
 				$this->buscavo->setCodFormato((int)$dados['formato']);
 				$this->autoriza_busca = true;
@@ -137,8 +144,10 @@ abstract class BuscaCacheBO {
 
 		$this->buscavo->setDataInicial($data1);
 		$this->buscavo->setDataFinal($data2);
-		if (is_array($dados['extras']))
+		if (is_array($dados['extras'])){
 			$this->buscavo->setParametrosExtra($dados['extras']);
+            $this->autor = $dados['extras']['autor'];
+        }
 		if (!$this->obriga_palavra)
 			$this->autoriza_busca = true;
 		elseif (!count($bdadosvo->getPalavraChave()))
@@ -191,7 +200,6 @@ abstract class BuscaCacheBO {
 	protected function ordenaResultado(&$resultadobusca) {
 		$result = array();
 		$result_temp = array();
-		
 		foreach ($resultadobusca as $tipo => $itensresult) {
 			foreach ($itensresult as $itemdados) {
 				if ($this->ordem == 1)
@@ -251,5 +259,9 @@ abstract class BuscaCacheBO {
 	public function getPalavraChave() {
 		return $this->palavrachave;
 	}
+
+	public function getAutor() {
+		return $this->autor;
+        }
 
 }

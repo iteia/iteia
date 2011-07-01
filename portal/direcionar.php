@@ -11,6 +11,7 @@ if ($novaurl) {
 	$url_partes = explode('/', $_SERVER['SCRIPT_URL']);
 	if (($_GET['tipo'] == 4) && isset($url_partes[2])) {
 		$pasta = '';
+		
 		switch ((int)$_GET['codformato']) {
 			case 1: $pasta = 'textos'; break;
 			case 2: $pasta = 'imagens'; break;
@@ -36,7 +37,6 @@ if ($novaurl) {
 }
 
 //print_r($endereco_pasta); exit();
-
 $direcionar = $dirbo->getTipoConteudo(trim($endereco_pasta), $_GET['tipo']);
 if (!$direcionar['cod_item'])
 	$direcionar = $dirbo->getTipoConteudo(trim($_GET['endereco']), $_GET['tipo']);
@@ -88,7 +88,12 @@ if ($direcionar['cod_item']) {
         case 4:
             include_once('classes/bo/ConteudoExibicaoBO.php');
             $contbo = new ConteudoExibicaoBO($direcionar['cod_item'], $direcionar['cod_formato']);
-            return $contbo->exibirConteudo();
+	    return $contbo->exibirConteudo();
+            die;
+            break;
+        case 5:
+			$_GET['cod'] = $direcionar['cod_item'];
+            include_once('canal.php');
             die;
             break;
     }

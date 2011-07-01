@@ -12,6 +12,8 @@ abstract class ConteudoBO {
 
 	public function __construct() {
 		$this->direitosbo = new DireitosBO;
+		$cod = $this->direitosbo->getCodLicencaPadrao($_SESSION['logado_cod']);
+		$this->dadosform = $this->direitosbo->setDadosCamposEdicao($cod['licenca']);
 	}
 
 	abstract protected function setDadosForm(&$dadosform);
@@ -24,8 +26,8 @@ abstract class ConteudoBO {
 	}
 
 	public function editar(&$dadosform, &$arquivos) {
-		$this->setDadosForm($dadosform);
-		$this->setArquivos($arquivos);
+        $this->setDadosForm($dadosform);
+        $this->setArquivos($arquivos);
 		try {
 			$this->validaDados();
 		} catch (Exception $e) {
@@ -118,30 +120,36 @@ abstract class ConteudoBO {
 	}
 
 	protected function setSessionAutoresFicha($codconteudo, &$contdao, &$sessao_id) {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AutorDAO.php");
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."vo/AutorVO.php");
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/EstadoDAO.php");
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AtividadeDAO.php");
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/CadastroDAO.php");
+		include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
+		include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/AtividadeDAO.php');
 		
-		$autordao = new AutorDAO;
-		$estadodao = new EstadoDAO;
+		$usrdao = new UsuarioDAO;
 		$ativdao = new AtividadeDAO;
-		$caddao = new CadastroDAO;
+		
 		
 		$lista_ficha = $contdao->getAutoresFicha($codconteudo);
 		foreach ($lista_ficha as $ficha) {
-			$autorvo = $autordao->getAutorVO($ficha['cod_usuario']);
-			$_SESSION['sess_conteudo_autores_ficha'][$sessao_id][$ficha['cod_usuario']] = array(
-				'codautor' => $ficha['cod_usuario'],
-				'nome' => $autorvo->getNome(),
-				'wiki' => $caddao->checaAutorWiki($ficha['cod_usuario']),
-				'atividade' => $ficha['cod_atividade'],
-				'nome_atividade' => $ativdao->getAtividade($ficha['cod_atividade']),
-				'estado' => $estadodao->getSiglaEstado($autorvo->getCodEstado()),
-				'descricao' => $autorvo->getDescricao(),
-				'falecido' => Util::iif($autorvo->getDataFalecimento() != '0000-00-00', 1, 0),
+			$dadosusuario = $usrdao->getUsuarioDados($ficha['cod_usuario']);
+			$_SESSION['sess_conteudo_autores_ficha'][$sessao_id][$dadosusuario['cod_usuario']] = array(
+				'codautor' 			=> $dadosusuario['cod_usuario'],
+				'nome'			 	=> $dadosusuario['nome'],
+				'atividade' 		=> $ficha['cod_atividade'],
+				'wiki' 				=> $usrdao->checaAutorWiki($dadosusuario['cod_usuario']),
+				'nome_atividade' 	=> $ativdao->getAtividade($ficha['cod_atividade']),
+				'estado' 			=> $dadosusuario['sigla'],
+				'descricao' 		=> $this->dados_get['descricao'],
+				'falecido' 			=> Util::iif($dadosusuario['data_falecimento'] != '0000-00-00', 1, 0)
 			);
 		}
 	}
+    
+    protected function validaColaborador(){
+        if(sizeof($_SESSION['colab_lista']) > 1){
+            if($this->dadosform['colaborador_aprov'] == 0){
+                $this->erro_mensagens[] = "Selecione ao menos um colaborador para solicitar aprovação";
+                $this->erro_campos[] = "colaborador_aprov";
+            }
+        }
+    }
+    
 }

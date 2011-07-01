@@ -10,7 +10,7 @@ class TextoExibicaoBO {
     }
 
     public function exibirConteudo(&$codconteudo, &$conteudo, &$comentbo) {
-        $conteudo['dados_arquivo'] = $this->textodao->getArquivoTexto($codconteudo);
+        $conteudo['dados_arquivo'] = $this->textodao->getListArquivosCompletos($codconteudo);
         
         include('includes/include_visualizacao_texto.php');
     }

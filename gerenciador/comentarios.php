@@ -22,7 +22,7 @@ var cod = <?=$codconteudo;?>;
     <form action="comentarios.php" method="get" id="box-busca" onsubmit="return false;">
     <label for="textfield" class="display-none">Palavras-chave</label>
     <input type="hidden" name="buscar" value="1" />
-    <input type="hidden" name="buscarpor" value="comentario" id="relacionar_buscarpor" />
+    <input type="hidden" name="buscarpor" value="todos" id="relacionar_buscarpor" />
       <input name="text" type="text" class="txt" id="relacionar_palavrachave"  onfocus="if (this.value == 'Buscar') {this.value = '';}" onblur="if (this.value == '') {this.value = 'Buscar';}" value="Buscar"  />
       <input type="image" src="img/ico/magnifier.gif" alt="Buscar" class="bt-buscar-img" onclick="javascript:buscaComentariosNavegacao(0, 1);" />
       <a href="comentarios_busca_popup.php?height=280&amp;width=310" title="Busca avan&ccedil;ada" class="thickbox">Busca avan&ccedil;ada</a>

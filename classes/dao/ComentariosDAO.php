@@ -21,98 +21,52 @@ class ComentariosDAO {
 	public function cadastrarComentario(&$comentvo) {
 		// pego as opções dos comentários
 		$configs = $this->getConfiguracoes();
-
+        
 		// se precisar de aprovação
 		if ($configs->PrecisaAprovacao) $disponivel = 2;
 		else $disponivel = 1;
-
+        
 		// pego as palavras da moderação
 		$palavrasmoderacao = $configs->PalavrasModeracao;
+		$palavrasmoderacao = str_replace(' ','',$palavrasmoderacao);
 		$palavrasmoderacao = explode(',', $palavrasmoderacao);
 		
-		$palavrascomentario = explode(' ', $comentvo->getComentario());
+		$palavrascomentario = explode(' ', $comentvo->getComentario().' '.$comentvo->getSite());
 			
-		foreach ($palavrascomentario as $palavrac) {
-			$palavrac = str_replace(array(',', '.', '"', '\''), '', $palavrac);
-			$sql = "SELECT CodSistema FROM Comentarios_Opcoes WHERE FIND_IN_SET('".stripslashes(strtolower($palavrac))."', REPLACE(LOWER(PalavrasModeracao), ' ', ''))";
-			if ($this->banco->numRows($this->banco->executaQuery($sql))) {
+		$texto = $comentvo->getComentario().' '.$comentvo->getSite().' '.$comentvo->getEmail().' '.$comentvo->getNome();
+		
+		foreach($palavrasmoderacao as $palavramod){
+			if($palavramod == '') continue;
+			if(preg_match("/".$palavramod."/",$texto) == 1){
 				$disponivel = 2;
-				break;
+				break;			
 			}
-			//foreach ($palavrasmoderacao as $palavra) {
-			//	if (@eregi($palavrac, $palavra)) { $disponivel = 2; break 2; }	
-			//}
 		}
 		
-		
-		/*
-		foreach ($palavrasmoderacao as $palavra) {
-			
-			if (@eregi(trim($palavra), $comentvo->getComentario())) 	{ $disponivel = 2; break; }
-			elseif (@eregi(trim($palavra), $comentvo->getNome())) 		{ $disponivel = 2; break; }
-			elseif (@eregi(trim($palavra), $comentvo->getSite())) 		{ $disponivel = 2; break; }
-			elseif (@eregi(trim($palavra), $comentvo->getEmail())) 		{ $disponivel = 2; break; }
-			elseif (@eregi(trim($palavra), $_SERVER['REMOTE_ADDR'])) 	{ $disponivel = 2; break; }
-			
-			//if (@strstr($comentvo->getComentario(), $palavra) || @strstr($comentvo->getNome(), $palavra) || @strstr($comentvo->getSite(), $palavra) || @strstr($comentvo->getEmail(), $palavra) || @strstr($_SERVER['REMOTE_ADDR'], $palavra)) {
-			//	echo $palavra;
-			//if ((strpos($palavra, $comentvo->getComentario()))) {
-			//	$disponivel = 2;
-			//	break;
-			//}
-		}
-		*/
-		
-		//echo $disponivel;
-		//echo $palavra; die;
-		
-		//teste comentario eduardo kmf lalala sei la coisa
-
 		// pego as palavras da lista negra
 		$palavraslistanegra = $configs->PalavrasListaNegra;
+		$palavraslistanegra = str_replace(' ','',$palavraslistanegra);
 		$palavraslistanegra = explode(',', $palavraslistanegra);
 		
-		$palavrascomentario = explode(' ', $comentvo->getComentario());
+		$palavrascomentario = explode(' ', $comentvo->getComentario().' '.$comentvo->getSite());
+
+		$texto = $comentvo->getComentario().' '.$comentvo->getSite().' '.$comentvo->getEmail().' '.$comentvo->getNome();
 		
-		foreach ($palavrascomentario as $palavrac) {
-			$palavrac = str_replace(array(',', '.', '"', '\''), '', $palavrac);
-			$sql = "SELECT CodSistema FROM Comentarios_Opcoes WHERE FIND_IN_SET('".stripslashes(strtolower($palavrac))."', REPLACE(LOWER(PalavrasListaNegra), ' ', ''))";
-			if ($this->banco->numRows($this->banco->executaQuery($sql))) {
+		foreach($palavraslistanegra as $palavramod) {
+			if($palavramod == '') continue;
+			if(preg_match("/".$palavramod."/",$texto) == 1) {
 				$disponivel = 3;
-				break;
+				break;			
 			}
-		}
-		
-		/*
-			
-		foreach ($palavrascomentario as $palavrac) {
-			foreach ($palavraslistanegra as $palavra) {
-				if (@eregi($palavrac, $palavra)) { $disponivel = 3; break 2; }	
-			}
-		}
-		
-		*/
-		
-		/*
-		foreach ($palavraslistanegra as $palavra) {
-			//if (@eregi($palavra, $comentvo->getComentario()) || @eregi($palavra, $comentvo->getNome()) || @eregi($palavra, $comentvo->getSite()) || @eregi($palavra, $comentvo->getEmail()) || @eregi($palavra, $_SERVER['REMOTE_ADDR'])) {
-			//if ((@strpos($palavra, $comentvo->getComentario())) || (@strpos($palavra, $comentvo->getNome())) || (@strpos($palavra, $comentvo->getSite())) || (@strpos($palavra, $comentvo->getEmail())) || (@strpos($palavra, $_SERVER['REMOTE_ADDR']))) {
-			//if (@strstr($comentvo->getComentario(), $palavra) || @strstr($comentvo->getNome(), $palavra) || @strstr($comentvo->getSite(), $palavra) || @strstr($comentvo->getEmail(), $palavra) || @strstr($_SERVER['REMOTE_ADDR'], $palavra)) {
-			//	$disponivel = 3;
-			//	break;
-			//}
-			
-			if (@eregi(trim($palavra), $comentvo->getComentario())) 	{ $disponivel = 3; break; }
-			elseif (@eregi(trim($palavra), $comentvo->getNome())) 		{ $disponivel = 3; break; }
-			elseif (@eregi(trim($palavra), $comentvo->getSite())) 		{ $disponivel = 3; break; }
-			elseif (@eregi(trim($palavra), $comentvo->getEmail())) 		{ $disponivel = 3; break; }
-			elseif (@eregi(trim($palavra), $_SERVER['REMOTE_ADDR'])) 	{ $disponivel = 3; break; }
-			
-		}
-		
-		*/
-		
-		//echo $disponivel; die;
+		}		
+
+		include_once(dirname(__FILE__).'/../util/Akismet.php');
+		$akismet = new Akismet(ConfigVO::getUrlSite(), '409e681f4638');
+		$akismet->setCommentAuthor($comentvo->getNome());
+		$akismet->setCommentAuthorEmail($comentvo->getEmail());
+		$akismet->setCommentAuthorURL($comentvo->getSite());
+		$akismet->setCommentContent($comentvo->getComentario());
+		if($akismet->isCommentSpam()) $disponivel = 3;
 
         $sql = "INSERT INTO Conteudo_Comentarios VALUES (NULL, '".$comentvo->getCodConteudo()."', '".$comentvo->getNome()."', '".$comentvo->getEmail()."', '".$comentvo->getSite()."', '".$comentvo->getComentario()."', NOW(), ".$disponivel.")";
         $this->banco->executaQuery($sql);
@@ -166,6 +120,15 @@ class ComentariosDAO {
 		$array['link'] = "ajax_conteudo.php?get=buscar_comentarios&buscar=1&palavrachave=$palavrachave&buscarpor=$buscarpor&de=$de&ate=$ate&mostrar=$mostrar&cod=$cod";
 
 		$where = "WHERE t1.disponivel != '0'";
+		
+		//if($_SESSION['logado_dados']['nivel'] == 8){
+		//	//Temporário
+		//	$ate = date("d/m/Y");
+		//	$de = "01/01/2010";
+		//	$where = " ";
+		//	//print_r($dados);
+		//	//Temporário fim
+		//}
 
 		if ((int)$cod) {
 			$where .= " AND t1.cod_conteudo='".$cod."'";
@@ -178,6 +141,17 @@ class ComentariosDAO {
 					case "comentario":
 						$where .= " AND t1.comentario LIKE '%$palavrachave%'";
 					break;
+                                        /* Adicionado */
+                                        case "autor":
+                                                $where .= " AND t1.autor LIKE '%$palavrachave%'";
+                                        break;
+                                        case "email":
+                                                $where .= " AND t1.email LIKE '%$palavrachave%'";
+                                        break;
+                                        case "todos":
+                                                $where .= " AND (t1.comentario LIKE '%$palavrachave%' OR t1.autor LIKE '%$palavrachave%' OR t1.email LIKE '%$palavrachave%')";
+                                        break;
+                                        /* Adicionado Fim*/
 				}
 			}
 
@@ -295,17 +269,22 @@ class ComentariosDAO {
 	}
 
 	private function menuComentario($situacao, $url, $cod, $pagina) {
-		if ($situacao == 1) // aprovado
+		if ($situacao == 1){ // aprovado
+            $html_menu[] = "<strong class=\"aprv\">Aprovado</strong>\n";
 			$html_menu[] = "<a href=\"javascript:void(0);\" onclick=\"javascript:submeteAcoesComentario(3, '".$url."&codcomentario=".$cod."&pagina=".$pagina."');\" class=\"rejeitar\" title=\"Rejeitar\">Rejeitar</a>\n";
-		if ($situacao == 2) { // aguardando
+        }
+		if ($situacao == 2 ) { // aguardando
 			$html_menu[] = "<a href=\"javascript:void(0);\" onclick=\"javascript:submeteAcoesComentario(2, '".$url."&codcomentario=".$cod."&pagina=".$pagina."');\" class=\"aprovar\" title=\"Aprovar\">Aprovar</a>\n";
 			$html_menu[] = "<a href=\"javascript:void(0);\" onclick=\"javascript:submeteAcoesComentario(3, '".$url."&codcomentario=".$cod."&pagina=".$pagina."');\" class=\"rejeitar\" title=\"Rejeitar\">Rejeitar</a>\n";
 		}
-		if ($situacao == 3) // rejeitado
+        
+		if ($situacao == 3){ // rejeitado
 			$html_menu[] = "<a href=\"javascript:void(0);\" onclick=\"javascript:submeteAcoesComentario(2, '".$url."&codcomentario=".$cod."&pagina=".$pagina."');\" class=\"aprovar\" title=\"Aprovar\">Aprovar</a>\n";
+            $html_menu[] = "<strong class=\"rej\">Rejeitado</strong>\n";
+        }
 
 		//$html_menu[] = "<a href=\"javascript:void(0);\" onclick=\"javascript:submeteAcoesComentario(1, '".$url."&codcomentario=".$cod."&pagina=".$pagina."');\">Apagar</a>\n";
-		return implode(' | ', $html_menu);
+		return "<div class=\"acoes-coment\">".implode(' | ', $html_menu)."<div class=\"acoes-coment\">";
 	}
 
 	public function executaAcoes($acao, $codcomentario) {

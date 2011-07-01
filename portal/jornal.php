@@ -1,4 +1,5 @@
 <?php
+
 include_once('classes/bo/NoticiaExibicaoBO.php');
 $notbo = new NoticiaExibicaoBO;
 
@@ -34,6 +35,11 @@ foreach ($noticias as $key => $value):
       <ul class="noticias-lista">
     <?php foreach ($value as $ind => $valueb): ?>
         <li<?=(!isset($value[$ind + 1]))?' class="no-border no-margin-b"':''?>><?=substr($valueb['periodo'], 12, 3)?>h<?=substr($valueb['periodo'], 16, 6)?>
+		
+		<?php if($valueb['cod_segmento']): ?>
+		  | <span class="tag-canal"><?=Util::getHtmlCanal($valueb['cod_segmento']);?></span>
+		<?php endif; ?>
+		
           <h1><a href="/<?=$valueb['url'];?>" title="Ir para página deste conteúdo"><?=$valueb['titulo']?></a></h1>
         </li>
     <?php endforeach; ?>

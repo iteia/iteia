@@ -2,6 +2,7 @@
 class ConteudoExibicaoFactory {
 
 	public static function getFactory($codformato) {
+		
 		switch ($codformato) {
 			case 1:
 				include_once('TextoExibicaoBO.php');

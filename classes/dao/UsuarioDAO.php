@@ -1,5 +1,5 @@
 <?php
-include_once("ConexaoDB.php");
+include_once('ConexaoDB.php');
 
 class UsuarioDAO {
 
@@ -37,13 +37,14 @@ class UsuarioDAO {
 		while (!$tenta);
 		*/
 
-		switch ($usuariovo->getCodTipo()) {
+		/*switch ($usuariovo->getCodTipo()) {
 			case 1: $pretitulo = 'colaboradores'; break;
 			case 2: $pretitulo = 'autores'; break;
 			case 3: $pretitulo = 'grupos'; break;
-		}
+		}*/
 
-		$url = $pretitulo.'/'.$usuariovo->getUrl();
+		//$url = $pretitulo.'/'.$usuariovo->getUrl();
+		$url = $usuariovo->getUrl();
 		$sql = "insert into Urls values ('".$url."', '".$cod_usuario."', '".$usuariovo->getCodTipo()."', '".ConfigVO::getCodSistema()."')";
 		$tenta = $this->banco->executaQuery($sql);
 
@@ -84,28 +85,28 @@ class UsuarioDAO {
 		}
 		*/
 
-		switch ($usuariovo->getCodTipo()) {
+		/*switch ($usuariovo->getCodTipo()) {
 			case 1: $pretitulo = 'colaboradores'; break;
 			case 2: $pretitulo = 'autores'; break;
 			case 3: $pretitulo = 'grupos'; break;
-		}
+		}*/
 
 		$pasta_titulo = '';
 		$sql = "SELECT titulo from Urls where cod_item='".$usuariovo->getCodUsuario()."' AND tipo='".$usuariovo->getCodTipo()."' and cod_sistema = '".ConfigVO::getCodSistema()."';";
 		$sql_result = $this->banco->executaQuery($sql);
 		$sql_row = mysql_fetch_array($sql_result);
-		$titulo_atual = $sql_row[0];
+		/*$titulo_atual = $sql_row[0];
 		$titulo_partes = explode('/', $titulo_atual);
 		if ($titulo_partes[1])
-			$pasta_titulo = $pretitulo.'/';
+			$pasta_titulo = $pretitulo.'/';*/
 
 		if ($usuariovo->getUrl()) {
 			$url = $usuariovo->getUrl();
-			
-			$url = explode('/', $url);
+
+			/*$url = explode('/', $url);
 			if (count($url))
-				$url = end($url);
-			
+				$url = end($url);*/
+
 			$sql = "update Urls set titulo='".$pasta_titulo.$url."' where cod_item='".$usuariovo->getCodUsuario()."' and tipo='".$usuariovo->getCodTipo()."' and cod_sistema = '".ConfigVO::getCodSistema()."'";
 			$tenta = $this->banco->executaQuery($sql);
 			$this->banco->sql_update('Usuarios', array('url' => $pasta_titulo.$url), "cod_usuario='".$usuariovo->getCodUsuario()."'");
@@ -178,7 +179,7 @@ class UsuarioDAO {
 	public function existeFinalEndereco($finalendereco, $codusuario = 0, $tipo = 0) {
 		//$sql = "select cod_usuario from Usuarios where url = '".$finalendereco."' and disponivel = 1 and cod_tipo='".$codtipo."'";
 		$titulo_pasta = '';
-		if ($codusuario) {
+		/*if ($codusuario) {
 			$sql = "select titulo from Urls where cod_item = '".$codusuario."' and tipo = '".$tipo."' and cod_sistema='".ConfigVO::getCodSistema()."';";
 			$sql_result = $this->banco->executaQuery($sql);
 			$sql_row = $this->banco->fetchArray();
@@ -190,7 +191,7 @@ class UsuarioDAO {
 					case 3: $titulo_pasta = 'grupos/'; break;
 				}
 			}
-		}
+		}*/
 
 		$sql = "select cod_item from Urls where titulo = '".$titulo_pasta.$finalendereco."' and cod_sistema='".ConfigVO::getCodSistema()."'";
 		if ($codusuario)
@@ -274,13 +275,34 @@ class UsuarioDAO {
 
 	public function getUsuarioDados($codusuario) {
 		$sql = "SELECT t1.*, t3.sigla, t3.cod_estado, t4.cod_cidade, t4.cidade, t5.titulo AS url FROM Usuarios AS t1 LEFT JOIN Estados AS t3 ON (t1.cod_estado=t3.cod_estado) LEFT JOIN Cidades AS t4 ON (t1.cod_cidade=t4.cod_cidade) LEFT JOIN Urls AS t5 ON (t1.cod_usuario=t5.cod_item) WHERE t1.cod_usuario='".$codusuario."' AND t1.cod_sistema='".ConfigVO::getCodSistema()."' AND t5.tipo=t1.cod_tipo;";
+
 		$query = $this->banco->executaQuery($sql);
 		$row = $this->banco->fetchArray($query);
 		$row['num_conteudo'] = (int)(!$this->checaAutorWiki($codusuario) ? $this->getNumeroConteudoAutorSemFicha($codusuario, 0) : $this->getNumeroConteudoUsuario($codusuario, 0, 2));
 		$row['autor_num_conteudo'] = $this->getTotalConteudoAutor($codusuario);
+		
+		if ($row['cod_tipo'] == 2) {
+			if ($row['nome'] == '') {
+				$sql1 = "select nome_completo from Autores where cod_usuario=".$codusuario;
+				$query1 = $this->banco->executaQuery($sql1);
+				$row1 = $this->banco->fetchArray($query1);
+				$row['nome'] = $row1['nome_completo'];
+			}
+		}
+		
 		return $row;
 	}
 	
+	public function getListaColaboradoresEdicao($codusuario) {
+		$dados_autores = array();
+		$sql = "select t1.cod_usuario, t1.nome, t2.responsavel FROM Usuarios AS t1 LEFT JOIN Colaboradores_Integrantes AS t2 ON (t1.cod_usuario=t2.cod_colaborador) WHERE t2.cod_autor = '".$codusuario."' AND t1.situacao='3' AND t1.disponivel='1' ORDER BY t1.nome";
+		//$sql = "select t1.cod_usuario, t1.nome FROM Usuarios AS t1 LEFT JOIN Colaboradores_Integrantes AS t2 ON (t1.cod_usuario=t2.cod_colaborador) WHERE t2.cod_autor = '".$codusuario."' AND t1.situacao='3' AND t2.responsavel='1' AND t1.disponivel='1' ORDER BY t1.nome";
+		$sql_result = $this->banco->executaQuery($sql);
+		while ($sql_row = $this->banco->fetchArray($sql_result))
+			$dados_autores[$sql_row['cod_usuario']] = $sql_row;
+		return $dados_autores;
+	}
+
 	public function getTotalConteudoAutor($codusuario) {
 		$sql = "SELECT COUNT(t1.cod_conteudo) AS total FROM Conteudo_Autores_Ficha AS t1 INNER JOIN Conteudo AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) WHERE t2.excluido='0' AND t2.publicado='1' AND t2.situacao='1' AND t2.cod_formato IN (1,2,3,4) AND t2.cod_sistema='".ConfigVO::getCodSistema()."' AND t1.cod_usuario='".$codusuario."' GROUP BY t1.cod_usuario";
 		$sql_result = $this->banco->executaQuery($sql);
@@ -324,7 +346,7 @@ class UsuarioDAO {
 
 		$tipoarray = array(1 => 'Colaborador', 2 => 'Autor', 3 => 'Grupo');
 		$array['total'] = $this->banco->numRows($this->banco->executaQuery($sql));
-
+		
 		$query = $this->banco->executaQuery("SELECT * FROM $visao WHERE cod_tipo='".$tipo."' AND cod_sistema='".ConfigVO::getCodSistema()."' ORDER BY cod_usuario DESC LIMIT $inicial,$mostrar");
 		//$query = $this->banco->executaQuery("SELECT t1.* FROM $visao AS t1 LEFT JOIN Usuarios_Niveis AS t2 ON (t1.cod_usuario=t2.cod_usuario) WHERE t1.cod_tipo='".$tipo."' /*AND t2.nivel > 1*/ AND t1.cod_sistema='".ConfigVO::getCodSistema()."' ORDER BY t1.cod_usuario DESC LIMIT $inicial,$mostrar");
 
@@ -345,10 +367,11 @@ class UsuarioDAO {
 		}
 		return $array;
 	}
-	
+
 	public function getAtoresMaisRecentes($quantidade) {
-		$sql = "SELECT DISTINCT(t1.cod_usuario), COUNT(t1.cod_conteudo) AS total FROM Conteudo_Autores_Ficha AS t1 INNER JOIN Conteudo AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) WHERE t2.excluido='0' AND t2.publicado='1' AND t2.situacao='1' AND t2.cod_formato IN (1,2,3,4) AND t2.cod_sistema='".ConfigVO::getCodSistema()."' GROUP BY t1.cod_usuario ORDER BY cod_usuario DESC LIMIT " .  $quantidade;
-		
+		//$sql = "SELECT DISTINCT(t1.cod_usuario), COUNT(t1.cod_conteudo) AS total FROM Conteudo_Autores_Ficha AS t1 INNER JOIN Conteudo AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) WHERE t2.excluido='0' AND t2.publicado='1' AND t2.situacao='1' AND t2.cod_formato IN (1,2,3,4,5,6) AND t2.cod_sistema='".ConfigVO::getCodSistema()."' GROUP BY t1.cod_usuario ORDER BY cod_usuario DESC LIMIT " .  $quantidade;
+		$sql = "SELECT DISTINCT(t1.cod_usuario), COUNT(t2.cod_conteudo) AS total FROM ((Usuarios AS t1 LEFT JOIN Conteudo_Autores_Ficha AS t2 ON (t1.cod_usuario=t2.cod_usuario)) LEFT JOIN Conteudo AS t3 ON (t2.cod_conteudo=t3.cod_conteudo)) WHERE t1.cod_sistema = '".ConfigVO::getCodSistema()."' AND t1.cod_tipo = '2' AND t1.disponivel = '1' AND t1.situacao = '3' AND (t3.excluido='0' OR t3.excluido IS NULL)  AND (t3.publicado='1' OR t3.publicado IS NULL) AND (t3.situacao='1' OR t3.situacao IS NULL) AND (t3.cod_formato IN (1,2,3,4,5,6) OR t3.cod_formato IS NULL) GROUP BY t1.cod_usuario ORDER BY t1.cod_usuario DESC LIMIT " .  $quantidade;
+
 		$query = $this->banco->executaQuery($sql);
 		while ($row = $this->banco->fetchArray($query)) {
 			$dados = $this->getUsuarioDados($row['cod_usuario']);
@@ -370,7 +393,7 @@ class UsuarioDAO {
 
 	public function getAtoresMaisAtivos($quantidade) {
 		$sql = "SELECT DISTINCT(t1.cod_usuario), COUNT(t1.cod_conteudo) AS total FROM Conteudo_Autores_Ficha AS t1 INNER JOIN Conteudo AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) WHERE t2.excluido='0' AND t2.publicado='1' AND t2.situacao='1' AND t2.cod_formato IN (1,2,3,4) AND t2.cod_sistema='".ConfigVO::getCodSistema()."' GROUP BY t1.cod_usuario ORDER BY total DESC LIMIT " .  $quantidade;
-		
+
 		$query = $this->banco->executaQuery($sql);
 		while ($row = $this->banco->fetchArray($query)) {
 			$dados = $this->getUsuarioDados($row['cod_usuario']);
@@ -438,7 +461,7 @@ class UsuarioDAO {
         } elseif ($tipo == 2) {
 			if ($codformato)
     			$where = "AND t2.cod_formato='$codformato'";
-        	$sql = "SELECT DISTINCT(t1.cod_conteudo) FROM Conteudo_Autores_Ficha AS t1 INNER JOIN Conteudo AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) WHERE t1.cod_usuario='$codusuario' $where AND t2.excluido='0' AND t2.situacao='1' AND t2.publicado='1'";
+        	$sql = "SELECT DISTINCT(t1.cod_conteudo) FROM Conteudo_Autores_Ficha AS t1 INNER JOIN Conteudo AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) WHERE t1.cod_usuario='$codusuario' $where AND t2.excluido='0' AND t2.situacao='1' AND t2.publicado='1' AND t2.cod_sistema='".ConfigVO::getCodSistema()."'";
 		} elseif ($tipo == 3) {
 			if ($codformato)
     			$where = "AND t2.cod_formato='$codformato'";
@@ -458,7 +481,9 @@ class UsuarioDAO {
 	}
 
 	public function getAutoresRelacionadosColaborador($codusuario, $limit=2) {
-        $sql = "SELECT DISTINCT(t2.cod_usuario) FROM Conteudo AS t1 INNER JOIN Conteudo_Autores AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) INNER JOIN Urls AS t3 ON (t2.cod_usuario=t3.cod_item) WHERE t1.cod_colaborador='$codusuario' AND t3.tipo='2' ORDER BY RAND() LIMIT $limit;";
+        //$sql = "SELECT DISTINCT(t2.cod_usuario) FROM Conteudo AS t1 INNER JOIN Conteudo_Autores AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) INNER JOIN Urls AS t3 ON (t2.cod_usuario=t3.cod_item) WHERE t1.cod_colaborador='$codusuario' AND t3.tipo='2' ORDER BY RAND() LIMIT $limit;";
+		
+		$sql = "SELECT DISTINCT(t1.cod_autor) AS cod_usuario FROM Colaboradores_Integrantes AS t1 WHERE t1.cod_colaborador='$codusuario' ORDER BY RAND() LIMIT $limit;";
         $sql_result = $this->banco->executaQuery($sql);
 		$array = array();
         while ($sql_row = $this->banco->fetchArray($sql_result)) {
@@ -505,9 +530,15 @@ class UsuarioDAO {
     }
 
     public function getBuscaDadosUsuarioNome(&$nome_usuario, $tipo=2) {
-		$sql = "select t2.cod_usuario, t2.nome, t2.imagem, t3.titulo AS url, t4.sigla FROM Usuarios AS t2 LEFT JOIN Urls AS t3 ON (t2.cod_usuario=t3.cod_item) LEFT JOIN Estados AS t4 ON (t2.cod_estado=t4.cod_estado) WHERE t2.disponivel='1' AND t2.nome = '".trim($nome_usuario)."' AND t3.tipo='".$tipo."' AND t2.cod_sistema='".ConfigVO::getCodSistema()."' ORDER BY t2.nome";
+		$sql = "select t2.cod_usuario, t2.nome, t2.imagem, t3.titulo AS url, t4.sigla FROM Usuarios AS t2 LEFT JOIN Urls AS t3 ON (t2.cod_usuario=t3.cod_item) LEFT JOIN Estados AS t4 ON (t2.cod_estado=t4.cod_estado) WHERE t2.disponivel='1' AND (t2.nome = '".trim($nome_usuario)."' ".($tipo == 2 ? " OR t2.cod_usuario IN (SELECT t5.cod_usuario FROM Autores AS t5 WHERE t5.nome_completo = '".trim($nome_usuario)."' AND t5.cod_usuario = t2.cod_usuario)" : "" )." ) AND t3.tipo='".$tipo."' AND t2.cod_sistema='".ConfigVO::getCodSistema()."' ORDER BY t2.nome";
 		$sql_result = $this->banco->executaQuery($sql);
 		return $this->banco->fetchArray($sql_result);
+	}
+
+	public function obterCodUsuarioPorNome(&$nome_usuario, $tipo = 2) {
+		echo $sql = "select t1.cod_usuario FROM Usuarios AS t1 LEFT JOIN Urls AS t2 ON (t1.cod_usuario=t2.cod_item) WHERE t1.disponivel = 1 AND (t1.nome = '".trim($nome_usuario)."' ".($tipo == 2 ? " OR t1.cod_usuario IN (SELECT t3.cod_usuario FROM Autores AS t3 WHERE t3.nome_completo = '".trim($nome_usuario)."' AND t1.cod_usuario = t3.cod_usuario)" : "" )." ) AND t2.tipo = ".$tipo." AND t1.cod_sistema='".ConfigVO::getCodSistema()."' ORDER BY t1.nome";
+		$row = $this->banco->fetchArray($this->banco->executaQuery($sql));
+		return (int)$row['cod_usuario'];
 	}
 
 	public function getCheckColabadoresAprovacao($colaboradores_lista) {
@@ -525,9 +556,8 @@ class UsuarioDAO {
 	}
 
 	public function checaAutorWiki($cod) {
-		$sql = "SELECT cod_usuario FROM Usuarios_Niveis WHERE cod_usuario='".$cod."' AND nivel='1'";
-		$query = $this->banco->executaQuery($sql);
-		$row = $this->banco->fetchArray($query);
+		$sql = 'SELECT cod_usuario FROM Usuarios_Niveis WHERE cod_usuario = '.$cod.' AND nivel = 1';
+		$row = $this->banco->fetchArray($this->banco->executaQuery($sql));
 		return (bool)$row['cod_usuario'];
 	}
 

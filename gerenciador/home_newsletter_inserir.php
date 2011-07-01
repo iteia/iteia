@@ -31,9 +31,9 @@ if ($editar) {
 	}
 }
 
-$paginatitulo = 'Destaque';
-$item_menu = "home";
-$item_submenu = "newsletter_inserir";
+$paginatitulo = 'Boletim';
+$item_menu = "boletim";
+$item_submenu = "criar_boletim";
 include('includes/topo.php');
 
 if ($codnewsletter && !$editar)
@@ -47,11 +47,9 @@ $codnewsletter = (int)$newsbo->getValorCampo("codnewsletter");
 var cod_newsletter = <?=$codnewsletter;?>;
 </script>
 
-    <h2>Newsletter</h2>
+    <h2>Boletim</h2>
     
 	<form method="post" name="lightbox" id="lightbox_form" action="home_newsletter_inserir.php" onsubmit="return false;">
-	<div id="op-comentario">
-	 <a href="home_newsletter.php">In&iacute;cio</a> | <strong>Criar newsletter</strong> | <a href="home_newsletter_listas.php">Listas de emails</a> | <a href="home_newsletter_emails_cadastrar.php">Cadastrar emails</a></div>
     
     <fieldset>
 		<input type="hidden" name="editar" value="1" />
@@ -60,7 +58,7 @@ var cod_newsletter = <?=$codnewsletter;?>;
 		<input type="hidden" name="acao" id="acao" value="" />
 	</fieldset>
 
-      <h3 class="titulo">Criar  newsletter </h3>
+      <h3 class="titulo">Criar Boletim </h3>
       <div class="box" id="destaques">
       <p>Escolha a data e hora na qual será iniciado o envio da newsletter </p>
         
@@ -69,7 +67,8 @@ var cod_newsletter = <?=$codnewsletter;?>;
         <input type="text" id="cont_titulo" class="txt counter" value="<?=Util::iif($newsbo->getValorCampo('titulo'), 255 - strlen($newsbo->getValorCampo('titulo')), 255);?>" size="4" disabled="disabled" /><br />
 																																	
         <label for="textfield2">De:</label><br />
-        <input type="text" class="txt" id="textfield2" size="75" value="fundarpe@gmail.com" disabled="disabled"/>
+        <!--<input type="text" class="txt" id="textfield2" size="75" value="fundarpe@gmail.com" disabled="disabled"/>-->
+        <input type="text" class="txt" id="textfield2" size="75" value="no-reply@iteia.org.br" disabled="disabled"/>
        
         <br />
         

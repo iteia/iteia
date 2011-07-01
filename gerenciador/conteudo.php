@@ -21,11 +21,11 @@ include('includes/topo.php');
 
     <?php if ($_SESSION['logado_dados']['nivel'] == 2): ?>
 
-    <p class="descricao">Gerencie abaixo os conte&uacute;dos cadastrados por voc&ecirc;, editando ou apagando eles do   sistema. Al&eacute;m disso, confira se eles j&aacute; foram aprovados pelos colaboradores ou   se ainda est&atilde;o na Lista de autoriza&ccedil;&otilde;es. <a href="conteudo_tipo.php">Para incluir novos conte&uacute;dos, clique aqui</a> </p>
+    <div class="descricao">Gerencie abaixo os conte&uacute;dos cadastrados por voc&ecirc;, editando ou apagando eles do   sistema. Al&eacute;m disso, confira se eles j&aacute; foram aprovados pelos colaboradores ou   se ainda est&atilde;o na Lista de autoriza&ccedil;&otilde;es. <a href="conteudo_tipo.php">Para publicar novos conte&uacute;dos, clique aqui</a> </div>
 
 	<?php else: ?>
 
-    <p class="descricao">Gerencie  os conte&uacute;dos cadastrados por voc&ecirc; ou pelos autores vinculados ao  colaborador que voc&ecirc; representa. Avalie antes de aprovar os poss&iacute;veis  arquivos pendentes ou <a href="conteudo_tipo.php">clique aqui para incluir um novo conte&uacute;do</a>, seja v&iacute;deo, &aacute;udio, imagem ou texto.</p>
+    <div class="descricao">Gerencie  os conte&uacute;dos cadastrados por voc&ecirc; ou pelos autores vinculados ao  colaborador que voc&ecirc; representa. Avalie antes de aprovar os poss&iacute;veis  arquivos pendentes ou <a href="conteudo_tipo.php">clique aqui para publicar um novo conte&uacute;do</a>, seja v&iacute;deo, &aacute;udio, imagem ou texto.</div>
 
     <?php endif; ?>
 
@@ -84,5 +84,4 @@ include('includes/topo.php');
 <script language="javascript" type="text/javascript">
 buscaConteudoNavegacao();
 </script>
-
 <?php include('includes/rodape.php'); ?>

@@ -2,6 +2,7 @@
 include_once("ConteudoBO.php");
 include_once(ConfigGerenciadorVO::getDirClassesRaiz()."vo/AlbumAudioVO.php");
 include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AudioDAO.php");
+include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
 
 class AlbumAudioEdicaoBO extends ConteudoBO {
 
@@ -9,6 +10,7 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 
 	public function __construct() {
 		$this->auddao = new AudioDAO;
+        $this->usrdao = new UsuarioDAO;
 		parent::__construct();
 	}
 
@@ -17,22 +19,21 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 		$this->dadosform["codaudio"] = (int)$this->dadosform["codaudio"];
 		$this->dadosform['imgtemp'] = trim($this->dadosform['imgtemp']);
 		$this->dadosform["titulo"] = substr(trim($this->dadosform["titulo"]), 0, 100);
-		//$this->dadosform["descricao"] = substr(trim(Util::removeTags($this->dadosform["descricao"])), 0, 1200);
 		$this->dadosform["descricao"] = substr(trim($this->dadosform["descricao"]), 0, 2000);
 		$this->dadosform["codclassificacao"] = (int)$this->dadosform["codclassificacao"];
 		$this->dadosform["codsegmento"] = (int)$this->dadosform["codsegmento"];
 		$this->dadosform["codcanal"] = (int)$this->dadosform["codcanal"];
 		$this->dadosform["tags"] = $this->dadosform["tags"];
 		$this->dadosform["permitir_comentarios"] = (int)$this->dadosform["permitir_comentarios"];
-		
+
 		$this->dadosform["pertence_voce"] = (int)$this->dadosform["pertence_voce"];
 		$this->dadosform["codcolaborador"] = (int)$this->dadosform["codcolaborador"];
-		
+
 		$this->dadosform["pedir_autorizacao"] = (int)$this->dadosform["pedir_autorizacao"];
 		$this->dadosform["colaboradores_lista"] = strip_tags(trim($this->dadosform["colaboradores_lista"]));
-		
+
 		$this->dadosform["sessao_id"] = trim($this->dadosform["sessao_id"]);
-		
+
 		$this->dadosform["contsegmento"] = (int)$this->dadosform["contsegmento"];
 		$this->dadosform["contsubarea"] = (int)$this->dadosform["contsubarea"];
 		$this->dadosform["codsubarea"] = (int)$this->dadosform["codsubarea"];
@@ -47,51 +48,31 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 			$this->erro_mensagens[] = "Adicione ao menos um arquivo MP3";
 			$this->erro_campos[] = "audio";
 		}
-		
+
 		if ($this->dadosform["contsegmento"] && !$this->dadosform["codsegmento"]) $this->erro_campos[] = "codsegmento";
-		//if ($this->dadosform["contsubarea"] && !$this->dadosform["codsubarea"]) $this->erro_campos[] = "codsubarea";
-		
-		//if ($this->dadosform["pertence_voce"] == 1) {
-		//	if (!count($_SESSION['sess_conteudo_autores_ficha'])) {
-		//		$this->erro_mensagens[] = "Selecione ao menos um autor na Ficha técnica";
-		//		$this->erro_campos[] = "ficha";
-		//	}
-		//}
-		
-		//if ($_SESSION['logado_dados']['nivel'] >= 6 && !$this->dadosform["codaudio"] && !$this->dadosform["codcolaborador"]) {
-		//	$this->erro_mensagens[] = "Selecione um colaborador para vincular a este conteúdo";
-		//	$this->erro_campos[] = "colaborador";
-		//}
-		
+		if (!count($_SESSION['sess_conteudo_autores_ficha'][$this->dadosform['sessao_id']])) {
+			if ($this->dadosform['pertence_voce'] == 1)
+				$this->erro_mensagens[] = "Na Ficha Técnica selecione a atividade exercida por você e clique em [+]Adicionar";
+			else
+				$this->erro_mensagens[] = "Selecione ao menos um autor na Ficha técnica";
+			$this->erro_campos[] = "ficha";
+		}
+
 		if ($_SESSION['logado_dados']['nivel'] == 2) {
 			if (!$this->dadosform["pedir_autorizacao"]) {
 				$this->erro_mensagens[] = "Selecione um tipo de Autorização";
 				$this->erro_campos[] = "autorizacao";
 			}
 			if ($this->dadosform["pedir_autorizacao"] == 2) {
-				include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
-				$usrdao = new UsuarioDAO;
-			
-				if (!count($usrdao->getCheckColabadoresAprovacao($this->dadosform["colaboradores_lista"]))) {
+				if (!count($this->usrdao->getCheckColabadoresAprovacao($this->dadosform["colaboradores_lista"]))) {
 					$this->erro_mensagens[] = "Selecione ao menos um colaborador para solicitar aprovação";
 					$this->erro_campos[] = "colaboradores_lista";
 				}
 			}
+		}else{
+			$this->validaColaborador();
 		}
 		
-		/*
-		if ($_SESSION['logado_dados']['nivel'] == 2) {
-			if (!$this->dadosform["pedir_autorizacao"]) {
-				$this->erro_mensagens[] = "Selecione um tipo de Autorização";
-				$this->erro_campos[] = "autorizacao";
-			}
-			if ($this->dadosform["pedir_autorizacao"] == 2 && !$this->dadosform["colaboradores_lista"]) {
-				$this->erro_mensagens[] = "Selecione ao menos um colaborador para solicitar aprovação";
-				$this->erro_campos[] = "colaboradores_lista";
-			}
-		}
-		*/
-
 		if (is_uploaded_file($this->arquivos["imagem"]["tmp_name"])) {
 			if ($this->arquivos["imagem"]["size"] > 2200000) {
 				$this->erro_mensagens[] = "Foto está com mais de 2MB";
@@ -115,18 +96,10 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 	protected function setDadosVO() {
 	    $this->audvo = new AlbumAudioVO;
 	    $this->audvo->setCodConteudo($this->dadosform["codaudio"]);
-
-	    /*if ($_SESSION['logado_como'] == 1) // se for enviada por um autor
-			$this->audvo->setCodAutor($_SESSION['logado_cod']);
-		else
-			$this->audvo->setCodColaborador($_SESSION['logado_cod']);*/
 		$this->audvo->setCodAutor($_SESSION['logado_cod']);
 		
-		//if ($_SESSION['logado_dados']['nivel'] >= 6)
-		//	$this->audvo->setCodColaborador($this->dadosform["codcolaborador"]);
-		//else
-			$this->audvo->setCodColaborador($_SESSION['logado_dados']['cod_colaborador']);
-
+		$this->audvo->setCodColaborador(($this->dadosform['colaborador_aprov'] ? $this->dadosform['colaborador_aprov'] : 0));
+        
 		$this->audvo->setCodClassificacao($this->dadosform['codclassificacao']);
 		$this->audvo->setCodSegmento($this->dadosform['codsegmento']);
 		$this->audvo->setCodSubArea($this->dadosform['codsubarea']);
@@ -134,62 +107,40 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 		$this->audvo->setTags(Util::geraTags($this->dadosform['tags']));
 		$this->audvo->setCodLicenca($this->direitosbo->getCodLicenca($this->dadosform["direitos"], $this->dadosform["cc_usocomercial"], $this->dadosform["cc_obraderivada"]));
 
-		if (!(int)$this->dadosform["codaudio"])
+		if (!$this->dadosform["codaudio"])
 			$this->audvo->setRandomico(Util::geraRandomico());
 		else
 		  $this->audvo->setRandomico($this->auddao->getRandomico($this->dadosform["codaudio"]));
 
 		$this->audvo->setTitulo($this->dadosform["titulo"]);
 		$this->audvo->setDescricao($this->dadosform["descricao"]);
-
 		$this->audvo->setListaAudios($_SESSION["sess_conteudo_audios_album"][$this->dadosform["sessao_id"]]);
 
-		if (!(int)$this->dadosform["codaudio"]) {
+		if (!$this->dadosform["codaudio"]) {
 			$this->audvo->setDataHora(date("Y-m-d H:i:s"));
-
-			//if ($_SESSION['logado_como'] == 1)
-			if ($_SESSION['logado_dados']['nivel'] == 2)
-				$this->audvo->setSituacao(0);
-			else
-				$this->audvo->setSituacao(1);
-
-			//$this->audvo->setSituacao(0); // é cadastrado como inativo
-			//$this->audvo->setPublicado(0); // é cadastrado como pendente
-			
-			if ($_SESSION['logado_dados']['nivel'] >= 5)
-				$this->audvo->setPublicado(1); // é cadastrado como publicado
-			else
-				$this->audvo->setPublicado(0); // é cadastrado como pendente
-			
+			$this->audvo->setSituacao(1);
+			$this->audvo->setPublicado(($_SESSION['logado_dados']['nivel'] >= 5 ? 1 : 0));
+			//$this->audvo->setSituacao(($_SESSION['logado_dados']['colaborador_responsavel'] == 1 ? 1 : 0));
+			//$this->audvo->setPublicado(($_SESSION['logado_dados']['colaborador_responsavel'] == 1 ? 1 : 0));
 		}
-		
-		$this->audvo->setPedirAutorizacao($this->dadosform["pedir_autorizacao"]);
-			
-		// buscar os cod_usuarios dos colaboradores selecionados pra jogar na vo
-			
+
 		$colaboradores = explode(';', $this->dadosform["colaboradores_lista"]);
-		$arrayColab = array();
-			
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
-		$usrdao = new UsuarioDAO;
-			
-		foreach ($colaboradores as $nome) {
-			if ($nome) {
-				$usuario = $usrdao->getBuscaDadosUsuarioNome($nome, 1);
-				$arrayColab[$usuario['cod_usuario']] = array('cod_usuario' => $usuario['cod_usuario']);
+		if (count($colaboradores)) {
+			$arrayColab = array();
+			foreach ($colaboradores as $nome) {
+				if ($nome) {
+					$usuario = $this->usrdao->getBuscaDadosUsuarioNome($nome, 1);
+					$arrayColab[$usuario['cod_usuario']] = $usuario['cod_usuario'];
+				}
 			}
+			$this->audvo->setListaColaboradoresRevisao(array_unique($arrayColab));
 		}
-			
-		$this->audvo->setListaColaboradoresRevisao(array_unique($arrayColab));
 
-		//if ($_SESSION['logado_como'] == 1) // se for enviada por um autor
-			//$this->audvo->setPublicado(0); // é cadastrado como pendente
-			// se for por um autor, fica pendente ate ir pra lista publica ou pra aprovação
-			// se for colaborador, fica pendente ate ele definir autores
-			// se for administrador, fica pendente ate ele definir um colaborador ou definir autores
-		//else
-		//	$this->textovo->setPublicado(1); // é cadastrado como aprovado
-
+		if($_SESSION['logado_dados']['nivel'] == 2){
+			$this->dadosform["pedir_autorizacao"] = 2;
+		}
+        
+		$this->audvo->setPedirAutorizacao($this->dadosform["pedir_autorizacao"]);
 		$this->audvo->setListaAutores($_SESSION["sess_conteudo_autores_ficha"][$this->dadosform["sessao_id"]]);
 		$this->audvo->setUrl(Util::geraUrlTitulo($this->dadosform["titulo"]));
 		$this->audvo->setPermitirComentarios($this->dadosform['permitir_comentarios']);
@@ -247,7 +198,7 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 		$this->dadosform["permitir_comentarios"] = $audvo->getPermitirComentarios();
 
 		$this->setSessionAutoresFicha($codaudio, $this->auddao, $this->dadosform["sessao_id"]);
-		
+
 		foreach ((array)$_SESSION['sess_conteudo_autores_ficha'][$this->dadosform["sessao_id"]] as $key => $value) {
 			if ($this->dadosform["codautor"] == $value['codautor']) {
 				$this->dadosform["pertence_voce"] = 1;
@@ -256,8 +207,7 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 		}
     }
 
-    // metodos comuns a todo os formartos
-    
+    // metodos comuns a todo os formatos
     public function getColaboradorConteudoAprovado($codusuario) {
 		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
 		$usrdao = new UsuarioDAO;
@@ -272,11 +222,11 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 	public function excluirImagem($codaudio) {
 		return $this->auddao->excluirImagem($codaudio);
 	}
-	
-	public function getPostadorConteudo($codaudio) {
-		return $this->auddao->getPostadorConteudo($codaudio);
+
+	public function getPostadorConteudo($codusuario) {
+		return $this->getColaboradorConteudo($codusuario);
 	}
-	
+
 	public function getAutoresFichaConteudo($codaudio) {
 		return $this->auddao->getAutoresFichaTecnicaCompletaConteudo($codaudio);
 	}
@@ -285,14 +235,17 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 		return $this->auddao->getAutoresConteudo($codaudio);
 	}
 
-	public function getColaboradorConteudo($codaudio) {
-		return $this->auddao->getColaboradorConteudo($codaudio);
+	public function getColaboradorConteudo($codusuario) {
+		include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
+		$usrdao = new UsuarioDAO;
+		$usuario = $usrdao->getUsuarioDados($codusuario);
+		return $usuario;
 	}
 
 	public function getSegmentoConteudo($codaudio) {
 		return $this->auddao->getSegmentoConteudo($codaudio);
 	}
-	
+
 	public function getSubAreaConteudo($codaudio) {
 		return $this->auddao->getSubAreaConteudo($codaudio);
 	}
@@ -312,7 +265,7 @@ class AlbumAudioEdicaoBO extends ConteudoBO {
 	public function getLicenca($codaudio) {
 		return $this->auddao->getLicenca($codaudio);
 	}
-	
+
 	public function getListaColaboradoresAprovacao($codaudio) {
 		return $this->auddao->getListaColaboradoresAprovacao($codaudio);
 	}

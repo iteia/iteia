@@ -19,10 +19,10 @@ class BannerVO {
 		return $this->codbanner;
 	}
 	
-	public function setCodColaborador($codcolaborador) {
+	public function setCodUsuario($codcolaborador) {
 		$this->codcolaborador = $codcolaborador;
 	}
-	public function getCodColaborador() {
+	public function getCodUsuario() {
 		return $this->codcolaborador;
 	}
 	

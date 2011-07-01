@@ -107,6 +107,8 @@ class AjaxHomeBO {
 	
 	private function listarConteudoPlayList() {
 		$codplaylist = $this->dados_get["codplaylist"];
+		if(isset($this->dados_get['itens']))
+				$itens_selecionados = split(',',$this->dados_get['itens']);
 		include_once("includes/ajax_playlist_conteudo_selecionados.php");
 	}
 	

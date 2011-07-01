@@ -35,9 +35,22 @@ class PlayerUtil {
 			$html_player .= '<script type="text/javascript">flowplayer("player", "'.ConfigVO::URL_SITE.'js/flowplayer-3.1.5/flowplayer-3.1.5.swf");</script>';
 
         } elseif ($tipo == 2) {
-            $link = explode('=', $item);
-            $url = "http://www.youtube.com/v/$link[1]";
-            $html_player = "<object width=\"".$width."\" height=\"".$height."\"><param name=\"movie\" value=\"$url\"></param><param name=\"wmode\" value=\"transparent\"></param><embed src=\"".$url."\" type=\"application/x-shockwave-flash\" wmode=\"transparent\" width=\"".$width."\" height=\"".$height."\"></embed></object>";
+            //$link = explode('=', $item);
+            //$url = "http://www.youtube.com/v/$link[1]";
+            //$html_player = "<object width=\"".$width."\" height=\"".$height."\"><param name=\"movie\" value=\"$url\"></param><param name=\"wmode\" value=\"transparent\"></param><embed src=\"".$url."\" type=\"application/x-shockwave-flash\" wmode=\"transparent\" width=\"".$width."\" height=\"".$height."\"></embed></object>";
+			switch(self::youtubeOuVimeo($item)){
+				case 1:
+					$link = explode('=', $item);
+					$url = "http://www.youtube.com/v/$link[1]";
+					$html_player =  "<object width=\"".$width."\" height=\"".$height."\"><param name=\"movie\" value=\"$url\"></param><param name=\"wmode\" value=\"transparent\"></param><embed src=\"".$url."\" type=\"application/x-shockwave-flash\" wmode=\"transparent\" width=\"".$width."\" height=\"".$height."\"></embed></object>";
+				break;
+				case 2:
+					$link = explode('com/', $item);
+					$num = $link[1];
+					//$html_player = "<object width=\"425\" height=\"239\"><param name=\"allowfullscreen\" value=\"true\" /><param name=\"allowscriptaccess\" value=\"always\" /><param name=\"movie\" value=\"http://vimeo.com/moogaloop.swf?clip_id=$num&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=00ADEF&amp;fullscreen=1&amp;autoplay=0&amp;loop=0\" /><embed src=\"http://vimeo.com/moogaloop.swf?clip_id=$num&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=00ADEF&amp;fullscreen=1&amp;autoplay=0&amp;loop=0\" type=\"application/x-shockwave-flash\" allowfullscreen=\"true\" allowscriptaccess=\"always\" width=\"425\" height=\"239\"></embed></object>";
+					$html_player = "<object width=\"620\" height=\"430\"><param name=\"allowfullscreen\" value=\"true\" /><param name=\"allowscriptaccess\" value=\"always\" /><param name=\"movie\" value=\"http://vimeo.com/moogaloop.swf?clip_id=$num&server=vimeo.com&show_title=1&show_byline=1&show_portrait=1&color=00ADEF&fullscreen=1&autoplay=0&loop=0\" /><embed src=\"http://vimeo.com/moogaloop.swf?clip_id=$num&server=vimeo.com&show_title=1&show_byline=1&show_portrait=1&color=00ADEF&fullscreen=1&autoplay=0&loop=0\" type=\"application/x-shockwave-flash\" allowfullscreen=\"true\" allowscriptaccess=\"always\" width=\"620\" height=\"430\"></embed></object>";
+				break;
+			}
         }
         return $html_player;
     }
@@ -48,13 +61,32 @@ class PlayerUtil {
 				return '<img src="/exibir_imagem.php?img='.$arquivo.'.png&amp;tipo=15&amp;s='.$size.'" alt="" width="'.$width.'" height="'.$height.'" />';
 		}
 		elseif ($url) {
-			$link = explode('=', $url);
-			return '<img src="http://i3.ytimg.com/vi/'.str_replace('&feature', '', $link[1]).'/default.jpg" width="'.$width.'" height="'.$height.'" alt="" />';
+			switch(self::youtubeOuVimeo($url)){
+				case 1:
+					$link = explode('=', $url);
+					return '<img src="http://i3.ytimg.com/vi/'.str_replace('&feature', '', $link[1]).'/default.jpg" width="'.$width.'" height="'.$height.'" alt="" />';
+				break;
+				case 2:
+					$link = explode('com/', $url);
+					$num = $link[1];
+					$hash = unserialize(file_get_contents("http://vimeo.com/api/v2/video/$num.php"));
+					return '<img src="'.$hash[0]['thumbnail_large'].'" width="'.$width.'" height="'.$height.'" alt="" />';
+				break;
+			}
 		}
 		elseif ($imagem) {
 			return '<img src="/exibir_imagem.php?img='.$imagem.'&amp;tipo=4&amp;s='.$size.'" alt="" width="'.$width.'" height="'.$height.'" />';
 		}
 		return '';
+	}
+	
+	public static function youtubeOuVimeo($item){
+		$html_player = '';
+		if (preg_match("/youtube/i", $item)) {
+			return 1;
+		}elseif(preg_match("/vimeo/i", $item)){
+			return 2;
+		}
 	}
 
 }

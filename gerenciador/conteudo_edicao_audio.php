@@ -1,18 +1,15 @@
 <?php
-include('verificalogin.php');
+include_once('verificalogin.php');
 include_once(ConfigGerenciadorVO::getDirClassesRaiz()."util/Util.php");
+include_once("classes/bo/AlbumAudioEdicaoBO.php");
 
 $editar = (int)$_POST['editar'];
 $codaudio = (int)$_GET["cod"];
 $edicaodados = (int)$_POST["edicaodados"];
 
-if ($codaudio)
-	$edicaodados = 1;
-	
-if (!$editar)
-	$sessao_id = Util::geraRandomico('num'); // gera uma nova id pra sessão
+if ($codaudio) $edicaodados = 1;
+if (!$editar) $sessao_id = Util::geraRandomico('num');
 
-include_once("classes/bo/AlbumAudioEdicaoBO.php");
 $audiobo = new AlbumAudioEdicaoBO;
 $exibir_form = true;
 
@@ -21,73 +18,47 @@ if (!isset($_SESSION["sess_conteudo_audios_album"]))
 if (!isset($_SESSION["sess_conteudo_autores_ficha"]))
 	$_SESSION["sess_conteudo_autores_ficha"] = array();
 
-if (!$editar) {
-	//unset($_SESSION["sess_conteudo_audios_album"]);
-	//unset($_SESSION["sess_conteudo_autores_ficha"]);
-}
-
-$codformato_class = 3;
 	
 if ($editar) {
 	try {
 		$cod_conteudo = $audiobo->editar($_POST, $_FILES);
 		$exibir_form = false;
-
 		Header("Location: conteudo_publicado_audio.php?cod=".$cod_conteudo);
 		exit();
-
 	} catch (Exception $e) {
 		$erro_mensagens = $e->getMessage();
 	}
 }
 
+$codformato_class = 3;
 $contbo = &$audiobo;
 
-if (!$editar)
-	$audiobo->setValorCampo('sessao_id', $sessao_id);
+if (!$editar) $audiobo->setValorCampo('sessao_id', $sessao_id);
 $sessao_id = $audiobo->getValorCampo('sessao_id');
-
-if ($codaudio && !$editar)
-	$audiobo->setDadosCamposEdicao($codaudio);
-
+if ($codaudio && !$editar) $audiobo->setDadosCamposEdicao($codaudio);
 $permitir_comentarios = $audiobo->getValorCampo("permitir_comentarios");
-if (!$codaudio)
-	$permitir_comentarios = true;
-
+if (!$codaudio) $permitir_comentarios = true;
 $codaudio = (int)$audiobo->getValorCampo("codaudio");
-
-if (count($_SESSION["sess_conteudo_audios_album"][$sessao_id]))
-	$possui_audios = true;
+if (count($_SESSION["sess_conteudo_audios_album"][$sessao_id])) $possui_audios = true;
 
 $item_menu = 'conteudo';
 $item_submenu = 'inserir';
 $nao_carregar_thickbox = true;
 $jquerynova = true;
+
 include('includes/topo.php');
 ?>
-
-<link rel="stylesheet" type="text/css" href="css/jquery.autocomplete.css" />
-
 <script language="javascript" type="text/javascript">
 var cod_autor_pessoal = '<?=$_SESSION['logado_dados']['cod'];?>';
 var sessao_id = '<?=$sessao_id;?>';
 </script>
-
-<script language="javascript" type="text/javascript" src="jscripts/conteudo.js"></script>
-<script language="javascript" type="text/javascript" src="jscripts/audio.js"></script>
-
-<!--
-<script language="javascript" type="text/javascript" src="jscripts/tiny_mce/tiny_mce.js"></script>
-<script language="javascript" type="text/javascript" src="jscripts/tiny_mce/editor-settings.js"></script>
--->
-
-<script language="javascript" type="text/javascript" src="jscripts/jquery.autocomplete.js"></script>
-<script language="javascript" type="text/javascript" src="jscripts/autocompletar.js"></script>
-
+<script type="text/javascript" src="jscripts/conteudo.js"></script>
+<script type="text/javascript" src="jscripts/audio.js"></script>
+<script type="text/javascript" src="jscripts/jquery.autocomplete.js"></script>
+<script type="text/javascript" src="jscripts/autocompletar.js"></script>
 <script type="text/javascript" src="jscripts/ajax.js"></script>
 <script type="text/javascript" src="jscripts/edicao.js"></script>
-
-<script language="javascript" type="text/javascript" src="jscripts/conteudo_autores_wiki.js"></script>
+<script type="text/javascript" src="jscripts/conteudo_autores_wiki.js"></script>
 
 <h2>Conte&uacute;do</h2>
 
@@ -157,57 +128,32 @@ var sessao_id = '<?=$sessao_id;?>';
         <div class="box">
         <fieldset>
         <legend>&Aacute;udios</legend>
-        
-		<p>Voc&ecirc; pode fazer upload de um ou de mais arquivos MP3 (tamanho m&aacute;ximo de 20MB cada)</p>
+		<p>Você pode fazer upload de um ou mais arquivos MP3 (tamanho máximo de 20MB cada). Ou você pode compactá-los num arquivo ZIP.</p>
         <label for="fileField1">Procurar</label><br />
-        
-        <!--
-        CAMPO DE UPLOAD ANTIGO
-        <div id="div_campoaudio"><input type="file" name="audio" id="fileField1" class="multi-pt" size="40" /></div>
-        <br />
-        <div class="campos">
-          <label for="leg">T&iacute;tulo da faixa</label>
-          <br />
-          <input type="text" class="txt" id="titulofaixa" onkeyup="contarCaracteres(this, 'cont_titulofaixa', 60);" size="80" />
-          <input type="text" disabled="disabled" id="cont_titulofaixa" class="txt counter" value="60" size="4" />
-        </div>
-        <div class="campos">
-          <label for="textfield4">Tempo</label>
-          <br />
-          <input type="text" id="tempo" class="txt hour" />
-          <strong><a href="javascript:void(0);" onclick="enviaAudioAlbum();">[+] Adicionar</a></strong>
-        </div>
-        -->
-        
         <div id="div_adicionar_mais_faixas"></div>
         
-		<p><a href="javascript:void(0);" onclick="adicionarMaisCampos();">Selecionar mais faixas</a></p>
+		<!--p><a href="javascript:void(0);" onclick="adicionarMaisCampos();">Selecionar mais faixas</a></p-->
         
 		<input type="button" onclick="enviaAudioAlbum();" class="bt-adicionar" value="Enviar" /><br /><br />
         
     </fieldset>
     			<div id="mostra_album_audios"></div>
       </div>
-
 <?php
 	include("includes/conteudo_direitos_autorais.php");
-	
-	//if ($_SESSION['logado_dados']['cod_colaborador'] && !$codaudio && $_SESSION['logado_dados']['nivel'] >= 5)
-	//	include("includes/conteudo_interno_colaborador_vincular.php");
-	
 	if ($_SESSION['logado_dados']['nivel'] == 2)
 		include("includes/conteudo_interno_autorizacao.php");
-	
 	if (($_SESSION['logado_dados']['nivel'] >= 5) || count($_SESSION['logado_dados']['cod_grupo']))
-		include("includes/conteudo_interno_pertence_voce.php");
-	
+		include("includes/conteudo_interno_autorizacao_colaborador.php");
+	include("includes/conteudo_interno_pertence_voce.php");
+	include("includes/conteudo_ficha_tecnica.php");
 	include("includes/conteudo_autores_wiki.php");
 ?>
 
-		<div class="box box-amarelo" id="classificar2">
+		<div class="box" id="classificar2">
         <fieldset>
-        <legend class="seta">Coment&aacute;rios</legend>
-          <div class="fechada" id="box-comentarios">
+        <legend class="">Coment&aacute;rios</legend>
+          <div class="" id="box-comentarios">
           <p>Voc&ecirc; pode permitir que os visitantes do portal iTEIA deixem ou n&atilde;o coment&aacute;rios neste conte&uacute;do. Caso voc&ecirc; autorize,  vale ressaltar que eles ser&atilde;o publicados automaticamente na p&aacute;gina. No  entanto, voc&ecirc; e os colaboradores do sistema poder&atilde;o gerenciar todos os  coment&aacute;rios (apagando ou suspendendo os mesmos) atrav&eacute;s do <a href="comentarios.php" target="_blank" class="ext" title="Este link ser&aacute; aberto numa nova janela">menu  principal</a>.</p>
           <p>
             <input type="checkbox" id="checkbox" name="permitir_comentarios" value="1" <?=Util::iif($permitir_comentarios, 'checked="checked"');?> />
@@ -222,25 +168,30 @@ var sessao_id = '<?=$sessao_id;?>';
       </div>
     </form>
 <?php endif; ?>
+<script type="text/javascript">
 <?php if ($exibir_form): ?>
-<script language="javascript" type="text/javascript">
 $(document).ready(function() {
 	adicionarMaisCampos();
 	contarCaracteres(document.getElementById("textfield"), "cont_titulo", 60);
 	contarCaracteres(document.getElementById("textarea"), "cont_descricao", 2000);
+	$('#ficha-tecnica').show();
+	$('#sou_autor_conteudo').show();
 <?php if (count($_SESSION["sess_conteudo_audios_album"][$sessao_id])): ?>
 	irPaginaBuscaAudios(1);
 <?php endif; ?>
 });
-</script>
 <?php
 	if ($audiobo->getValorCampo('pertence_voce') == 1)
-		echo '<script language="javascript" type="text/javascript">$(\'#ficha-tecnica\').show(); $(\'#sou_autor_conteudo\').show();</script>';
+		echo '$(\'#ficha-tecnica\').show(); $(\'#sou_autor_conteudo\').show();';
+	if ($_SESSION['logado_dados']['nivel'] == 2)
+		echo '$(\'#sou_autor_conteudo\').show();';
 	if ($audiobo->getValorCampo("codcanal") || $audiobo->getValorCampo("codsegmento")):
-		echo '<script language="javascript" type="text/javascript">$(\'#box-classificar\').show();</script>';
+		echo '$(\'#box-classificar\').show();';
 	endif;
 endif;
 ?>
-  </div>
-  <hr />
+exibeListaAutoresFicha();
+</script>
+</div>
+<hr />
 <?php include('includes/rodape.php'); ?>

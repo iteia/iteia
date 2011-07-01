@@ -45,11 +45,19 @@ include('includes/topo.php');
 	<p class="box-erro">Preenha os campos obrigat&oacute;rios</p>
 <?php endif; ?>
 
+        <?php
+        if(strtotime($autorbo->getValorCampoAutorUm('data_cadastro_sf')) < strtotime($autorbo->getValorCampoAutorDois('data_cadastro_sf')))
+            $datacadastro = strtotime($autorbo->getValorCampoAutorUm('data_cadastro_sf'));
+        else
+            $datacadastro = strtotime($autorbo->getValorCampoAutorDois('data_cadastro_sf'));
+           ?>
+           
     <form action="cadastro_autores_unificar.php" method="post">
     
     <input type="hidden" name="editar" value="1" />
 	<input type="hidden" name="codautor1" value="<?=$codautor1?>" />
     <input type="hidden" name="codautor2" value="<?=$codautor2?>" />
+    <input type="hidden" name="datacadastro" value="<?=$datacadastro?>" />
     
     <h3 class="titulo">Unificar de cadastros</h3>
     <div class="box">
@@ -73,7 +81,7 @@ include('includes/topo.php');
         <tr>
           <td>Nome Completo*</td>
 		  <td><input type="radio" name="nomecompleto" class="radio" id="op2" value="1" <?=Util::iif($autorbo->getValorCampo("nomecompleto") == 1, "checked=\"checked\"")?> /></td>
-          <td width="300" valign="top"><?=$autorbo->getValorCampoAutorUm('nomecompleto');?></td>
+          <td width="300" valign="top"><label for="op2"><?=$autorbo->getValorCampoAutorUm('nomecompleto');?></label></td>
 		  <td><input type="radio" name="nomecompleto" class="radio" id="op2-1" value="2" <?=Util::iif($autorbo->getValorCampo("nomecompleto") == 2, "checked=\"checked\"")?> /></td>
           <td width="300"><label for="op2-1"><?=$autorbo->getValorCampoAutorDois('nomecompleto');?></label></td>
         </tr>
@@ -133,7 +141,7 @@ include('includes/topo.php');
         <tr>
           <td>Endere&ccedil;o</td>
           <td><input type="radio" name="endereco" class="radio" id="op7" value="1" <?=Util::iif($autorbo->getValorCampo("endereco") == 1, "checked=\"checked\"")?> /></td>
-          <td width="300" valign="top"><?=$autorbo->getValorCampoAutorUm('endereco')?></td>
+          <td width="300" valign="top"><label for="op7"><?=$autorbo->getValorCampoAutorUm('endereco')?></label></td>
 		  <td><input type="radio" name="endereco" class="radio" id="op7-1" value="2" <?=Util::iif($autorbo->getValorCampo("endereco") == 2, "checked=\"checked\"")?> /></td>
           <td width="300"><label for="op7-1"><?=$autorbo->getValorCampoAutorDois('endereco')?></label></td>
         </tr>
@@ -151,7 +159,7 @@ include('includes/topo.php');
           <td><input name="bairro" type="radio" class="radio" id="op9" value="1" <?=Util::iif($autorbo->getValorCampo("bairro") == 1, "checked=\"checked\"")?> /></td>
           <td width="300" valign="top"><label for="op9"><?=$autorbo->getValorCampoAutorUm('bairro')?></label></td>
           <td><input type="radio" name="bairro" class="radio" id="op9-1" value="2" <?=Util::iif($autorbo->getValorCampo("bairro") == 2, "checked=\"checked\"")?> /></td>
-          <td width="300"><?=$autorbo->getValorCampoAutorDois('bairro')?></td>
+          <td width="300"><label for="op9-1"><?=$autorbo->getValorCampoAutorDois('bairro')?></label></td>
         </tr>
         
         <tr>
@@ -159,13 +167,13 @@ include('includes/topo.php');
           <td><input name="cep" type="radio" class="radio" id="op10" value="1" <?=Util::iif($autorbo->getValorCampo("cep") == 1, "checked=\"checked\"")?> /></td>
           <td width="300" valign="top"><label for="op10"><?=$autorbo->getValorCampoAutorUm('cep')?></label></td>
           <td><input type="radio" name="cep" class="radio" id="op10-1" value="2" <?=Util::iif($autorbo->getValorCampo("cep") == 2, "checked=\"checked\"")?> /></td>
-          <td width="300"><?=$autorbo->getValorCampoAutorDois('cep')?></td>
+          <td width="300"><label for="op10-1"><?=$autorbo->getValorCampoAutorDois('cep')?></label></td>
         </tr>
         
         <tr>
           <td>Pa&iacute;s*</td>
           <td><input type="radio" name="pais" class="radio" id="op11" value="1" <?=Util::iif($autorbo->getValorCampo("pais") == 1, "checked=\"checked\"")?> /></td>
-          <td width="300" valign="top"><?=$autorbo->getValorCampoAutorUm('pais')?></td>
+          <td width="300" valign="top"><label for="op11"><?=$autorbo->getValorCampoAutorUm('pais')?></label></td>
           <td><input name="pais" type="radio" class="radio" id="op11-1" value="2" <?=Util::iif($autorbo->getValorCampo("pais") == 2, "checked=\"checked\"")?> /></td>
           <td width="300"><label for="op11-1"><?=$autorbo->getValorCampoAutorDois('pais')?></label></td>
         </tr>
@@ -175,7 +183,7 @@ include('includes/topo.php');
           <td><input name="estado" type="radio" class="radio" id="op12" value="1" <?=Util::iif($autorbo->getValorCampo("estado") == 1, "checked=\"checked\"")?> /></td>
           <td width="300" valign="top"><label for="op12"><?=$autorbo->getValorCampoAutorUm('estado')?></label></td>
           <td><input type="radio" name="estado" class="radio" id="op12-1" value="2" <?=Util::iif($autorbo->getValorCampo("estado") == 2, "checked=\"checked\"")?> /></td>
-          <td width="300"><?=$autorbo->getValorCampoAutorDois('estado')?></td>
+          <td width="300"><label for="op12-1"><?=$autorbo->getValorCampoAutorDois('estado')?></label></td>
         </tr>
         
         <tr>
@@ -183,7 +191,7 @@ include('includes/topo.php');
           <td><input name="cidade" type="radio" class="radio" id="op13" value="1" <?=Util::iif($autorbo->getValorCampo("cidade") == 1, "checked=\"checked\"")?> /></td>
           <td width="300" valign="top"><label for="op13"><?=$autorbo->getValorCampoAutorUm('cidade')?></label></td>
           <td><input type="radio" name="cidade" class="radio" id="op13-1" value="2" <?=Util::iif($autorbo->getValorCampo("cidade") == 2, "checked=\"checked\"")?> /></td>
-          <td width="300"><?=$autorbo->getValorCampoAutorDois('cidade')?></td>
+          <td width="300"><label for="op13-1"><?=$autorbo->getValorCampoAutorDois('cidade')?></label></td>
         </tr>
         
 		<tr>
@@ -191,7 +199,7 @@ include('includes/topo.php');
           <td><input name="telefone" type="radio" class="radio" id="op14" value="1" <?=Util::iif($autorbo->getValorCampo("telefone") == 1, "checked=\"checked\"")?> /></td>
           <td width="300" valign="top"><label for="op14"><?=$autorbo->getValorCampoAutorUm('telefone')?></label></td>
           <td><input type="radio" name="telefone" class="radio" id="op14-1" value="2" <?=Util::iif($autorbo->getValorCampo("telefone") == 2, "checked=\"checked\"")?> /></td>
-          <td width="300"><?=$autorbo->getValorCampoAutorDois('telefone')?></td>
+          <td width="300"><label for="op14-1"><?=$autorbo->getValorCampoAutorDois('telefone')?></label></td>
         </tr>
         
         <tr>
@@ -199,13 +207,13 @@ include('includes/topo.php');
           <td><input name="celular" type="radio" class="radio" id="op15" value="1" <?=Util::iif($autorbo->getValorCampo("celular") == 1, "checked=\"checked\"")?> /></td>
           <td width="300" valign="top"><label for="op15"><?=$autorbo->getValorCampoAutorUm('celular')?></label></td>
           <td><input type="radio" name="celular" class="radio" id="op15-1" value="2" <?=Util::iif($autorbo->getValorCampo("celular") == 2, "checked=\"checked\"")?> /></td>
-          <td width="300"><?=$autorbo->getValorCampoAutorDois('celular')?></td>
+          <td width="300"><label for="op15-1"><?=$autorbo->getValorCampoAutorDois('celular')?></label></td>
         </tr>
         
         <tr>
           <td>Email</td>
           <td><input type="radio" name="email" class="radio" id="op16" value="1" <?=Util::iif($autorbo->getValorCampo("email") == 1, "checked=\"checked\"")?> /></td>
-          <td width="300" valign="top"><?=$autorbo->getValorCampoAutorUm('email')?></td>
+          <td width="300" valign="top"><label for="op16"><?=$autorbo->getValorCampoAutorUm('email')?></label></td>
           <td><input name="email" type="radio" class="radio" id="op16-1" value="2" <?=Util::iif($autorbo->getValorCampo("email") == 2, "checked=\"checked\"")?> /></td>
           <td width="300"><label for="op16-1"><?=$autorbo->getValorCampoAutorDois('email')?></label></td>
         </tr>
@@ -213,7 +221,7 @@ include('includes/topo.php');
         <tr>
           <td>Site</td>
           <td><input type="radio" name="site" class="radio" id="op17" value="1" <?=Util::iif($autorbo->getValorCampo("site") == 1, "checked=\"checked\"")?> /></td>
-          <td width="300" valign="top">http://<?=$autorbo->getValorCampoAutorUm('site')?></td>
+          <td width="300" valign="top"><label for="op17">http://<?=$autorbo->getValorCampoAutorUm('site')?></label></td>
           <td><input name="site" type="radio" class="radio" id="op17-1" value="2" <?=Util::iif($autorbo->getValorCampo("site") == 2, "checked=\"checked\"")?> /></td>
           <td width="300"><label for="op17-1">http://<?=$autorbo->getValorCampoAutorDois('site')?></label></td>
         </tr>
@@ -234,7 +242,7 @@ include('includes/topo.php');
 		  </td>
           <td><input type="radio" name="contato" class="radio" id="op18-1" value="2" <?=Util::iif($autorbo->getValorCampo("contato") == 2, "checked=\"checked\"")?> /></td>
           <td width="300" valign="top">
-          <label for="op18">
+          <label for="op18-1">
 		  <?php
 		  foreach($autorbo->getValorCampoAutorDois('contato') as $key => $value):
 		  ?>

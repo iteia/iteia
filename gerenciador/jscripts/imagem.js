@@ -2,17 +2,18 @@ var total_faixas = 0;
 
 function adicionarMaisCampos() {
 	if (total_faixas < 50) {
-		for (i = 0; i < 5; i++) {
+		for (i = 0; i < 1; i++) {
 			total_faixas++;
 		
 			var node_campoaudio = document.createElement("input");
 			node_campoaudio.setAttribute("type", "file");
 			node_campoaudio.setAttribute("name", "imagem[]");
+			node_campoaudio.setAttribute("multiple", "multiple");
 			node_campoaudio.setAttribute("size", "40");
 			node_campoaudio.setAttribute("id", "imagem_" + total_faixas);
 		
 			document.getElementById("div_adicionar_mais_imagens").appendChild(node_campoaudio);
-			document.getElementById("div_adicionar_mais_imagens").appendChild(document.createElement("br"));
+			//document.getElementById("div_adicionar_mais_imagens").appendChild(document.createElement("br"));
 		}
 	}
 }

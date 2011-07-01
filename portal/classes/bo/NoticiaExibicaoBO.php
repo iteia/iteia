@@ -3,24 +3,29 @@ include_once("classes/vo/ConfigPortalVO.php");
 include_once(ConfigPortalVO::getDirClassesRaiz()."vo/ConfigVO.php");
 include_once(ConfigPortalVO::getDirClassesRaiz()."dao/NoticiaDAO.php");
 include_once(ConfigPortalVO::getDirClassesRaiz()."dao/ConteudoDAO.php");
+include_once(ConfigPortalVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
 include_once(ConfigPortalVO::getDirClassesRaiz()."util/Util.php");
 
 class NoticiaExibicaoBO {
-
+    
     private $notdao = null;
+    private $usrdao = null;
     private $contdao = null;
-	private $datas_indices = array();
+    private $datas_indices = array();
 
     public function __construct() {
         $this->notdao = new NoticiaDAO;
         $this->contdao = new ConteudoDAO;
+        $this->usrdao = new UsuarioDAO;
     }
 
     public function exibirConteudo($codconteudo, $conteudo) {
         $conteudo['noticia'] = $this->notdao->getNoticiaDados($codconteudo);
+        $conteudo['autor'] = $this->usrdao->getUsuarioDados($conteudo['conteudo']['cod_autor']);
 
         if ($conteudo['conteudo']['imagem']) {
             $valores = getimagesize(ConfigVO::getDirFotos().$conteudo['conteudo']['imagem']);
+            //$valores = getimagesize(ConfigVO::getUrlSite()."exibir_imagem.php?img=".$conteudo['conteudo']['imagem']."&tipo=5&s=8");
 			$conteudo['noticia']['largura'] = min($valores[0], 200);
 			$size = 8;
 			if ($conteudo['noticia']['largura'] < 200)
@@ -52,11 +57,13 @@ class NoticiaExibicaoBO {
 		$total_paginas = count($this->datas_indices) - 1;
 		$tag1 = '<strong class="local">';
 		$tag2 = '</strong>';
-		$link_paginas = 'noticias.php?n=1';
+		//$link_paginas = 'jornal.php?n=1';
+        $link_paginas = 'jornal?';
 
 		$html = '<ul id="paginacao"><li id="anterior">';
 		if ($pagina_atual > 1)
-			$html .= '<a href="'.$link_paginas.'&amp;pagina='.($pagina_atual - 1).'">&laquo; Anterior</a>';
+            $html .= '<a href="'.$link_paginas.'pagina='.($pagina_atual - 1).'">&laquo; Anterior</a>';
+			//$html .= '<a href="'.$link_paginas.'&amp;pagina='.($pagina_atual - 1).'">&laquo; Anterior</a>';
 		//if ($pagina_atual < $total_paginas) //lista invertida
 			//$html .= '<a href="'.$link_paginas.'&amp;pagina='.($pagina_atual + 1).'">&laquo; Anterior</a>'; //lista invertida
 		else
@@ -84,13 +91,15 @@ class NoticiaExibicaoBO {
 				if ($pagina_atual == $i)
 					$html .= $prefixo.' '.$tag1.$i.$tag2.' '.$sufixo;
 				else
-					$html .= $prefixo.' <a href="'.$link_paginas.'&amp;pagina='.$i.'" '.$estilo_link.'>'.$tag1_link.$i.$tag2_link.'</a> '.$sufixo;
+                    $html .= $prefixo.' <a href="'.$link_paginas.'pagina='.$i.'" '.$estilo_link.'>'.$tag1_link.$i.$tag2_link.'</a> '.$sufixo;
+					//$html .= $prefixo.' <a href="'.$link_paginas.'&amp;pagina='.$i.'" '.$estilo_link.'>'.$tag1_link.$i.$tag2_link.'</a> '.$sufixo;
 			}
 		}
 
 		$html .= '</li><li id="proximo">';
 		if ($pagina_atual < $total_paginas)
-			$html .= '<a href="'.$link_paginas.'&amp;pagina='.($pagina_atual + 1).'">Pr&oacute;xima &raquo;</a>';
+            $html .= '<a href="'.$link_paginas.'pagina='.($pagina_atual + 1).'">Pr&oacute;xima &raquo;</a>';
+			//$html .= '<a href="'.$link_paginas.'&amp;pagina='.($pagina_atual + 1).'">Pr&oacute;xima &raquo;</a>';
 		//if ($pagina_atual > 1) //lista invertida
 			//$html .= '<a href="'.$link_paginas.'&amp;pagina='.($pagina_atual - 1).'">Pr&oacute;xima &raquo;</a>'; //lista invertida
 		else

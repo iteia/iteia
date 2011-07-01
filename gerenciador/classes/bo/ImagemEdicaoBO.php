@@ -29,10 +29,28 @@ class ImagemEdicaoBO extends ConteudoBO {
 		
 		if (!$this->dadosform["codimagem"] && !count($this->arquivos["imagem"]["tmp_name"]))
 			$this->erro_mensagens[] = "Selecione ao menos um arquivo de imagem";
-			
+		
+		// checar se o primeiro e unico arquivo enviado é um .zip
+		// se for faz a descompactação e trata as imagens normalmente
+		if (count($this->arquivos['imagem']['tmp_name'][0])) {
+			$extensao = strtolower(Util::getExtensaoArquivo($this->arquivos['imagem']['name'][0]));
+			if ($extensao == 'zip') {
+				$zip = new ZipArchive;
+				$zip->open($this->arquivos['imagem']['tmp_name'][0], ZIPARCHIVE::CHECKCONS);
+				$zip->extractTo(ConfigVO::getDirTemp());
+
+				unset($this->arquivos['imagem']);
+				for($i = 0; $i < $zip->numFiles; $i++) {
+					$this->arquivos['imagem']['tmp_name'][$i] = ConfigVO::getDirTemp().$zip->getNameIndex($i);
+					$this->arquivos['imagem']['name'][$i] = $zip->getNameIndex($i);
+					$this->arquivos['imagem']['size'][$i] = filesize($this->arquivos['imagem']['tmp_name'][$i]);
+				}
+			}
+		}
+		
 		if (count($this->arquivos["imagem"]["tmp_name"])) {
 			foreach ($this->arquivos["imagem"]["tmp_name"] as $key => $value) {
-				if (is_uploaded_file($this->arquivos["imagem"]["tmp_name"][$key])) {
+				if (is_file($this->arquivos["imagem"]["tmp_name"][$key])) {
 					if ($this->arquivos["imagem"]["size"][$key] > 5242880) {
 						$this->erro_mensagens[] = "Uma das Imagens está com mais de 5MB";
 						break;
@@ -70,7 +88,7 @@ class ImagemEdicaoBO extends ConteudoBO {
 		// cadastrar varias imagens
 		foreach ($this->arquivos["imagem"]['tmp_name'] as $key => $audio) {
 			
-			if (is_uploaded_file($this->arquivos["imagem"]["tmp_name"][$key])) {
+			if (is_file($this->arquivos["imagem"]["tmp_name"][$key])) {
 			
 				$this->imgvo->setRandomico(Util::geraRandomico());
 				//$this->audvo->setFaixa($this->arquivos["audio"]['name'][$key]);

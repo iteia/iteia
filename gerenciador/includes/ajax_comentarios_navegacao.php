@@ -1,5 +1,5 @@
 <div id="op-comentario"><strong>Visualizar:</strong><br /> 
-<?=$resultado['html_navegacao_superior'];?>        
+<? //echo $resultado['html_navegacao_superior'];?>        
 </div>
       
     <h3 class="titulo"><?=$resultado['titulo_superior'];?></h3>
@@ -17,8 +17,10 @@
           <tr>
             <th class="col-1" scope="col"><input name="checkbox" type="checkbox" id="check-all" /></th>
             <th class="col-titulo" scope="col">T&iacute;tulo</th>
+            <!--
             <th class="col-acoes" scope="col">A&ccedil;&otilde;es</th>
             <th class="col-remover" scope="col">Apagar</th>
+            -->
           </tr>
         </thead>
         <tbody>
@@ -26,18 +28,26 @@
           	foreach ($resultado as $value):
             	if ((int)$value['cod']): 
           	?>
+            
           <tr>
             <td class="col-1"><input name="codcomentario" type="checkbox" class="check" value="<?=$value['cod'];?>" /></td>
+            
             <td class="col-titulo">
-            <p class="dash"><a href="<?=ConfigVO::URL_SITE.$value['url'];?>" title="Este link ser&aacute; aberto numa nova janela" target="_blank" class="ext"><strong><?=$value['url'];?></strong></a></p>
+            <h3 class="line"><a href="<?=ConfigVO::URL_SITE.$value['url'];?>" title="Este link ser&aacute; aberto numa nova janela" target="_blank" class="ext"><?=$value['url'];?></a></h3>
             
             <p><strong><?=$value['autor'];?></strong> comentou em 
               <?=date('d.m.Y - H\\hi', strtotime($value['data']));?><br />
               <?=$value['email'];?> <?=Util::iif($value['site'], "| <a href=\"http://".$value['site']."\" target=\"_blank\">".$value['site']."</a>");?></p>
-                <p><?=$value['comentario'];?></p></td>
+                <p class="pre"><?=$value['comentario'];?></p>
+                <?=$value['menu_acao'];?>
+            </td>
+            
+            <!--
             <td class="col-acoes"><?=$value['menu_acao'];?></td>
             <td class="col-remover"><a href="javascript:void(0);" onclick="javascript:submeteAcoesComentario(1, '<?=$resultado['link'];?>&codcomentario=<?=$value['cod'];?>&pagina=<?=$paginacao['pagina'];?>');">Apagar</a></td>
+            -->
           </tr>
+          
           	<?php
             	endif;
           	endforeach;

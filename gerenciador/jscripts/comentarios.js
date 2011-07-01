@@ -30,7 +30,8 @@ function submeteAcoesComentario(acao, url) {
 }
 
 function submeteAcoesComentarioMulti(acao, url) {
-	var lista_checkboxes = $("input[@name=codcomentario]");
+	//var lista_checkboxes = $("input[@name=codcomentario]");
+	var lista_checkboxes = $("input[name=codcomentario]");
 	var lista_marcados = new Array;
 	
 	for (i = 0; i < lista_checkboxes.length; i++) {

@@ -42,9 +42,19 @@ function carregarColaboradores() {
 	$('#mostra_lista_colaboradores_revisao').load('ajax_conteudo.php?get=carregar_colaboradores_revisao');
 }
 
-function adicionarIntegrante() {
+/*function adicionarIntegrante() {
 	$.get('ajax_conteudo.php?get=adicionar_colaborador_integrantes&nome_integrante='+$('#nome_integrante').val(), function html(html) { $("#mostrar_colaborador_intergrantes").html(html); });
 	$('#nome_integrante').val('');
+}*/
+
+function adicionarIntegrante() {
+	$.get('ajax_conteudo.php?get=adicionar_colaborador_integrantes&cod_usuario='+$('#codusuario_autor_selecionado').val(),
+		function html(html) {
+			$('#mostrar_colaborador_intergrantes').html(html);
+			$('#nome_integrante').val('');
+			$('#codusuario_autor_selecionado').val(0);
+		}
+	);
 }
 
 function removerAutorIntegrante(codusuario) {

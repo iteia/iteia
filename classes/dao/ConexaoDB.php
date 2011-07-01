@@ -2,11 +2,11 @@
 
 class ConexaoDB {
 
-	const SERVIDOR = "192.168.0.100";
-	const USUARIO  = "";
-	const SENHA    = "";
+	const SERVIDOR = "localhost"; //"192.168.0.100";
+	const USUARIO  = "root"; //"eduardo";
+	const SENHA    = "12345"; //"eduardo";
 	const DATABASE = "iteia_geral";
-
+    
 	static private $instance;
 	private $conexao;
 	private $sql_result;

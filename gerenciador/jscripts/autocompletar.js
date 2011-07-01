@@ -15,7 +15,12 @@ $().ready(function() {
 
 	$("#nome_integrante").autocomplete("ajax_conteudo.php?get=buscar_integrantes&buscar=1&tipo=2&buscarpor=nome&integrar_codgrupo="+$("#codgrupo").val()+"&integrantes=1&conteudo_simples=1", {
 		multiple: false
-	});	
+	});
+	
+	$("#nome_integrante").result(function(event, data, formatted) {
+		if (data)
+			$("#codusuario_autor_selecionado").val(data[1]);
+	});
 	
 	$("#nome_autor_wiki").autocomplete("ajax_conteudo.php?get=buscar_integrantes&buscar=1&tipo=2&buscarpor=nome&buscar_autor_ficha=1&buscar_tipo=3&integrantes=1&limiteresultado=30&conteudo_simples=1", {
 		multiple: false,
@@ -29,7 +34,11 @@ $().ready(function() {
 		}
 	});
 	
-	$("#nome_colaborador").autocomplete("ajax_conteudo.php?get=buscar_integrantes&buscar=1&tipo=1&buscarpor=nome", {
+//	$("#nome_colaborador").autocomplete("ajax_conteudo.php?get=buscar_integrantes&buscar=1&tipo=1&buscarpor=nome", {
+//		multiple: true
+//	});
+
+	$("#nome_colaborador").autocomplete("ajax_conteudo.php?get=buscar_colaboradores", {
 		multiple: true
 	});
 

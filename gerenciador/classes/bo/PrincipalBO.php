@@ -1,62 +1,36 @@
 <?php
-include_once(ConfigGerenciadorVO::getDirClassesRaiz()."vo/AutorVO.php");
-include_once(ConfigGerenciadorVO::getDirClassesRaiz()."vo/ColaboradorVO.php");
-include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AutorDAO.php");
-include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/ColaboradorDAO.php");
+include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
 
 class PrincipalBO {
 
-	private $dadosusuario = null;
-	private $usuariodao = null;
+	private $usrdao = null;
 
 	public function __construct() {
-		//if ($_SESSION['logado_como'] == 1) {
-			$this->usuariodao = new AutorDAO;
-			$this->dadosusuario = $this->usuariodao->getAutorVO($_SESSION['logado_cod']);
-		/*} else {
-			$this->usuariodao = new ColaboradorDAO;
-			$this->dadosusuario = $this->usuariodao->getColaboradorVO($_SESSION['logado_cod']);
-		}*/
+		$this->usrdao = new UsuarioDAO;
 	}
 
 	public function getUsuarioDados() {
-		if ($this->dadosusuario->getImagem()) {
-			$dadosusuario['imagem'] = 'exibir_imagem.php?img='.$this->dadosusuario->getImagem().'&amp;tipo=a&amp;s=6';
-		} else {
-			//if ($_SESSION['logado_como'] == 1) {
-				$dadosusuario['imagem'] =  'img/imagens-padrao/autor.jpg';
-			/*} else {
-				$dadosusuario['imagem'] =  'img/imagens-padrao/colaborador.jpg';
-			}*/
-		}
+		$dadosusuario = $this->usrdao->getUsuarioDados($_SESSION['logado_cod']);
+		if ($dadosusuario['imagem'])
+			$dadosusuario['imagem'] = 'exibir_imagem.php?img='.$dadosusuario['imagem'].'&amp;tipo=a&amp;s=6';
+		else
+			$dadosusuario['imagem'] =  'img/imagens-padrao/autor.jpg';
 
-		$dadosusuario['cod_usuario'] = $this->dadosusuario->getCodUsuario();
-		$dadosusuario['nome'] = $this->dadosusuario->getNome();
-		$dadosusuario['url'] = $this->dadosusuario->getUrl();
-		$dadosusuario['cidade'] = $this->getCidade($this->dadosusuario->getCodCidade());
-		$dadosusuario['estado'] = $this->getEstado($this->dadosusuario->getCodEstado());
+		$dadosusuario['cod_usuario'] = $dadosusuario['cod_usuario'];
+		$dadosusuario['nome'] = $dadosusuario['nome'];
+		$dadosusuario['url'] = $dadosusuario['url'];
+		$dadosusuario['cidade'] = $dadosusuario['cidade'];
+		$dadosusuario['estado'] = $dadosusuario['sigla'];
 
 		return $dadosusuario;
 	}
 	
 	public function getListaColaboradoresEdicao() {
-		return $this->usuariodao->getListaColaboradoresEdicao($_SESSION['logado_dados']['cod']);
-	}
-
-	public function getEstado($codestado) {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/EstadoDAO.php");
-		$estdao = new EstadoDAO;
-		return $estdao->getSiglaEstado($codestado);
-	}
-
-	public function getCidade($codcidade) {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/CidadeDAO.php");
-		$ciddao = new CidadeDAO;
-		return $ciddao->getNomeCidade($codcidade);
+		return $this->usrdao->getListaColaboradoresEdicao($_SESSION['logado_dados']['cod']);
 	}
 
 	public function getEstatisticasUsuario($codtipo) {
-		return $this->usuariodao->getEstatisticasUsuario($codtipo);
+		return $this->usrdao->getEstatisticasUsuario($codtipo);
 	}
 
 }

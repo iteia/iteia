@@ -27,18 +27,16 @@ if ($editar) {
 if ($codusuario && !$editar)
 	$newsbo->setDadosCamposEdicao($codusuario);
 
-$paginatitulo = 'Destaque';
-$item_menu = "home";
-$item_submenu = "newsletter_inserir";
+$paginatitulo = 'Boletim';
+$item_menu = "boletim";
+$item_submenu = "cadastrar_email";
 include('includes/topo.php');
 ?>
 
 <script type="text/javascript" src="jscripts/funcoes.js"></script>
 <script type="text/javascript" src="jscripts/home_newsletter.js"></script>
 
-    <h2>Destaques</h2>
-    <div id="op-comentario">
-      <a href="home_newsletter.php">In&iacute;cio</a> | <a href="home_newsletter_inserir.php">Criar newsletter</a> | <a href="home_newsletter_listas.php">Listas de emails</a> | <strong>Cadastrar emails</strong></div>
+    <h2>Boletim</h2>
 
 <?php if ($erro_mensagens): ?>
 <div class="box box-alerta">
@@ -73,7 +71,9 @@ include('includes/topo.php');
             <br />
             <select name="select2" id="select5">
               <?php foreach($newsbo->getListasEnvio() as $value): ?>
+                <?php if($value['cod_lista'] != 6): ?>
 				<option value="<?=$value['cod_lista'];?>|<?=$value['titulo'];?>"><?=$value['titulo'];?></option>
+                <?php endif; ?>
 			<?php endforeach; ?>
               </select>
            

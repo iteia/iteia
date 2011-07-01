@@ -17,10 +17,8 @@ if ($editar) {
 	try {
 		$cod_conteudo = $notbo->editar($_POST, $_FILES);
 		$exibir_form = false;
-
 		Header("Location: noticia_publicado.php?cod=".$cod_conteudo);
 		exit();
-
 	} catch (Exception $e) {
 		$erro_mensagens = $e->getMessage();
 	}
@@ -97,14 +95,14 @@ $codnoticia = (int)$notbo->getValorCampo("codnoticia");
 		
         <label for="textarea">Not&iacute;cia<span>*</span></label>
         <br />
-        <textarea name="texto" cols="60" style="height:350px;" rows="10" class="mceAdvanced" id="textarea" <?=$notbo->verificaErroCampo("texto")?> onkeyup="contarCaracteres(this, 'cont_descricao', 20000);"><?=Util::clearText($notbo->getValorCampo("texto"));?></textarea>
+        <textarea name="texto" cols="60" style="height:350px;" rows="10" class="mceAdvanced" id="textarea" <?=$notbo->verificaErroCampo("texto");?> onkeyup="contarCaracteres(this, 'cont_descricao', 20000);"><?=Util::clearText($notbo->getValorCampo("texto"));?></textarea>
         <input type="text" class="txt counter" value="20000" size="4" disabled="disabled" id="cont_descricao" />
         <br />
         
-        <label for="label">Tags (palavras-chave)</label>
+        <!--<label for="label">Tags (palavras-chave)</label>
         <br />
         <input type="text" name="tags" id="tags" value="<?=$notbo->getValorCampo("tags")?>" class="txt" size="80" />
-        <small>Separe por ponto-e-v&iacute;rgula &quot;;&quot;</small>
+        <small>Separe por ponto-e-v&iacute;rgula &quot;;&quot;</small>-->
 
         <div class="box-imagem">
     	<div class="visualizar-img" id="div_imagem_exibicao">
@@ -148,6 +146,8 @@ $codnoticia = (int)$notbo->getValorCampo("codnoticia");
           <em><small>Ex. hh:mm</small></em></div>
         </fieldset>
       </div>
+	  
+<?php include("includes/conteudo_box_categorias.php"); ?>
       
 <?php if ($_SESSION['logado_dados']['nivel'] == 1000000): ?>
       
@@ -211,7 +211,7 @@ $codnoticia = (int)$notbo->getValorCampo("codnoticia");
 <script language="javascript" type="text/javascript">
 contarCaracteres(document.getElementById("textfield"), "cont_titulo", 100);
 contarCaracteres(document.getElementById("textfield2"), "cont_subtitulo", 200);
-contarCaracteres(document.getElementById("textarea"), "cont_descricao", 2000);
+contarCaracteres(document.getElementById("textarea"), "cont_descricao", 20000);
 //contarCaracteres(document.getElementById("textfield6"), "cont_home_titulo", 100);
 //contarCaracteres(document.getElementById("textarea2"), "cont_home_resumo", 200);
 //exibirCamposHome();

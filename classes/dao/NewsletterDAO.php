@@ -161,7 +161,7 @@ class NewsletterDAO {
 			$sql .= " AND HI.cod_item IN (".implode(',', (array)$_SESSION['sessao_newsletter_itens']).")";
 			
 		$sql .= " ORDER BY HI.ordem ASC;";
-
+        
 		$sql_result = $this->banco->executaQuery($sql);
 		while ($sql_row = $this->banco->fetchArray($sql_result)) {
 			$inicio_img = substr($sql_row["imagem"], 0, 10);
@@ -298,7 +298,7 @@ class NewsletterDAO {
 	
 	public function getNewsletterAgendadasRecentes() {
 		$array = array();
-		$sql = "select N.cod_newsletter, N.titulo, NP.data_envio from Home_Newsletter N LEFT JOIN Home_Newsletter_Programacao NP ON (N.cod_newsletter=NP.cod_newsletter) where /*NP.data_envio >= '".date('Y-m-d H:i:s')."' AND*/ N.enviada = 0 ORDER BY NP.data_envio DESC LIMIT 3;";
+		$sql = "select N.cod_newsletter, N.titulo, NP.data_envio from Home_Newsletter N INNER JOIN Home_Newsletter_Programacao NP ON (N.cod_newsletter=NP.cod_newsletter) where /*NP.data_envio >= '".date('Y-m-d H:i:s')."' AND*/ N.enviada = 0 ORDER BY NP.data_envio DESC LIMIT 3;";
 		$sql_result = $this->banco->executaQuery($sql);
 		while ($row = $this->banco->fetchArray($sql_result)) {
 			$row['total'] = count($this->getConteudoNewsletter($row['cod_newsletter']));
@@ -316,7 +316,7 @@ class NewsletterDAO {
 	
 	public function getCodNewsletterListaProgramada() {
 		$array = array();
-		$sql = "select NP.cod_newsletter, N.data_cadastro from Home_Newsletter_Programacao AS NP LEFT JOIN Home_Newsletter AS N ON (N.cod_newsletter=NP.cod_newsletter) where NP.data_envio <= '".date('Y-m-d H:i:s')."' AND N.enviada='0' order by NP.data_envio;";
+		$sql = "select NP.cod_newsletter, N.data_cadastro, N.titulo from Home_Newsletter_Programacao AS NP INNER JOIN Home_Newsletter AS N ON (N.cod_newsletter=NP.cod_newsletter) where NP.data_envio <= '".date('Y-m-d H:i:s')."' AND N.enviada='0' order by NP.data_envio;";
 		$sql_result = $this->banco->executaQuery($sql);
 		while ($row = $this->banco->fetchArray($sql_result))
 			$array[] = $row;

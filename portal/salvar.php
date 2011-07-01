@@ -7,6 +7,14 @@ include_once('classes/bo/ConteudoExibicaoBO.php');
 $cod_conteudo = (int)$_GET['c'];
 $cod_formato  = (int)$_GET['f'];
 $opcional  = (int)$_GET['i'];
+$gambi = (int)$_GET['a'];
+
+if($gambi){
+    include_once('classes/bo/TextoExibicaoBO.php');
+    $textbo = new TextoExibicaoBO();
+    $textbo->DownloadArquivo($cod_conteudo,'');
+    exit;
+}
 
 $contbo = new ConteudoExibicaoBO($cod_conteudo, $cod_formato);
 return $contbo->DownloadArquivo($opcional);

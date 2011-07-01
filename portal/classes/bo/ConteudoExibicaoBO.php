@@ -32,13 +32,18 @@ class ConteudoExibicaoBO {
     private function dadosGlobalConteudo() {
     	$this->contdao->addAcesso($this->codconteudo);
     	$this->conteudo['no_comment'] = $this->nocomment;
-        $this->conteudo['conteudo'] = $this->contdao->getDadosConteudo($this->codconteudo);
+		$ignora_colab = false;
+		$codformato = $this->contdao->getFormatoConteudo($this->codconteudo);
+		if ($codformato == 6 || $codformato == 5)
+			$ignora_colab = true;
+        $this->conteudo['conteudo'] = $this->contdao->getDadosConteudo($this->codconteudo, $ignora_colab);
+		//print_r( $this->conteudo);
 
 		$autordados = $this->usuariodao->getUsuarioDados($this->conteudo['conteudo']['cod_autor']);
 
         // redireciona pra index se o conteudo não está acessivel
 		// ou se o autor não estiver excluido ou inativo
-        if ($this->conteudo['conteudo']['cod_formato'] != 5) {
+        if (($this->conteudo['conteudo']['cod_formato'] != 5) && ($this->conteudo['conteudo']['cod_formato'] != 6)) {
 			if ($autordados['disponivel'] != 1 || $autordados['situacao'] != 3) {
 				Header('Location: /404.php');
 				die;
@@ -49,26 +54,33 @@ class ConteudoExibicaoBO {
         	Header('Location: /404.php');
 			die;
         }
-
-		$this->conteudo['canal'] = Util::getHtmlCanal($this->conteudo['conteudo']['cod_segmento']);
+	
+		//$this->conteudo['canal'] = Util::getHtmlCanal($this->conteudo['conteudo']['cod_segmento']);
+		$this->conteudo['canal'] = '';
+		if($this->conteudo['conteudo']['cod_segmento'])
+			$this->conteudo['canal'] = Util::getHtmlCanal($this->conteudo['conteudo']['cod_segmento'],'');
+		if($this->conteudo['conteudo']['cod_subarea'] != 0)
+			$this->conteudo['canal'] .= ', '.Util::getHtmlCanal($this->conteudo['conteudo']['cod_subarea']);
+			
         $this->conteudo['tags'] = $this->getTagsConteudo();
         //$this->conteudo['canal'] = $this->contdao->getCanalConteudo($this->codconteudo);
         $this->conteudo['autores'] = $this->getAutoresConteudo();
-		
+
 		$this->conteudo['relacionado'] = $this->contdao->getConteudoRelacionado($this->codconteudo, 0, 0);
 		$this->conteudo['relacionado_tags'] = $this->contdao->getConteudoRelacionadoTags($this->codconteudo);
         $this->conteudo['maisconteudo'] = $this->contdao->getMaisConteudoColaborador($this->codconteudo, $this->codformato, $this->conteudo['conteudo']['cod_colaborador']);
 		$this->conteudo['compartilhar'] = ConfigVO::URL_SITE.$this->conteudo['conteudo']['url'];
 		$this->conteudo['comentarios'] = $this->comentdao->getQtsComentarios($this->codconteudo);
-
+	
         $this->conteudo['maisconteudo_autores'] = $this->contdao->getConteudoAutoresFichaTecnica($this->codconteudo);
         $this->conteudo['autores_ficha_tecnica'] = $this->getAutoresFichaTecnicaConteudo();
+		$this->conteudo['autores_ficha_tecnica_url'] = $this->getAutoresFichaTecnicaConteudoUrls();
 		$cod_autores_ficha = $this->contdao->getCodAutoresFichaTecnicaConteudo($this->codconteudo);
 
 		$this->conteudo['exibir_unico'] = false;
 		if (in_array($this->conteudo['conteudo']['cod_autor'], $cod_autores_ficha) && count($cod_autores_ficha) == 1)
 			$this->conteudo['exibir_unico'] = true;
-			
+
 		$this->conteudo['permitir_comentarios'] = $this->contdao->getPermissaoComentario($this->codconteudo);
 		$licencas = $this->contdao->getLicenca($this->conteudo['conteudo']['cod_licenca']);
 
@@ -81,52 +93,52 @@ class ConteudoExibicaoBO {
 		$abrea='&nbsp;';
 		$fechaa='';
 		$url_licenca="#";
-		
+
 		if(($tipo_licenca!=7)&&($tipo_licenca!=8)){
 		$url_licenca="http://creativecommons.org/licenses/by-nc-nd/2.5/br/";
 		$abrea='&nbsp;<a href="'.$url_licenca.'">';
 		$fechaa='</a>';
-		} 
-		
-	
+		}
+
+
 		if($tipo_licenca==1){
 		$url_licenca="http://creativecommons.org/licenses/by/2.5/br/";
 		$abrea='&nbsp;<a href="'.$url_licenca.'">';
 		$fechaa='</a>';
-		} 
-		
-		
+		}
+
+
 		if($tipo_licenca==2){
 		$url_licenca="http://creativecommons.org/licenses/by-sa/2.5/br/";
 		$abrea='&nbsp;<a href="'.$url_licenca.'">';
 		$fechaa='</a>';
-		} 
-		
+		}
+
 		if($tipo_licenca==3){
 		$url_licenca="http://creativecommons.org/licenses/by-nd/2.5/br/";
 		$abrea='&nbsp;<a href="'.$url_licenca.'">';
 		$fechaa='</a>';
-		} 
-		
+		}
+
 		if($tipo_licenca==4){
 		$url_licenca="http://creativecommons.org/licenses/by-nc/2.5/br/";
 		$abrea='&nbsp;<a href="'.$url_licenca.'">';
 		$fechaa='</a>';
-		} 
-		
+		}
+
 		if($tipo_licenca==5){
 		$url_licenca="http://creativecommons.org/licenses/by-nc-sa/2.5/br/";
 		$abrea='&nbsp;<a href="'.$url_licenca.'">';
 		$fechaa='</a>';
-		} 
-		
+		}
+
 		if($tipo_licenca==6){
 		$url_licenca="http://creativecommons.org/licenses/by-nc-nd/2.5/br/";
 		$abrea='&nbsp;<a href="'.$url_licenca.'">';
 		$fechaa='</a>';
-		} 
-		
-		
+		}
+
+
 		$arraylicenca .= $abrea.Util::getTituloLicenca($this->conteudo['conteudo']['cod_licenca']).$fechaa;
 		$this->conteudo['licenca'] = $arraylicenca;
     }
@@ -134,7 +146,7 @@ class ConteudoExibicaoBO {
 	private function getTagsConteudo() {
 		$html  = '';
 		foreach($this->contdao->getTagsConteudoNovo($this->codconteudo) as $tag)
-			$html .= (($html != '') ? ' ' : ' ').'<a href="/busca_action.php?buscar=&amp;formatos=2,3,4,5&amp;tag='.urlencode($tag['tag']).'" class="common0 size0">'.$tag['tag'].'</a>';
+			$html .= (($html != '') ? ' ' : ' ').'<a href="/busca_action.php?buscar=&amp;formatos=2,3,4,5,6,7&amp;tag='.urlencode($tag['tag']).'" class="common0 size0">'.$tag['tag'].'</a>';
 		return $html;
 	}
 
@@ -159,7 +171,7 @@ class ConteudoExibicaoBO {
 		$html .= '</ul>';
 		return $html;
 	}
-	
+
 	private function getAutoresFichaTecnicaConteudo() {
 		$autores = array();
 		$html  = '';
@@ -168,7 +180,6 @@ class ConteudoExibicaoBO {
 		$maisusuaios=$this->contdao->getAutoresFichaTecnicaConteudoMaisautores($this->codconteudo);
 		foreach($usuariosativos as $key => $usuarios) {
 			$value = $this->usuariodao->getUsuarioDados($usuarios['cod_usuario']);
-			
 			$html .= '<li'.(!isset($usuariosativos[$key + 1]) ? ' class="no-margin-b no-border"' : '').'>';
 			if ($value['imagem'])
 				$html .= '<div class="foto"><a href="'.ConfigVO::URL_SITE.$value['url'].'" title="Ir para página deste autor"><img src="/exibir_imagem.php?img='.$value['imagem'].'&amp;tipo=a&amp;s=29" alt="Imagem do autor: '.$value['nome'].'" width="40" height="40" /></a></div>';
@@ -180,15 +191,15 @@ class ConteudoExibicaoBO {
 			$html .= '</li>';
 		}
 		$html .= '</ul>';
-		
-		
-		
-		//  
+
+
+
+		//
 		    $i = 0;
 			foreach($maisusuaios as $key => $usuarios) {
 			$i++;
 			$value = $this->usuariodao->getUsuarioDados($usuarios['cod_usuario']);
-			
+
 			//$html2 .= '<li'.(!isset($usuariosativos[$key + 1]) ? ' class="no-margin-b no-border"' : '').'>';
 			if ($value['imagem'])
 				$html2 .= '<div class="foto"><a href="'.ConfigVO::URL_SITE.$value['url'].'" title="Ir para página deste autor"><img src="/exibir_imagem.php?img='.$value['imagem'].'&amp;tipo=a&amp;s=29" alt="Imagem do autor: '.$value['nome'].'" width="40" height="40" /></a></div>';
@@ -207,14 +218,32 @@ class ConteudoExibicaoBO {
 		$retorno['2']=$html2;
 		$retorno[3]=$i;
 		//return $html;
+
+		return $retorno;
+	}
+	
+	private function getAutoresFichaTecnicaConteudoUrls() {
+		$retorno= array();
+		$usuariosativos = $this->contdao->getAutoresFichaTecnicaConteudoNovo($this->codconteudo);
+		$maisusuaios=$this->contdao->getAutoresFichaTecnicaConteudoMaisautores($this->codconteudo);
 		
+		foreach($usuariosativos as $key => $usuarios) {
+			$value = $this->usuariodao->getUsuarioDados($usuarios['cod_usuario']);
+			$retorno[]=$value['url'];
+		}
+		
+		foreach($maisusuaios as $key => $usuarios) {
+			$value = $this->usuariodao->getUsuarioDados($usuarios['cod_usuario']);
+			$retorno[]=$value['url'];
+		}
 		return $retorno;
 	}
 
     public function exibirConteudo() {
         include_once("ConteudoExibicaoFactory.php");
-        $this->codfact = ConteudoExibicaoFactory::getFactory($this->codformato);
-        $this->dadosGlobalConteudo();
+	
+	$this->codfact = ConteudoExibicaoFactory::getFactory($this->codformato);
+        $this->dadosGlobalConteudo(); 
         return $this->codfact->exibirConteudo($this->codconteudo, $this->conteudo, $this->comentbo);
     }
 

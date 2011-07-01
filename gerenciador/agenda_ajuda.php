@@ -1,19 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<title>Eventos - Ajuda &raquo; Gerenciador de conte&uacute;do</title>
-<style type="text/css" media="screen">
-<!--
-@import url("css/style.css");
--->
-body {
-	background:none;
-}
-</style>
-</head>
-<body>
-<div id="lightbox">
+<?php
+include('verificalogin.php');
+include_once(ConfigGerenciadorVO::getDirClassesRaiz()."util/Util.php");
+
+$item_menu = "agenda";
+$item_submenu = "ajuda";
+include('includes/topo.php');
+?>
+    <h2>Agenda</h2>
+    <h3 class="titulo">Ajuda</h3>
+    <div class="box">
   <p>Esta se&ccedil;&atilde;o &eacute; destinada ao cadastro de eventos apoiados pelo  colaborador. Shows, reuni&otilde;es, encontros, oficinas e todas as atividades  do Coletivo podem ser cadastradas, ficando dispon&iacute;vel na sua agenda.  Eventos cadastrados nesta se&ccedil;&atilde;o tamb&eacute;m aparecem na agenda principal do iTEIA.</p>
   <p>O formu&aacute;rio de eventos cont&eacute;m os seguintes campos:</p>
   <ul>
@@ -27,7 +22,6 @@ body {
     <li> <strong>Per&iacute;odo:</strong> Caso este evento ocorra por diversos dias com a mesma  descri&ccedil;&atilde;o. Caso a descri&ccedil;&atilde;o mude conforme o dia &eacute; mais interessante  cadastrar cada dia como um evento distinto.</li>
     <li><strong>Hor&aacute;rio:</strong> Previs&atilde;o de in&iacute;cio e conclus&atilde;o da atividade. </li>
   </ul><br />
+  </div>
 
-</div>
-</body>
-</html>
+<?php include('includes/rodape.php'); ?>

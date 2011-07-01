@@ -3,30 +3,41 @@ function recomendar(cod_conteudo, cod_formato, tipo) {
 }
 
 function loadComentarios(cod_conteudo) {
-    $('#carrega_comentarios').load('/comentarios.php?acao=carregar&cod='+cod_conteudo);
+    $('#carrega_comentarios').load('/comentarios.php?acao=carregar&cod='+cod_conteudo); 
 }
 
-function enviarComentario() {
-	if(document.formcomentario.comentario.value==''){
-		document.formcomentario.comentario.className='txt erro';
+function enviarComentario(element) {
+	element.disabled = true;
+	var formDeComentario = document.formcomentario.comentario;
+	var formDeNome = document.formcomentario.nome;
+	var formDeEmail = document.formcomentario.email;
+
+	if(formDeComentario.value==''){
+		formDeComentario.className='txt erro';
 	} else {
-		document.formcomentario.comentario.className='txt';
+		formDeComentario.className='txt';
 	}
 
-	if(document.formcomentario.nome.value==""){
-		document.formcomentario.nome.className='txt erro';
+	if(formDeNome.value==""){
+		formDeNome.className='txt erro';
 	} else {
-		document.formcomentario.nome.className='txt';
+		formDeNome.className='txt';
 	}
 
-	if(document.formcomentario.email.value==""){
-		document.formcomentario.email.className='txt erro';
+	if(formDeEmail.value==""){
+		formDeEmail.className='txt erro';
 	} else {
-		document.formcomentario.email.className='txt';
+		formDeEmail.className='txt';
 	}
 
-    $.post('/comentarios.php?acao=enviar', $('#formcomentario').serialize(), function html(html) { $('#resposta_comentario').html(html); limpaCamposComentario(); loadComentarios($('#cod1').val()) });
-
+	var teste = new RegExp("^[-!#$%&\'*+\\.\/0-9=?A-Z^_`{|}~]+@([-0-9A-Z]+\.)+([0-9A-Z]){2,4}$","i");
+	
+	if(formDeComentario.value!='' && formDeNome.value!="" && formDeEmail.value!="" && teste.test(formDeEmail.value)==true){
+		$.post('/comentarios_enviar.php?ajax=sim', $('#formcomentario').serialize(), function html(html) {$('#resposta_comentario').html(html);limpaCamposComentario()});
+	}else{
+		$.post('/comentarios_enviar.php?ajax=sim', $('#formcomentario').serialize(), function html(html) {$('#resposta_comentario').html(html)});
+		element.disabled = false;
+	}
 }
 
 function limpaCamposComentario() {

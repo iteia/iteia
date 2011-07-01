@@ -7,17 +7,28 @@ include_once(ConfigPortalVO::getDirClassesRaiz()."dao/BannerDAO.php");
 class BannerExibicaoBO {
 
 	private $bandao = null;
+    private $banners_exibidos = null;
 
 	public function __construct() {
 		$this->bandao = new BannerDAO;
+        $this->banners_exibidos = array();
 	}
+    
+    public function getBannersExibidos(){
+        return $this->banners_exibidos;
+    }
+    
+    public function setBannersExibidos($cod){
+        $this->banners_exibidos[] = $cod;
+    }
 
-	public function getHtmlBannersLaterais() {
+	public function getHtmlBannersLaterais($dados) {
 		$html = '';
 		$html .= "<ul>\n";
-
-		for ($i = 1; $i <= 3; $i++) {
-			$dados_banner = $this->bandao->mostrarBanner();
+        
+        while(count($this->banners_exibidos) <= $this->bandao->countBanners($dados)) {
+			$dados_banner = $this->bandao->mostrarBanner($this, $dados);
+            $this->setBannersExibidos($dados_banner[0]);
 			if ($dados_banner['cod_banner']) {
 				$html .= "<li".($i == 3 ? ' class="no-margin-r"' : '').">";
 				if ($dados_banner['link'])
@@ -27,11 +38,33 @@ class BannerExibicaoBO {
 					$html .= "</a>";
 				$html .= "</li>\n";
 			}
+            if(count($this->banners_exibidos) > 3)
+                break;
 		}
-
 		$html .= "</ul>\n";
 		return $html;
 	}
+    
+	//public function getHtmlBannersLaterais() {
+	//	$html = '';
+	//	$html .= "<ul>\n";
+	//
+	//	for ($i = 1; $i <= 3; $i++) {
+	//		$dados_banner = $this->bandao->mostrarBanner();
+	//		if ($dados_banner['cod_banner']) {
+	//			$html .= "<li".($i == 3 ? ' class="no-margin-r"' : '').">";
+	//			if ($dados_banner['link'])
+	//				$html .= "<a href=\"http://".$dados_banner['link']."\" target=\"_blank\" title=\"".$dados_banner['titulo']."\">";
+	//			$html .= "<img src=\"/exibir_imagem?img=".$dados_banner['arquivo']."&amp;tipo=a&amp;s=39\" alt=\"".$dados_banner['titulo']."\" />";
+	//			if ($dados_banner['link'])
+	//				$html .= "</a>";
+	//			$html .= "</li>\n";
+	//		}
+	//	}
+	//
+	//	$html .= "</ul>\n";
+	//	return $html;
+	//}
 
 	public function getHtmlBannersSuperior() {
 		$html = '';
@@ -62,5 +95,12 @@ class BannerExibicaoBO {
 
 		return $html;
 	}
-
+    public function temBanners($dados){
+        $tem = false;
+        
+        if($this->bandao->countBanners($dados) > 0)
+            $tem = true;
+            
+        return $tem;
+    }
 }

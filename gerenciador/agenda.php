@@ -20,9 +20,9 @@ include('includes/topo.php');
       <a href="agenda_busca_pop.php?height=280&amp;width=310" title="Busca avan&ccedil;ada" class="thickbox">Busca avan&ccedil;ada</a>
     </form>
     
-    <p class="descricao"> <a href="agenda_edicao.php">Publique eventos</a> sobre os mais variados acontecimentos relacionados ao(s) colaborador(es) que voc&ecirc; representa ou aos autores e grupos vinculados a ele. Os eventos aparecer&atilde;o na home e na p&aacute;gina do(s) colaborador(es) no portal. <br />
+    <div class="descricao"> <a href="agenda_edicao.php">Publique eventos</a> sobre os mais variados acontecimentos relacionados ao(s) colaborador(es) que voc&ecirc; representa ou aos autores e grupos vinculados a ele. Os eventos aparecer&atilde;o na home e na p&aacute;gina do(s) colaborador(es) no portal. <br />
       <br />
-    <small>OBS: quanto mais informa&ccedil;&otilde;es e detalhes voc&ecirc; cadastrar, melhor ser&aacute; divulgado o evento. </small></p>
+    <small>OBS: quanto mais informa&ccedil;&otilde;es e detalhes voc&ecirc; cadastrar, melhor ser&aacute; divulgado o evento. </small></div>
 
 	<!--
     <form action="agenda.php" method="get" id="busca">

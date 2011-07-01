@@ -52,7 +52,9 @@ class AutorUnificarBO extends UsuarioBO {
 		$this->dadosform["sitesrelacionados"] = (int)$dadosform["sitesrelacionados"];
 		
 		$this->dadosform["finalendereco"] = (int)$dadosform["finalendereco"];
-		$this->dadosform["tipo_autor"] = (int)$dadosform["tipo_autor"];	
+		$this->dadosform["tipo_autor"] = (int)$dadosform["tipo_autor"];
+        
+        $this->dadosform["data_cadastro"] = (int)$dadosform["datacadastro"];
     }
 
 	protected function validaDados() {
@@ -138,8 +140,7 @@ class AutorUnificarBO extends UsuarioBO {
 		
 		$this->autorvo->setLogin($this->getDadosOpcaoSelecionada($this->dadosform["finalendereco"])->getUrl());
         $this->autorvo->setSenha(substr(md5(time()), 0, 6));
-		
-		//print_r($this->autorvo); die;
+        $this->autorvo->setDataCadastro(date("Y-m-d H:i:s", $this->dadosform["data_cadastro"]));
 	}
 
     protected function editarDados() {
@@ -147,8 +148,17 @@ class AutorUnificarBO extends UsuarioBO {
 		// agora a url do autor 2 é excluida
 		$this->autordao->atualizarUrlUnificacao($this->dadosform['codautor2']);
 		
+        // Se o autor estiver pendente na autorização este será reprovado
+        include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioAprovacaoDAO.php');
+        $aprovdao = new UsuarioAprovacaoDAO;
+        
+        if ($this->dadosform['codautor2'] && !$aprovdao->usuarioEstaAprovado($this->dadosform['codautor2'])) {
+            $aprovdao->editarNotificacaoAprovacao($this->dadosform['codautor2'], 2, $_SESSION['logado_dados']['cod_colaborador'], 'Autor não aprovado unificado');
+        }
+        
 		// atualizo dados do autor mantido (autor 1)
 		$this->autordao->atualizar($this->autorvo);
+        $this->autordao->atualizarDataCadastro($this->autorvo);
 		
 		// atualiza foto
 		$this->autordao->atualizarFoto($this->autorvo->getImagem(), $this->autorvo->getCodUsuario());
@@ -187,7 +197,7 @@ class AutorUnificarBO extends UsuarioBO {
 
 	public function getDadosAutorUm($codautor) {
 		$autorvo = $this->autordao->getAutorVO($codautor);
-		
+
 		$this->dadosform['codautor1'] =  $this->dadosautor1["codautor"] = $autorvo->getCodUsuario();
 		
 		$this->dadosautor1["nomeartistico"] = $autorvo->getNome();
@@ -222,6 +232,7 @@ class AutorUnificarBO extends UsuarioBO {
 		$this->dadosautor1["cpf"] = $autorvo->getCPF();
 		$this->dadosautor1["tipo_autor"] = $autorvo->getTipoAutor();
 		$this->dadosautor1["data_cadastro"] = date('d/m/Y', strtotime($autorvo->getDataCadastro()));
+        $this->dadosautor1["data_cadastro_sf"] = $autorvo->getDataCadastro();
 	}
 	
 	public function getDadosAutorDois($codautor) {
@@ -261,6 +272,7 @@ class AutorUnificarBO extends UsuarioBO {
 		$this->dadosautor2["cpf"] = $autorvo->getCPF();
 		$this->dadosautor2["tipo_autor"] = $autorvo->getTipoAutor();
 		$this->dadosautor2["data_cadastro"] = date('d/m/Y', strtotime($autorvo->getDataCadastro()));
+        $this->dadosautor2["data_cadastro_sf"] = $autorvo->getDataCadastro();
 	}
 	
 	public function setValorCampo($nomecampo, $valor) {

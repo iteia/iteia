@@ -10,25 +10,25 @@ class UsuarioBO {
 	private $usedao = null;
 	
 	public function __construct() {
-		$this->usedao = new UsuarioDAO;
+	    $this->usedao = new UsuarioDAO;
 	}
 	
 	public function getUsuarioMaisRecentes($tipo, $inicial=0, $mostrar=3) {
-		if ($tipo == 2)
-			return $this->usedao->getAtoresMaisRecentes($mostrar);
-		return $this->usedao->getUsuarioMaisRecentes($tipo, $inicial, $mostrar);
+            if ($tipo == 2)
+                return $this->usedao->getAtoresMaisRecentes($mostrar);
+            return $this->usedao->getUsuarioMaisRecentes($tipo, $inicial, $mostrar);
 	}
 	
 	public function getUsuarioMaisAtivos($tipo, $inicial=0, $mostrar=6) {
-		if ($tipo == 2)
-			return $this->usedao->getAtoresMaisAtivos($mostrar);
-		return $this->usedao->getUsuarioMaisAtivos($tipo, $inicial, $mostrar);
+            if ($tipo == 2)
+                return $this->usedao->getAtoresMaisAtivos($mostrar);
+            return $this->usedao->getUsuarioMaisAtivos($tipo, $inicial, $mostrar);
 	}
 
 	public function getListaEstados() {
-		include_once(ConfigPortalVO::getDirClassesRaiz().'dao/EstadoDAO.php');
-		$estdao = new EstadoDAO;
-		return $estdao->getListaEstados();
+            include_once(ConfigPortalVO::getDirClassesRaiz().'dao/EstadoDAO.php');
+            $estdao = new EstadoDAO;
+            return $estdao->getListaEstados();
 	}
 	
 	public function getEstado($codestado) {

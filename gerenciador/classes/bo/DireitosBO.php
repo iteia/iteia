@@ -1,7 +1,14 @@
 <?php
+include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/LicencaDAO.php');
 
 class DireitosBO {
-
+	
+	public $licencadao = null;
+	
+	public function __construct(){
+		$this->licencadao = new LicencaDAO();
+	}
+	
 	public function setDadosForm(&$dadosform) {
 		$dadosform["direitos"] = (int)$dadosform["direitos"];
 		$dadosform["cc_usocomercial"] = (int)$dadosform["cc_usocomercial"];
@@ -91,4 +98,40 @@ class DireitosBO {
 		return $dados_direito;
 	}
 
+	public function getCodLicencaPadrao($cod_usuario){
+		$licencaDados = array();
+		$licencaDados = $this->licencadao->getLicencaPadrao($cod_usuario);
+		if(empty($licencaDados)){
+			$licencaDados['licenca'] = 5;	
+		}
+		return $licencaDados;
+	}
+	
+	public function getLicencaPadrao($cod){
+		$licencaDados = $this->getCodLicencaPadrao($cod);
+		//print_r(empty($licencaDados));die;
+		$licencaDados['licenca'] = $this->setDadosCamposEdicao($licencaDados['licenca']);		
+		return $licencaDados;
+	}
+	
+	public function editar($dados){
+		$this->setDadosForm($dados);
+		$error = $this->validaDados($dados);
+		
+		if (count($error)) {
+			throw new Exception(implode("<br />\n", $error));
+		}
+		
+		$direitos = $dados['direitos'];
+		$cc_usocomercial = $dados['cc_usocomercial'];
+		$cc_obraderivada = $dados['cc_obraderivada'];
+		$cod_licenca = $this->getCodLicenca($direitos,$cc_usocomercial,$cc_obraderivada);
+		
+		if($dados['edicaodados']){			
+			$this->licencadao->update($cod_licenca,$dados['edicaodados']);
+		}else{
+			$this->licencadao->insert($cod_licenca);
+		}
+		
+	}
 }

@@ -58,8 +58,8 @@ class AtividadeBO {
 		return $this->editarDados();
 	}
 	
-	public function getListaAtividades($get) {
-		return $this->atidao->getListaAtividades($get);
+	public function getListaAtividades($get, $limite) {
+		return $this->atidao->getListaAtividades($get, $limite);
 	}
 	
 	public function setDadosCamposEdicao($codatividade) {

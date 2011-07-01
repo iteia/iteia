@@ -40,15 +40,12 @@ if ($codautor && !$editar) {
 	$autorbo->setDadosCamposEdicao($codautor);
 	$codestado = $autorbo->getValorCampo("codestado");
 	$codcidade = $autorbo->getValorCampo("codcidade");
-} else {
-	$codestado = 17;
-	$codcidade = 6330;
 }
 
 $codautor = (int)$autorbo->getValorCampo("codautor");
 ?>
     <h2>Usu&aacute;rios</h2>
-    
+
 <script type="text/javascript" src="jscripts/ajax.js"></script>
 <script type="text/javascript" src="jscripts/autor.js"></script>
 <script type="text/javascript" src="jscripts/edicao.js"></script>
@@ -79,13 +76,13 @@ $codautor = (int)$autorbo->getValorCampo("codautor");
 		<p>Os campos marcados o asterísco (*) são obrigatórios.</p>
         <fieldset>
 		<legend>Dados pessoais</legend>
-		
+
 		<label for="label2">Nome completo<span>*</span></label> <em><small>(mesmo do CPF)</small></em>
         <br />
         <input type="text" class="txt" onkeyup="contarCaracteres(this, 'cont_nome_completo', 100);" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('nomecompleto')))?>" <?=$autorbo->verificaErroCampo("nomecompleto")?> id="nome_completo" name="nomecompleto" maxlength="100" size="80" />
 		<input type="text" class="txt counter" size="4" id="cont_nome_completo" disabled="disabled" value="100" />
         <br />
-		
+
 		<label for="textfield">Nome art&iacute;stico</label>
         <br />
 		<input type="text" class="txt" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('nomeartistico')))?>" name="nomeartistico" id="nome" onkeyup="contarCaracteres(this, 'cont_nome', 100);" maxlength="100" size="80" <?=$autorbo->verificaErroCampo("nomeartistico")?> />
@@ -94,7 +91,7 @@ $codautor = (int)$autorbo->getValorCampo("codautor");
 		<label for="textfield11">E-mail<span>*</span></label> <em><small>(Não será exibido)</small></em>
 <br />
         <input type="text" class="txt" id="textfield11" size="80" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('email')))?>" name="email" <?=$autorbo->verificaErroCampo("email")?> /><!--<input id="publicarmail" type="checkbox" name="mostrar_email" value="1" <?=Util::iif($autorbo->getValorCampo('mostrar_email'), 'checked="chedked"');?> /> <label for="publicarmail">Mostrar na sua p&aacute;gina pessoal?</label>--><br />
-		
+
 		<label for="textfield20">CPF</label>  <em><small>(Não será exibido)</small></em><br />
         <input type="text" name="cpf" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('cpf')))?>" class="txt cpf" id="textfield20" <?=$autorbo->verificaErroCampo("cpf")?> />
         <br />
@@ -107,7 +104,7 @@ $codautor = (int)$autorbo->getValorCampo("codautor");
 <?php if (!$proprio): ?>
 
 		<input type="checkbox" id="falecido" name="falecido" value="1" <?=Util::iif($autorbo->getValorCampo("falecido"), "checked=\"checked\"")?> />
-        
+
 		<label for="falecido">J&aacute; falecido?</label>
         <br />
         <div class="display-none" id="box-falecido">
@@ -122,7 +119,7 @@ $codautor = (int)$autorbo->getValorCampo("codautor");
   <br />
 
 <?php endif; ?>
-        
+
         <label for="textarea">Biografia:</label> <em><small>(Fale um pouco sobre você)</small></em>
         <br />
         <textarea name="biografia" cols="60" rows="10" class="mceSimple" id="textarea" <?=$autorbo->verificaErroCampo("biografia")?> onkeyup="contarCaracteres(this, 'cont_descricao', 1400);"><?=Util::clearText($autorbo->getValorCampo("biografia"));?></textarea>
@@ -157,72 +154,65 @@ $codautor = (int)$autorbo->getValorCampo("codautor");
         </fieldset>
       </div>
       <div class="box">
-        <fieldset>
-        <legend>Endereço</legend>
-        <label for="textfield5">Endere&ccedil;o</label>
-        <br />
-        <input type="text" class="txt" id="textfield5" size="80" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('endereco')))?>" name="endereco" />
-        <br />
-        <label for="textfield6">Complemento</label>
-        <br />
-        <input type="text" class="txt" id="textfield6" size="40" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('complemento')))?>" name="complemento" />
-        <br />
-        <label for="textfield7">Bairro</label>
-        <br />
-        <input type="text" class="txt" id="textfield7" size="40" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('bairro')))?>" name="bairro" />
-        <br />
-        <label for="textfield8">CEP</label> <em><small>(Ex. 50000-000)</small></em>
-        <br />
-        <input type="text" class="txt cep" id="textfield8" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('cep')))?>" name="cep" />
-        <!--<em><small>Ex. 54000-000</small></em>--> <br />
-        <label for="select">Pa&iacute;s<span>*</span></label>
-        <br />
-        <select name="codpais" id="pais" onchange="javascript:exibeEstadoCidade();" <?=$autorbo->verificaErroCampo("pais")?>>
-		<?php
-		$lista_paises = $autorbo->getListaPaises();
-		$pais_selecionado = $autorbo->getValorCampo("codpais");
-		if (!$pais_selecionado)
-			$pais_selecionado = ConfigGerenciadorVO::getCodPaisBrasil();
-		foreach ($lista_paises as $pais) {
-			echo "<option value=\"".$pais["cod_pais"]."\"";
-			if ($pais["cod_pais"] == $pais_selecionado)
-				echo " selected=\"selected\"";
-			echo ">".$pais["pais"]."</option>\n";
-		}
-		?>
-      </select>
-        <br />
-      <div style="display: inline;" id="mostraestado">
-      <label for="select2">Estado<span>*</span></label>
-      <br />
-      <select name="codestado" id="estado" onchange="obterCidades(this, <?=(int)$codcidade?>)" <?=$autorbo->verificaErroCampo("estado")?>>
-		<?php
-		echo "<option value=\"0\"";
-		if (!$codestado)
-			echo " selected=\"selected\"";
-		echo ">Selecione o Estado</option>\n";
-		$lista_estados = $autorbo->getListaEstados();
-		foreach ($lista_estados as $estado) {
-			echo "<option value=\"".$estado["cod_estado"]."\"";
-			if ($estado["cod_estado"] == $codestado)
-				echo " selected=\"selected\"";
-			echo ">".$estado["sigla"]."</option>\n";
-		}
-		?>
-      </select>
-      <br />
-	  </div>
-
-        <label for="select3">Cidade<span>*</span></label>
-      <br />
-      <select name="codcidade" id="selectcidade" <?=$autorbo->verificaErroCampo("codcidade")?>>
-	  <option>.</option>
-	  </select>
-
-	  <input type="text" class="txt" <?=$autorbo->verificaErroCampo("cidade")?> style="display:none;" name="cidade" id="cidade" size="45" value="<?=htmlentities(stripslashes($autorbo->getValorCampo("cidade")))?>" maxlength="100" />
-
-        </fieldset>
-      </div>
+			<fieldset>
+				<legend>Endereço</legend>
+				<label>CEP</label> <em><small>(Ex. 50000-000)</small></em><br />
+				<input type="text" class="txt cep" id="cep" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('cep')))?>" name="cep" /> <a href="javascript:validarCEP();">Validar CEP</a>
+				<fieldset class="privacidade">
+					<label>Logradouro</label><br />
+					<input type="text" class="txt" id="logradouro" size="80" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('endereco')))?>" name="endereco" /><br />
+					<label>Complemento</label><br />
+					<input type="text" class="txt" id="complemento" size="40" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('complemento')))?>" name="complemento" /><br />
+					<label>Bairro</label><br />
+					<input type="text" class="txt" id="bairro" size="40" value="<?=htmlentities(stripslashes($autorbo->getValorCampo('bairro')))?>" name="bairro" /><br />
+					<div class="exibir">
+						<label><input type="checkbox" value="1" name="exibir_endereco" <?=($autorbo->getValorCampo('exibir_endereco') == 1 ? 'checked="checked"' : '')?>> 
+						Deseja exibir seu endereço no portal?</label>
+						<p>Marcando esta opção serão exibidos no portal apenas o logradouro, complemento e bairro.</p>
+						<p> O país, estado e cidade são exibidos automaticamente.</p>
+					</div>
+				</fieldset>
+				<label>Pa&iacute;s<span>*</span></label><br />
+				<select name="codpais" id="pais" onchange="javascript:exibeEstadoCidade();" <?=$autorbo->verificaErroCampo("pais")?>>
+				<?php
+				$lista_paises = $autorbo->getListaPaises();
+				$pais_selecionado = $autorbo->getValorCampo("codpais");
+				if (!$pais_selecionado)
+					$pais_selecionado = ConfigGerenciadorVO::getCodPaisBrasil();
+				foreach ($lista_paises as $pais) {
+					echo "<option value=\"".$pais["cod_pais"]."\"";
+					if ($pais["cod_pais"] == $pais_selecionado)
+						echo " selected=\"selected\"";
+					echo ">".$pais["pais"]."</option>\n";
+				}
+				?>
+				</select><br />
+				<div style="display: inline;" id="mostraestado">
+				<label for="select2">Estado<span>*</span></label>
+				<br />
+				<select name="codestado" id="estado" onchange="obterCidades(this, <?=(int)$codcidade?>)" <?=$autorbo->verificaErroCampo("estado")?>>
+				  <?php
+				  echo "<option value=\"0\"";
+				  if (!$codestado)
+					  echo " selected=\"selected\"";
+				  echo ">Selecione o Estado</option>\n";
+				  $lista_estados = $autorbo->getListaEstados();
+				  foreach ($lista_estados as $estado) {
+					  echo "<option value=\"".$estado["cod_estado"]."\"";
+					  if ($estado["cod_estado"] == $codestado)
+						  echo " selected=\"selected\"";
+					  echo ">".$estado["sigla"]."</option>\n";
+				  }
+				  ?>
+				</select><br />
+			</div>
+			<label for="select3">Cidade<span>*</span></label><br />
+			<select name="codcidade" id="selectcidade" <?=$autorbo->verificaErroCampo("codcidade")?>>
+			<option>.</option>
+			</select>
+			<input type="text" class="txt" <?=$autorbo->verificaErroCampo("cidade")?> style="display:none;" name="cidade" id="cidade" size="45" value="<?=htmlentities(stripslashes($autorbo->getValorCampo("cidade")))?>" maxlength="100" />
+		</fieldset>
+    </div>
 
       <div class="box box-amarelo">
         <fieldset>
@@ -324,7 +314,7 @@ $codautor = (int)$autorbo->getValorCampo("codautor");
 		<select name="tipo_autor" id="tipo_autor" <?=$autorbo->verificaErroCampo("tipo_autor")?> onchange="javascript:mudaCampoLogin();">
 			<option value="0">Selecione</option>
 			<option value="1" <?=Util::iif($autorbo->getValorCampo("tipo_autor") == 1, 'selected="selected"');?>>Wiki</option>
-			<option value="2" <?=Util::iif($autorbo->getValorCampo("tipo_autor") > 1  && $autorbo->getValorCampo("tipo_autor") < 7, 'selected="selected"');?>>Autor</option>
+			<option value="<?=Util::iif($autorbo->getValorCampo("tipo_autor") > 1  && $autorbo->getValorCampo("tipo_autor") < 7, $autorbo->getValorCampo("tipo_autor"), 2);?>" <?=Util::iif($autorbo->getValorCampo("tipo_autor") > 1  && $autorbo->getValorCampo("tipo_autor") < 7, 'selected="selected"');?>>Autor</option>
 			<?php if ($_SESSION['logado_dados']['nivel'] > 6): ?>
 				<option value="<?=$_SESSION['logado_dados']['nivel'];?>" <?=Util::iif($autorbo->getValorCampo("tipo_autor") > 6, 'selected="selected"');?>>Administrador</option>
 			<?php endif; ?>
@@ -343,7 +333,7 @@ $codautor = (int)$autorbo->getValorCampo("codautor");
         <fieldset>
         <legend>Dados de acesso ao sistema</legend>
         <?php if (!$edicaodados): ?>
-        <label for="textfield14">Login</label>  
+        <label for="textfield14">Login</label>
 		<em><small>(O nome de acesso ao sistema &eacute; o mesmo do final do endere&ccedil;o escolhido)</small></em>
         <br />
         <input type="text" disabled="disabled" class="txt login" id="textfield14" value="<?=htmlentities(stripslashes($autorbo->getValorCampo("finalendereco")))?>" <?=$autorbo->verificaErroCampo("login")?> />
@@ -366,7 +356,7 @@ else:
         <legend>Dados de acesso ao sistema</legend>
        <p> Login:
         <strong><br /><?=htmlentities(stripslashes($autorbo->getValorCampo("finalendereco")))?></strong></p>
-       <p><a href="cadastro_alterar_senha.php?cod=<?=$autorbo->getValorCampo('codautor');?>&amp;height=250&amp;width=305" class="thickbox" title="Alterar senha">Alterar a senha do cadastro</a></p>
+       <p><a href="cadastro_alterar_senha.php?cod=<?=$autorbo->getValorCampo('codautor');?>&amp;height=250&amp;width=305&amp;TB_iframe=true" class="thickbox" title="Alterar senha">Alterar a senha do cadastro</a></p>
 
         </fieldset>
       </div>

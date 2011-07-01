@@ -42,7 +42,6 @@ if ($_POST['lembrar'] && !$lembrar) {
       </form>
 	  
 	 	<ul>
-		<li>&rsaquo; <a href="lembrar_email.php" title="Esqueceu seu e-mail?">Esqueci meu e-mail</a></li>
 		<li>&rsaquo; <a href="login.php" title="Voltar para acesso ao sistema">Voltar para acesso ao sistema</a></li>
 		</ul>
 <?php

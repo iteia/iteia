@@ -2,10 +2,16 @@
 
 class Util {
 
+    public static function paginacaoComplementoUrl($url){
+        global $complemento;
+        $complemento= $url;
+    }
+    
     public static function paginacao($pagina, $num, $num_total, $base_url, $indicador='', $ajax=0, $function='', $campo='') {
         global $delimitador;
 		global $classepagatual;
-		
+        global $complemento;
+
         $pg = $pagina - 1;
         $inicio = $pg * $num;
         $fim = $inicio + $num;
@@ -25,7 +31,7 @@ class Util {
 			if ($ajax) {
 				$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':"<a href=\"javascript:void(0);\" onclick=\"$function('$indicador','$campo','$i');\">$i</a>";
     		} else {
-    			$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':'<a href="'.stripslashes($endereco.$i).'">'.$i.'</a>';
+    			$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':'<a href="'.stripslashes($endereco.$i.$complemento).'">'.$i.'</a>';
     		}
     	    if ($i <  $init_page_max) {
     		  //$page_string .= ", ";
@@ -45,7 +51,7 @@ class Util {
 				if ($ajax) {
 					$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':"<a href=\"javascript:void(0);\" onclick=\"$function('$indicador','$campo','$i');\">$i</a>";
 	    		} else {
-	    			$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':'<a href="'.stripslashes($endereco.$i).'">'.$i.'</a>';
+	    			$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':'<a href="'.stripslashes($endereco.$i.$complemento).'">'.$i.'</a>';
 	    		}
     		    if ($i <  $init_page_max + 1) {
     			     //$page_string .= ', ';
@@ -64,7 +70,7 @@ class Util {
 				if ($ajax) {
 					$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':"<a href=\"javascript:void(0);\" onclick=\"$function('$indicador','$campo','$i');\">$i</a>";
     			} else {
-    				$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':'<a href="'.stripslashes($endereco.$i).'">'.$i.'</a>';
+    				$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':'<a href="'.stripslashes($endereco.$i.$complemento).'">'.$i.'</a>';
     			}
     			if ($i <  $total_pagina) {
     		    	//$page_string .= ", ";
@@ -80,7 +86,7 @@ class Util {
     			if ($ajax) {
     				$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':"<a href=\"javascript:void(0);\" onclick=\"$function('$indicador','$campo','$i');\">$i</a>";
         		} else {
-        			$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':'<a href="'.stripslashes($endereco.$i).'">'.$i.'</a>';
+        			$page_string .= ($i == $on_page)?'<strong'.$classepagatual.'>'.$i.'</strong>':'<a href="'.stripslashes($endereco.$i.$complemento).'">'.$i.'</a>';
         		}
         	    if ($i <  $total_pagina) {
         		    //$page_string .= ', ';
@@ -468,17 +474,17 @@ class Util {
 						$period = '.';
 						$matches['6'][$i] = substr($matches['6'][$i], 0, -1);
 					}
-
 					$str = str_replace($matches['0'][$i],
 										$matches['1'][$i].'<a href="http'.
 										$matches['4'][$i].'://'.
 										$matches['5'][$i].
 										$matches['6'][$i].'"'.$pop.'>'.
-										$matches['4'][$i].
-										//$matches['6'][$i].'"'.$pop.'>http'.
-										//$matches['4'][$i].'://'.
-										$matches['5'][$i].
-										$matches['6'][$i].'</a>'.
+										//$matches['4'][$i].
+										////$matches['6'][$i].'"'.$pop.'>http'.
+										////$matches['4'][$i].'://'.
+										//$matches['5'][$i].
+										//$matches['6'][$i].'</a>'.
+										$matches['3'][$i].$matches['6'][$i].'</a>'.
 										$period, $str);
 				}
 			}
@@ -676,7 +682,7 @@ class Util {
 		}
 		return $descricao;
 	}
-	
+
 	public static function getTituloLicenca($codlicenca) {
 		switch ($codlicenca) {
 			case 1:
@@ -690,32 +696,41 @@ class Util {
 		}
 		return $nomelicenca;
 	}
-	
+
 	public static function getHtmlCanal($codsegmento, $html='<br />') {
 		require_once(ConfigPortalVO::getDirClassesRaiz()."dao/SegmentoDAO.php");
 		$segdao = new SegmentoDAO;
 		$dados = $segdao->getSegmentoDados($codsegmento);
-		if ($dados['nome'])
-			return '<a href="/canal.php?cod='.$codsegmento.'" title="Ir para p·gina deste canal">'.htmlentities($dados['nome']).'</a>'.$html;
+		if ($dados['nome']) {
+			$url_canal = 'canal.php?cod='.$codsegmento;
+			if ($dados['url'])
+				$url_canal = $dados['url'];
+			return '<a href="/'.$url_canal.'" title="Ir para p·gina deste canal">'.htmlentities($dados['nome']).'</a>'.$html;
+		}
 	}
-	
+
 	public static function getHtmlListaAutores($codconteudo, $texto='Por ') {
 		require_once(ConfigPortalVO::getDirClassesRaiz()."dao/ConteudoDAO.php");
 		$contdao = new ConteudoDAO;
-		
-		$lista_autores = $contdao->getAutoresConteudo($codconteudo);
-		$links_autores = array();
-		foreach ($lista_autores as $autor)
-			$links_autores[] = '<a href="'.$autor['titulo'].'" title="Ir para p·gina deste autor" class="info">'.$autor['nome'].'</a>';
+        
+		//$lista_autores = $contdao->getAutoresConteudo($codconteudo);
+		//$links_autores = array();
+		//      
+		//foreach ($lista_autores as $autor)
+		//	$links_autores[] = '<a href="'.$autor['titulo'].'" title="Ir para p·gina deste autor" class="info">'.$autor['nome'].'</a>';
 		$autores = $contdao->getAutoresConteudo($codconteudo);
 		$lista_autores_ficha = $contdao->getAutoresFichaTecnicaConteudo($codconteudo);
-
+        
 		$html  = '';
 		$html .= $texto;
 
 		if (count($lista_autores_ficha)) {
 			if ($lista_autores_ficha[0]['nome'])
 				$lista = Util::iif($lista != '', ', ')."<a href=\"/".$lista_autores_ficha[0]['url']."\" title=\"Ir para p·gina deste autor\" class=\"info\">".Util::cortaTexto($lista_autores_ficha[0]['nome'], 35)."</a>";
+            else
+                $lista = Util::iif($lista != '', ', ')."<a href=\"/".$lista_autores_ficha[0]['url']."\" title=\"Ir para p·gina deste autor\" class=\"info\">".Util::cortaTexto($autores[0]['nome_completo'], 35)."</a>";
+                
+            
 			if ($lista_autores_ficha[1]['nome'])
 				$lista .= ' e outros';
 		}
@@ -723,7 +738,9 @@ class Util {
 		if ($lista == '') {
 			if (count($autores)) {
 				if ($autores[0]['nome'])
-					$lista .= Util::iif($lista != '', ', ')."<a href=\"/".$autores[0]['url']."\" title=\"Ir para p·gina deste autor\" class=\"info\">".Util::cortaTexto($autores[0]['nome'], 35)."</a>";
+                    $lista .= Util::iif($lista != '', ', ')."<a href=\"/".$autores[0]['url']."\" title=\"Ir para p·gina deste autor\" class=\"info\">".Util::cortaTexto($autores[0]['nome'], 35)."</a>";
+                else
+                    $lista .= Util::iif($lista != '', ', ')."<a href=\"/".$autores[0]['url']."\" title=\"Ir para p·gina deste autor\" class=\"info\">".Util::cortaTexto($autores[0]['nome_completo'], 35)."</a>";
 				if ($autores[1]['nome'])
 					$lista .= ' e outros';
 			}
@@ -731,20 +748,20 @@ class Util {
 
 		return $html.$lista;
 	}
-	
+
 	public static function bitly($url) {
 		$login = 'iteia';    //your bit.ly login
 		$apikey = 'R_3137e6519b8d3bf0e9a1be44a21ae655'; //bit.ly apikey
 		$format = 'json';         //choose between json or xml
 		$version = '2.0.1';
-	
+		
 		//create the URL
 		$bitly = 'http://api.bit.ly/shorten?version='.$version.'&longUrl='.urlencode($url).'&login='.$login.'&apiKey='.$apikey.'&format='.$format;
-	
+		
 		//get the url
 		//could also use cURL here
 		$response = file_get_contents($bitly);
-	
+		
 		//parse depending on desired format
 		if (strtolower($format) == 'json') {
 			$json = @json_decode($response,true);
@@ -758,15 +775,23 @@ class Util {
 	}
 
      public static function  removeAcento($frase) {
-	 
-	 $frase=ereg_replace("[^a-zA-Z0-9_.]", "", 
-  strtr($frase, "·‡„‚ÈÍÌÛÙı˙¸Á¡¿√¬… Õ”‘’⁄‹« ", 
+
+	 $frase=ereg_replace("[^a-zA-Z0-9_.]", "",
+  strtr($frase, "·‡„‚ÈÍÌÛÙı˙¸Á¡¿√¬… Õ”‘’⁄‹« ",
   "aaaaeeiooouucAAAAEEIOOOUUC_"));
-  
+
    return $frase;
 
-	 
+
 	 }
 
-
+    public static function VerificaHttp($url){
+            //if (substr($url, 0, 6) != 'http://') {
+            //	if (!ereg('http', $url))
+            //		$url = 'http://'.$url;
+            //}
+            $url = str_replace('http://', '', $url);
+            $url = 'http://'.$url;
+            return $url;
+    }
 }

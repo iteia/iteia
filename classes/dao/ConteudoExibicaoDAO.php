@@ -36,7 +36,7 @@ class ConteudoExibicaoDAO {
         $row = $this->banco->fetchArray($query);
 
         if ($row['tipo'] == 4) {
-            $sql = "SELECT cod_formato FROM Conteudo WHERE cod_conteudo='$row[cod_item]'";
+            $sql = "SELECT cod_formato FROM Conteudo WHERE cod_conteudo='".$row['cod_item']."'";
             $query1 = $this->banco->executaQuery($sql);
             $row1 = $this->banco->fetchArray($query1);
             $row['cod_formato'] = $row1['cod_formato'];
@@ -44,8 +44,8 @@ class ConteudoExibicaoDAO {
         return $row;
     }
 
-	public function getDadosConteudo($codconteudo) {
-    	$sql = "SELECT t1.*, t2.formato, t3.nome AS classificacao, t4.nome AS segmento, t5.nome AS colaborador, t6.num_recomendacoes, t6.num_acessos, t7.titulo AS url, t8.titulo AS licenca_titulo, t8.descricao AS licenca_descricao, t9.titulo AS url_colaborador, t10.num_negativos FROM Conteudo AS t1 INNER JOIN Conteudo_Formato AS t2 ON (t1.cod_formato=t2.cod_formato) LEFT JOIN Conteudo_Classificacao AS t3 ON (t1.cod_classificacao=t3.cod_classificacao AND t2.cod_formato=t3.cod_formato) LEFT JOIN Conteudo_Segmento AS t4 ON (t1.cod_segmento=t4.cod_segmento AND t2.cod_formato=t4.cod_pai) LEFT JOIN Usuarios AS t5 ON (t1.cod_colaborador=t5.cod_usuario) LEFT JOIN Conteudo_Estatisticas AS t6 ON (t1.cod_conteudo=t6.cod_conteudo) INNER JOIN Urls AS t7 ON (t1.cod_conteudo=t7.cod_item) LEFT JOIN Licencas AS t8 ON (t1.cod_licenca=t8.cod_licenca) LEFT JOIN Urls AS t9 ON (t1.cod_colaborador=t9.cod_item) LEFT JOIN Conteudo_Estatisticas_VotosNegativos AS t10 ON (t1.cod_conteudo=t10.cod_conteudo) WHERE t1.cod_conteudo='".$codconteudo."' AND t1.excluido='0' AND t5.cod_tipo = 1 AND t7.tipo = 4 AND t9.tipo = 1 AND t1.situacao='1' AND t1.publicado='1' AND t1.cod_sistema = ".ConfigVO::getCodSistema();
+	public function getDadosConteudo($codconteudo, $ignora_colab = false) {
+    	$sql = "SELECT t1.*, t11.titulo AS autor_url,  t2.formato, t3.nome AS classificacao, t4.nome AS segmento, ".((!$ignora_colab)?"t5.nome AS colaborador, ":'')."t6.num_recomendacoes, t6.num_acessos, t7.titulo AS url, t8.titulo AS licenca_titulo, t8.descricao AS licenca_descricao".((!$ignora_colab)?", t9.titulo AS url_colaborador":'').", t10.num_negativos FROM Conteudo AS t1 INNER JOIN Conteudo_Formato AS t2 ON (t1.cod_formato=t2.cod_formato) LEFT JOIN Conteudo_Classificacao AS t3 ON (t1.cod_classificacao=t3.cod_classificacao AND t2.cod_formato=t3.cod_formato) LEFT JOIN Conteudo_Segmento AS t4 ON (t1.cod_segmento=t4.cod_segmento AND t2.cod_formato=t4.cod_pai) ".((!$ignora_colab)?"LEFT JOIN Usuarios AS t5 ON (t1.cod_colaborador=t5.cod_usuario)":'')." LEFT JOIN Conteudo_Estatisticas AS t6 ON (t1.cod_conteudo=t6.cod_conteudo) INNER JOIN Urls AS t7 ON (t1.cod_conteudo=t7.cod_item) LEFT JOIN Licencas AS t8 ON (t1.cod_licenca=t8.cod_licenca) ".((!$ignora_colab)?" LEFT JOIN Urls AS t9 ON (t1.cod_colaborador=t9.cod_item)":'')." LEFT JOIN Conteudo_Estatisticas_VotosNegativos AS t10 ON (t1.cod_conteudo=t10.cod_conteudo) LEFT JOIN Urls AS t11 ON (t1.cod_autor=t11.cod_item) WHERE t1.cod_conteudo='".$codconteudo."' AND t1.excluido='0' ".((!$ignora_colab)?" AND t5.cod_tipo = 1":'')." AND t7.tipo = 4 ".((!$ignora_colab)?" AND t9.tipo = 1":'')." AND t1.situacao='1' AND t1.publicado='1' AND t1.cod_sistema = ".ConfigVO::getCodSistema();
         $this->banco->executaQuery($sql);
         return $this->banco->fetchArray();
     }
@@ -63,7 +63,6 @@ class ConteudoExibicaoDAO {
 			$sql = "SELECT t1.*, t2.titulo AS url_titulo FROM Conteudo AS t1 LEFT JOIN Urls AS t2 ON (t1.cod_conteudo=t2.cod_item) WHERE t1.cod_conteudo='".$codconteudo."' AND t1.excluido='0' $and AND t2.tipo='4' and t1.cod_sistema = ".ConfigVO::getCodSistema();
 		$query = $this->banco->executaQuery($sql);
         $row = $this->banco->fetchArray($query);
-
         $row['tipo'] = 'a';
         if ($row['cod_formato'] == 2) {
 			$sql1 = "SELECT t1.imagem FROM Imagens AS t1 LEFT JOIN Albuns AS t2 ON (t1.cod_imagem=t2.cod_imagem_capa) WHERE t2.cod_conteudo='".$codconteudo."'";
@@ -240,7 +239,7 @@ class ConteudoExibicaoDAO {
     public function getConteudoRelacionado($codconteudo, $inicial=0, $mostrar=4) {
     	if ($mostrar)
 		   	$limit = "LIMIT $inicial, $mostrar";
-        $sql = "SELECT t1.cod_conteudo, t1.cod_formato, t1.titulo, t1.imagem, t2.formato, t3.num_recomendacoes, t3.num_acessos, t5.titulo AS url FROM Conteudo AS t1 INNER JOIN Conteudo_Formato AS t2 ON (t1.cod_formato=t2.cod_formato) LEFT JOIN Conteudo_Estatisticas AS t3 ON (t1.cod_conteudo=t3.cod_conteudo) INNER JOIN Conteudo_Relacionados AS t4 ON (t1.cod_conteudo=t4.cod_conteudo2) LEFT JOIN Urls AS t5 ON (t1.cod_conteudo=t5.cod_item) WHERE t4.cod_conteudo1='$codconteudo' AND t1.excluido='0' and t5.cod_sistema='".ConfigVO::getCodSistema()."' and t1.cod_sistema = ".ConfigVO::getCodSistema();
+        $sql = "SELECT t1.cod_conteudo, t1.cod_formato, t1.titulo, t1.imagem, t1.cod_segmento, t2.formato, t3.num_recomendacoes, t3.num_acessos, t5.titulo AS url FROM Conteudo AS t1 INNER JOIN Conteudo_Formato AS t2 ON (t1.cod_formato=t2.cod_formato) LEFT JOIN Conteudo_Estatisticas AS t3 ON (t1.cod_conteudo=t3.cod_conteudo) INNER JOIN Conteudo_Relacionados AS t4 ON (t1.cod_conteudo=t4.cod_conteudo2) LEFT JOIN Urls AS t5 ON (t1.cod_conteudo=t5.cod_item) WHERE t4.cod_conteudo1='$codconteudo' AND t1.excluido='0' and t5.cod_sistema='".ConfigVO::getCodSistema()."' and t1.cod_sistema = ".ConfigVO::getCodSistema();
 
         $query = $this->banco->executaQuery($sql . " ORDER BY t3.num_acessos $limit");
         $array = array();
@@ -254,6 +253,7 @@ class ConteudoExibicaoDAO {
             $array[] = array(
                 'cod_conteudo' => $row['cod_conteudo'],
                 'cod_formato' => $row['cod_formato'],
+				'cod_segmento' => $row['cod_segmento'],
                 'titulo' => $row['titulo'],
                 'imagem' => $row['imagem'],
                 'formato' => $row['formato'],
@@ -406,6 +406,13 @@ class ConteudoExibicaoDAO {
 		$row2 = $this->banco->fetchArray($query);
 
 		return array(1 => (int)$row['num_recomendacoes'], 2 => (int)$row2['num_negativos']);
+	}
+
+	public function getFormatoConteudo($codconteudo) {
+		$sql = "SELECT cod_formato FROM Conteudo WHERE cod_conteudo='".$codconteudo."';";
+		$query = $this->banco->executaQuery($sql);
+		$row = $this->banco->fetchArray($query);
+		return (int)$row['cod_formato'];
 	}
 
 }

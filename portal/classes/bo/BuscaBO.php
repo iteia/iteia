@@ -22,11 +22,14 @@ class BuscaBO {
     }
 	
 	public function getListaEstados(){
-	 return $this->buscadao->getListaTodosEstados($get);
+	 return $this->buscadao->getListaTodosEstados();
 	}
 	
 	public function getListaCidades(){
 	
+	}
+	public function getListaTodosCanais(){
+		return $this->buscadao->getListaTodosCanais();
 	}
 	
     public function verificaErroCampo($nomecampo) {

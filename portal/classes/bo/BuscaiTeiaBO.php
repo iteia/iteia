@@ -7,58 +7,64 @@ class BuscaiTeiaBO extends BuscaCacheBO {
 	protected function gerarResultado() {
 		$itensres = array();
 		$param_extra = $this->buscavo->getParametrosExtra();
-		
+        
 		if (isset($param_extra['ordenacao']) && (int)$param_extra['ordenacao'])
 			$this->setOrdem($param_extra['ordenacao']);
-		
+                        
+
 		if (in_array(2, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'CO.cod_formato = 3 AND CO.cod_sistema='.ConfigVO::getCodSistema();
 			$itensres['audios'] = $this->gerarResultadoItens('conteudo', $sql_complemento);
 		}
-		
+
 		if (in_array(3, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'CO.cod_formato = 4 AND CO.cod_sistema='.ConfigVO::getCodSistema();
 			$itensres['videos'] = $this->gerarResultadoItens('conteudo', $sql_complemento);
 		}
-		
+
 		if (in_array(4, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'CO.cod_formato = 1 AND CO.cod_sistema='.ConfigVO::getCodSistema();
 			$itensres['textos'] = $this->gerarResultadoItens('conteudo', $sql_complemento);
 		}
-		
+
 		if (in_array(5, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'CO.cod_formato = 2 AND CO.cod_sistema='.ConfigVO::getCodSistema();
 			$itensres['imagens'] = $this->gerarResultadoItens('conteudo', $sql_complemento);
 		}
-		
+
 		if (in_array(6, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'CO.cod_formato = 5 AND CO.cod_sistema='.ConfigVO::getCodSistema();
+                        $param_extra['noticia_agenda'] = true;
+                        $this->buscavo->setParametrosExtra($param_extra);
 			$itensres['noticias'] = $this->gerarResultadoItens('conteudo', $sql_complemento);
 		}
-		
+
 		if (in_array(7, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'CO.cod_formato = 6 AND CO.cod_sistema='.ConfigVO::getCodSistema();
+                        $param_extra['noticia_agenda'] = true;
+                        $this->buscavo->setParametrosExtra($param_extra);
 			$itensres['eventos'] = $this->gerarResultadoItens('conteudo', $sql_complemento);
 		}
-		
+
 		if (in_array(8, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'CS.cod_sistema='.ConfigVO::getCodSistema();
 			$itensres['canais'] = $this->gerarResultadoItens('canais', $sql_complemento);
 		}
-		
+
 		if (in_array(9, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'VA.cod_sistema='.ConfigVO::getCodSistema();
 			$itensres['autores'] = $this->gerarResultadoItens('autores', $sql_complemento);
 		}
-		
+
 		if (in_array(10, $this->buscavo->getListaFormatos()) || !count($this->buscavo->getListaFormatos())) {
 			$sql_complemento = 'VC.cod_sistema='.ConfigVO::getCodSistema();
 			$itensres['colaboradores'] = $this->gerarResultadoItens('colaboradores', $sql_complemento);
 		}
+                //print_r($param_extra);
 
 		return $itensres;
 	}
-	
+
 	public function getItensBusca() {
 		$resultado_pagina = &$this->resultado_busca;
 		$arrayItens = array();
@@ -70,14 +76,14 @@ class BuscaiTeiaBO extends BuscaCacheBO {
 	public function exibeResultadoHtml() {
 		$html = '';
 		$resultado_pagina = &$this->resultado_busca;
-		
+
 		// DAO's para acesso de outros dados
 		include_once(ConfigPortalVO::getDirClassesRaiz().'dao/SegmentoDAO.php');
 		$canaldao = new SegmentoDAO;
-		
+
 		include_once(ConfigPortalVO::getDirClassesRaiz().'dao/VideoDAO.php');
 		$videodao = new VideoDAO;
-		
+
 		foreach ($resultado_pagina as $item) {
 			$link_item = '';
 			$tipo_item = '';
@@ -86,7 +92,9 @@ class BuscaiTeiaBO extends BuscaCacheBO {
 			$complemento_item = '';
 			$descricao_item = '';
 			$dadositem = $this->getResultadoItensDados($item['tipo'], $item['coditem']);
-
+            //alteração
+            $dadositem['cod_segmento'] = Util::iif($dadositem['cod_subarea'] != 0,$dadositem['cod_subarea'],$dadositem['cod_segmento']);
+            
 			switch ($item['tipo']) {
 				case 'audios':
 					$icon_item = 'audio';
@@ -163,12 +171,16 @@ class BuscaiTeiaBO extends BuscaCacheBO {
 					$descricao_item = $dadositem['descricao'];
 					if ($dadositem['imagem'])
 						$foto_item = '<img src="/exibir_imagem.php?img='.$dadositem['imagem'].'&amp;tipo=4&amp;s=34" alt="" />';
+//                	$canal = Util::getHtmlCanal($dadositem['cod_segmento'], '');
+//					$complemento_item = (!empty($canal) ? $canal. ' |' : '');
 					break;
 				case 'canais':
 					$icon_item = 'canal';
 					$link_formato_item = '/canais';
 					$formato_item = 'Canal';
 					$link_item = '/canal.php?cod='.$item['coditem'];
+					if ($dadositem['url'])
+						$link_item = '/'.$dadositem['url'];
 					$titulo_item = $dadositem['nome'];
 					$descricao_item = $dadositem['descricao'];
 					if ($dadositem['imagem'])
@@ -181,7 +193,7 @@ class BuscaiTeiaBO extends BuscaCacheBO {
 					$formato_item = 'Autores';
 					$data_item = date('d.m.Y - H\\hi', strtotime($dadositem['datacadastro']));
 					$link_item = $dadositem['url_titulo'];
-					$titulo_item = $dadositem['nome'];
+					$titulo_item = ($dadositem['nome'] ? $dadositem['nome'] : $dadositem['nome_completo']);
 					$descricao_item = $dadositem['descricao'];
 					if ($dadositem['imagem'])
 						$foto_item = '<img src="/exibir_imagem.php?img='.$dadositem['imagem'].'&amp;tipo=4&amp;s=38" alt="" />';
@@ -205,7 +217,7 @@ class BuscaiTeiaBO extends BuscaCacheBO {
             $html .= "<h1><a href=\"".$link_item."\" title=\"Ir para página deste conteúdo\"><span class=\"midia\">".Util::iif($this->getPalavraChave(), Util::marcarPalavra(Util::getTrecho(strip_tags($titulo_item), array($this->getPalavraChave()), 450), $this->getPalavraChave()), strip_tags($titulo_item))."</span></a></h1>\n";
 			if ($foto_item)
 				$html .= "<div class=\"capa\"><a href=\"".$link_item."\" title=\"Ir para página deste conteúdo\">".$foto_item."</a></div>\n";
-				
+
 			if ($descricao_item)
 				$html .= "<p>".Util::cortaTexto(Util::iif($this->getPalavraChave(), Util::marcarPalavra(Util::getTrecho(strip_tags($descricao_item), array($this->getPalavraChave()), 450), $this->getPalavraChave()), strip_tags($descricao_item)))."</p>\n";
 			$html .= "</td>\n";

@@ -1,5 +1,5 @@
 <?php
-require_once("../classes/vo/ConfigVO.php");
+require_once(dirname(__FILE__)."/../../../classes/vo/ConfigVO.php");
 
 class ConfigGerenciadorVO {
 

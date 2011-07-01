@@ -17,10 +17,8 @@ if ($editar) {
 	try {
 		$cod_conteudo = $agendabo->editar($_POST, $_FILES);
 		$exibir_form = false;
-
 		Header("Location: agenda_publicado.php?cod=".$cod_conteudo);
 		exit();
-
 	} catch (Exception $e) {
 		$erro_mensagens = $e->getMessage();
 	}
@@ -82,10 +80,10 @@ $codagenda = (int)$agendabo->getValorCampo("codagenda");
         <input type="text" class="txt counter" value="600" size="4" disabled="disabled" id="cont_descricao" />
         <br />
         
-        <label for="label">Tags (palavras-chave)</label>
+        <!--<label for="label">Tags (palavras-chave)</label>
         <br />
         <input type="text" name="tags" id="tags" value="<?=$agendabo->getValorCampo("tags")?>" class="txt" size="80" />
-        <small>Separe por ponto-e-v&iacute;rgula &quot;;&quot;</small>
+        <small>Separe por ponto-e-v&iacute;rgula &quot;;&quot;</small>-->
         
 	      <br />
 	      <label for="textfield4">Local<span>*</span></label>
@@ -166,6 +164,8 @@ $codagenda = (int)$agendabo->getValorCampo("codagenda");
           <em><small>Ex. hh:mm</small></em></div>
         </fieldset>
       </div>
+	
+<?php include("includes/conteudo_box_categorias.php"); ?>
 
       <div id="botoes" class="box"> <a href="agenda.php" class="bt bt-cancelar">Cancelar</a>
         <input type="submit" class="bt-gravar" value="Gravar" />

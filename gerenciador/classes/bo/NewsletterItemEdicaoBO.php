@@ -16,9 +16,9 @@ class NewsletterItemEdicaoBO extends ConteudoBO {
 	protected function setDadosForm(&$dadosform) {
 		$this->dadosform = $dadosform;
 		$this->dadosform["coditem"] = (int)$this->dadosform["coditem"];
-		$this->dadosform["titulo"] = substr(trim($this->dadosform["titulo"]), 0, 100);
-		$this->dadosform["resumo"] = substr(trim(Util::removeTags($this->dadosform["resumo"])), 0, 200);
-		$this->dadosform["credito"] = substr(trim(Util::removeTags($this->dadosform["credito"])), 0, 200);
+		$this->dadosform["titulo"] = substr(trim(utf8_decode($this->dadosform["titulo"])), 0, 100);
+		$this->dadosform["resumo"] = substr(trim(Util::removeTags(utf8_decode($this->dadosform["resumo"]))), 0, 200);
+		$this->dadosform["credito"] = substr(trim(Util::removeTags(utf8_decode($this->dadosform["credito"]))), 0, 200);
 		$this->dadosform['imgtemp'] = (int)$this->dadosform['imgtemp'];
 		$this->dadosform['individual'] = (int)$this->dadosform['individual'];
 	}
@@ -38,7 +38,7 @@ class NewsletterItemEdicaoBO extends ConteudoBO {
 			$this->newsvo->setCredito(($this->dadosform["credito"]));
 		//}
 	}
-
+ 
 	protected function editarDados() {
 		$this->newsdao->atualizar($this->newsvo);
 		$coditem = $this->newsvo->getCodItem();

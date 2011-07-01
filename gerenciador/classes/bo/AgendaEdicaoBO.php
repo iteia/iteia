@@ -32,6 +32,11 @@ class AgendaEdicaoBO extends ConteudoBO {
 		$this->dadosform["hora_final"] = substr(trim($this->dadosform["hora_final"]), 0, 5);
 		$this->dadosform["site"] = trim(str_replace("http://", "", $this->dadosform["site"]));
 		$this->dadosform["tags"] = $this->dadosform["tags"];
+		
+		$this->dadosform["codclassificacao"] = (int)$this->dadosform["codclassificacao"];
+		$this->dadosform["codsegmento"] = (int)$this->dadosform["codsegmento"];
+		$this->dadosform["codcanal"] = (int)$this->dadosform["codcanal"];
+		$this->dadosform["codsubarea"] = (int)$this->dadosform["codsubarea"];
 	}
 
 	protected function validaDados() {
@@ -79,11 +84,11 @@ class AgendaEdicaoBO extends ConteudoBO {
 	protected function setDadosVO() {
 		$this->agevo = new AgendaVO;
 		$this->agevo->setCodConteudo((int)$this->dadosform["codagenda"]);
-		
+
 		$this->agevo->setCodAutor($_SESSION['logado_cod']);
 		if ($_SESSION['logado_dados']['nivel'] >= 5)
 			$this->agevo->setCodColaborador($_SESSION['logado_dados']['cod_colaborador']);
-		
+
 		$this->agevo->setTitulo($this->dadosform["titulo"]);
 		$this->agevo->setDescricao($this->dadosform["descricao"]);
 		$this->agevo->setLocal($this->dadosform["local"]);
@@ -97,17 +102,16 @@ class AgendaEdicaoBO extends ConteudoBO {
 		$this->agevo->setHoraInicial(substr($this->dadosform["hora_inicial"], 0, 2).":".substr($this->dadosform["hora_inicial"], 3, 2).":00");
 		$this->agevo->setHoraFinal(substr($this->dadosform["hora_final"], 0, 2).":".substr($this->dadosform["hora_final"], 3, 2).":59");
 
-		if (!(int)$this->dadosform["codagenda"]) {
-			//if ($_SESSION['logado_como'] == 1)
-			if ($_SESSION['logado_dados']['nivel'] == 2)
-				$this->agevo->setSituacao(0);
-			else
-				$this->agevo->setSituacao(1);
-		}
-
+		$this->agevo->setSituacao(1);
 		$this->agevo->setPublicado(1);
+		$this->agevo->setDataHora($this->agevo->getDataInicial().' '.$this->agevo->getHoraInicial());
 		$this->agevo->setUrl(Util::geraUrlTitulo($this->dadosform["titulo"]));
 		$this->agevo->setTags(Util::geraTags($this->dadosform['tags']));
+		
+		$this->agevo->setCodClassificacao($this->dadosform['codclassificacao']);
+		$this->agevo->setCodSegmento($this->dadosform['codsegmento']);
+		$this->agevo->setCodSubArea($this->dadosform['codsubarea']);
+		$this->agevo->setCodCanal($this->dadosform['codcanal']);
 	}
 
 	protected function editarDados() {
@@ -158,6 +162,11 @@ class AgendaEdicaoBO extends ConteudoBO {
 			$this->dadosform["hora_inicial"] = date("H:i", strtotime($agevo->getHoraInicial()));
 		//if ($agevo->getHoraFinal() && ($agevo->getHoraFinal() != "00:00:00"))
 			$this->dadosform["hora_final"] = date("H:i", strtotime($agevo->getHoraFinal()));
+			
+		$this->dadosform["codclassificacao"] = $agevo->getCodClassificacao();
+		$this->dadosform["codsegmento"] = $agevo->getCodSegmento();
+		$this->dadosform["codsubarea"] = $agevo->getCodSubArea();
+		$this->dadosform["codcanal"] = $agevo->getCodCanal();
 	}
 
 	public function excluirImagem($cod) {

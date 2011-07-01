@@ -93,8 +93,9 @@ function apagarImagem(cod, tipo) {
 	$('.remover').hide();
 }
 
-function apagarArquivo(cod, tipo) {
-	$('.arquivo').load("excluir_arquivo.php?cod="+cod+"&tipo="+tipo);
+function apagarArquivo(cod, tipo, cod_texto) {
+	$('.arquivo').load("excluir_arquivo.php?cod="+cod+"&tipo="+tipo+'&cod_texto='+cod_texto);
 	$('.arquivo').hide();
 	tb_remove();
+	location.reload(true);
 }

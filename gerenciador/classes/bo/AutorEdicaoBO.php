@@ -38,6 +38,7 @@ class AutorEdicaoBO extends UsuarioBO {
 		$this->dadosform["mostrar_email"] = (int)$dadosform["mostrar_email"];
 
 		$this->dadosform["tipo_autor"] = (int)$dadosform["tipo_autor"];
+		$this->dadosform["exibir_endereco"] = (int)$dadosform["exibir_endereco"];
 
 		$this->dadosform["site"] = str_replace("http://", "", substr(trim($dadosform["site"]), 0, 200));
 
@@ -116,7 +117,7 @@ class AutorEdicaoBO extends UsuarioBO {
 			} elseif (!eregi("^[a-zA-Z0-9]+$", $this->dadosform["finalendereco"])) {
 				$this->erro_mensagens[] = "Final do endereço só pode conter letras e números";
 				$this->erro_campos[] = "finalendereco";
-			} elseif ($this->autordao->existeFinalEndereco('autores/'.$this->dadosform["finalendereco"], $this->dadosform["codautor"])) {
+			} elseif ($this->autordao->existeFinalEndereco($this->dadosform["finalendereco"], $this->dadosform["codautor"])) {
 				$this->erro_mensagens[] = "Final do endereço já existente";
 				$this->erro_campos[] = "finalendereco";
 			}
@@ -155,13 +156,13 @@ class AutorEdicaoBO extends UsuarioBO {
 		$this->autorvo->setNome($this->dadosform["nomeartistico"]);
 		$this->autorvo->setNomeCompleto($this->dadosform["nomecompleto"]);
 		$this->autorvo->setDataNascimento(substr($this->dadosform["datanascimento"], 6, 4).'-'.substr($this->dadosform["datanascimento"], 3, 2).'-'.substr($this->dadosform["datanascimento"], 0, 2));
-		
+
 		if ($this->dadosform["falecido"]) {
 			$this->autorvo->setDataFalecimento(substr($this->dadosform["datafalecimento"], 6, 4).'-'.substr($this->dadosform["datafalecimento"], 3, 2).'-'.substr($this->dadosform["datafalecimento"], 0, 2));
 		} elseif ($this->dadosform["datafalecimento"] == '') {
 			$this->autorvo->setDataFalecimento("0000-00-00");
         }
-		
+
         $this->autorvo->setDescricao($this->dadosform["biografia"]);
 		$this->autorvo->setEndereco($this->dadosform["endereco"]);
 		$this->autorvo->setComplemento($this->dadosform["complemento"]);
@@ -179,6 +180,7 @@ class AutorEdicaoBO extends UsuarioBO {
 		$this->autorvo->setUrl($this->dadosform["finalendereco"]);
 
 		$this->autorvo->setCPF($this->dadosform["cpf"]);
+		$this->autorvo->setExibirEndereco($this->dadosform["exibir_endereco"]);
 
         $this->autorvo->setLogin($this->dadosform["finalendereco"]);
         $this->autorvo->setSenha($this->dadosform["senha"]);
@@ -283,7 +285,8 @@ class AutorEdicaoBO extends UsuarioBO {
 		$this->dadosform["sitesrelacionados"] = $autorvo->getSitesRelacionados();
 
 		$this->dadosform["cpf"] = $autorvo->getCPF();
-
+		$this->dadosform["exibir_endereco"] = $autorvo->getExibirEndereco();
+		
 		$this->dadosform["tipo_autor"] = $autorvo->getTipoAutor();
 
 		foreach ($this->dadosform["contato"] as $key => $value)
@@ -302,13 +305,15 @@ class AutorEdicaoBO extends UsuarioBO {
 	}
 
 	public function getAutorWiki($codautor) {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/CadastroDAO.php");
-		$caddao = new CadastroDAO;
-		return $caddao->checaAutorWiki($codautor);
+		return $this->autordao->checaAutorWiki($codautor);
 	}
 
 	public function getColaboradoresRepresentantes($codautor) {
 		return $this->autordao->getColaboradoresRepresentantes($codautor);
+	}
+	
+	public function getColaboradoresParticipantes($codautor) {
+		return $this->autordao->getColaboradoresParticipantes($codautor);
 	}
 
 }

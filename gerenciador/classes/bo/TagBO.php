@@ -58,8 +58,8 @@ class TagsBO {
 		return $this->editarDados();
 	}
 	
-	public function getListaTags($get) {
-		return $this->tagdao->getListaTags($get);
+	public function getListaTags($get, $limite) {
+		return $this->tagdao->getListaTags($get, $limite);
 	}
 	
 	public function setDadosCamposEdicao($codtag) {

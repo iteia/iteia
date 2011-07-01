@@ -16,9 +16,10 @@ if (count($resultado)):
           <tr>
             <th class="col-1" scope="col"><input name="checkbox" type="checkbox" id="check-all" />            </th>
             <th class="col-titulo" scope="col">T&iacute;tulo</th>
-            <th class="col-autor" scope="col">Autor</th>
+            <th class="col-autor" scope="col">Postado por</th>
             <th class="col-ico" scope="col">Formato</th>
             <th class="col-situacao" scope="col">Situa&ccedil;&atilde;o</th>
+			<th class="col-tipo"  scope="col">Data de cadastro</th>
             <th class="col-editar" scope="col">Editar</th>
           </tr>
         </thead>
@@ -33,6 +34,7 @@ if (count($resultado)):
             <td class="col-autor"><?=$value['autores'];?></td>
             <td class="col-formato"><?=$value['formato'];?></td>
             <td class="col-situacao"><?=$value['situacao'];?></td>
+			<td class="col-tipo"><?=date("d/m/Y",strtotime($value['datahora']));?></td>
             <td class="col-editar">
 			<?php if ($_SESSION['logado_dados']['nivel'] == 2 || $_SESSION['logado_dados']['nivel'] == 5 || $_SESSION['logado_dados']['nivel'] == 6):
 				if ($value['cod_autor_colaborador'] == $_SESSION['logado_dados']['cod']): ?>
@@ -54,7 +56,7 @@ if (count($resultado)):
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="6" class="selecionados"><strong>Selecionados:</strong> <a href="javascript:submeteAcoesConteudo(1, '#mostra_resultados_relacionamento', '<?=$resultado['link'];?>&pagina=<?=$paginacao['pagina'];?>');">Apagar</a> | <a href="javascript:submeteAcoesConteudo(2, '#mostra_resultados_relacionamento', '<?=$resultado['link'];?>&pagina=<?=$paginacao['pagina'];?>');">Ativar</a> | <a href="javascript:submeteAcoesConteudo(3, '#mostra_resultados_relacionamento', '<?=$resultado['link'];?>&pagina=<?=$paginacao['pagina'];?>');">Desativar</a></td>
+            <td colspan="7" class="selecionados"><strong>Selecionados:</strong> <a href="javascript:submeteAcoesConteudo(1, '#mostra_resultados_relacionamento', '<?=$resultado['link'];?>&pagina=<?=$paginacao['pagina'];?>');">Apagar</a> | <a href="javascript:submeteAcoesConteudo(2, '#mostra_resultados_relacionamento', '<?=$resultado['link'];?>&pagina=<?=$paginacao['pagina'];?>');">Ativar</a> | <a href="javascript:submeteAcoesConteudo(3, '#mostra_resultados_relacionamento', '<?=$resultado['link'];?>&pagina=<?=$paginacao['pagina'];?>');">Desativar</a></td>
           </tr>
         </tfoot>
       </table>

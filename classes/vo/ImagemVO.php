@@ -1,6 +1,7 @@
 <?php
+include_once("ConteudoVO.php");
 
-class ImagemVO {
+class ImagemVO{
 
 	private $cod_imagem = 0;
 	private $cod_conteudo = 0;

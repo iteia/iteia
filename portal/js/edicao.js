@@ -11,10 +11,10 @@ function exibeEstadoCidade() {
 }
 
 function obterCidades(obj, codcidade) {
-	codestado = obj.options[obj.options.selectedIndex].value;
+	var codestado = obj.options[obj.options.selectedIndex].value;
 	if (codestado == "0") {
 		removeAllChildren(document.getElementById("selectcidade"));
-		node_option = document.createElement("option");
+		var node_option = document.createElement("option");
 		node_option.setAttribute("value", "0");
 		node_option.appendChild(document.createTextNode("Selecione a Cidade"));
 		document.getElementById("selectcidade").appendChild(node_option);
@@ -23,32 +23,97 @@ function obterCidades(obj, codcidade) {
 		AjaxRequest();
 		var url = "/ajax.php?acao=getcidades&codestado=" + codestado;
 		Ajax.onreadystatechange = function () {
-			if ((Ajax.readyState == 4) && (Ajax.status == 200))
+			if ((Ajax.readyState == 4) && (Ajax.status == 200)){
 				listaCidades(codcidade);
+			}
 		}
 		Ajax.open("GET", url, true);
 		Ajax.send(null);
 	}
 }
 
-function listaCidades(codcidade) {
-	var select_cidades = document.getElementById("selectcidade");
-	removeAllChildren(select_cidades);
+function obterSubcanais(obj) {
+	var codCanal = obj.options[obj.options.selectedIndex].value;
+	if (codCanal == "0") {
+		removeAllChildren(document.getElementById("subchannel"));
+		var node_option = document.createElement("option");
+		node_option.setAttribute("value", "0");
+		node_option.appendChild(document.createTextNode("Qualquer subcanal"));
+		document.getElementById("subchannel").appendChild(node_option);
+	}
+	else {
+		AjaxRequest();
+		var url = "/ajax.php?acao=getsubcanais&codCanal=" + codCanal;
+		Ajax.onreadystatechange = function () {
+			if ((Ajax.readyState == 4) && (Ajax.status == 200)){
+				listaSubcanais(codCanal);
+			}
+		}
+		Ajax.open("GET", url, true);
+		Ajax.send(null);
+	}
+}
 
-	node_option = document.createElement("option");
+//function listaCidades(codcidade) {
+//	var select_cidades = document.getElementById("selectcidade");
+//	removeAllChildren(select_cidades);
+//
+//	node_option = document.createElement("option");
+//	node_option.setAttribute("value", "0");
+//	node_option.appendChild(document.createTextNode("Selecione a Cidade"));
+//	select_cidades.appendChild(node_option);
+//
+//	var cidades = Ajax.responseXML.getElementsByTagName("cidades")[0];
+//	for (i = 0; i < cidades.childNodes.length; i++) {
+//		codcid = cidades.childNodes[i].getAttribute("cod");
+//		node_option = document.createElement("option");
+//		node_option.setAttribute("value", codcid);
+//		if (codcid == codcidade)
+//			node_option.setAttribute("selected", "selected");
+//		node_option.appendChild(document.createTextNode(cidades.childNodes[i].firstChild.nodeValue));
+//		select_cidades.appendChild(node_option);
+//	}
+//}
+
+function listaCidades(codcidade) {
+	var select_cidades1 = document.getElementById("selectcidade");
+	removeAllChildren(select_cidades1);
+
+	var node_option = document.createElement("option");
 	node_option.setAttribute("value", "0");
 	node_option.appendChild(document.createTextNode("Selecione a Cidade"));
-	select_cidades.appendChild(node_option);
+	select_cidades1.appendChild(node_option);
 
 	var cidades = Ajax.responseXML.getElementsByTagName("cidades")[0];
 	for (i = 0; i < cidades.childNodes.length; i++) {
-		codcid = cidades.childNodes[i].getAttribute("cod");
+		var codcid = cidades.childNodes[i].getAttribute("cod");
 		node_option = document.createElement("option");
 		node_option.setAttribute("value", codcid);
 		if (codcid == codcidade)
 			node_option.setAttribute("selected", "selected");
 		node_option.appendChild(document.createTextNode(cidades.childNodes[i].firstChild.nodeValue));
-		select_cidades.appendChild(node_option);
+		select_cidades1.appendChild(node_option);
+	}
+}
+
+function listaSubcanais(codcidade) {
+	var select_cidades1 = document.getElementById("subchannel");
+	removeAllChildren(select_cidades1);
+
+	var node_option = document.createElement("option");
+	node_option.setAttribute("value", "0");
+	node_option.appendChild(document.createTextNode("Qualquer subcanal"));
+	select_cidades1.appendChild(node_option);
+
+	var cidades = Ajax.responseXML.getElementsByTagName("subcanais")[0];
+	for (i = 0; i < cidades.childNodes.length; i++) {
+		var codcid = cidades.childNodes[i].getAttribute("cod");
+		node_option = document.createElement("option");
+		node_option.setAttribute("value", codcid);
+		if (codcid == codcidade)
+			node_option.setAttribute("selected", "selected");
+		node_option.appendChild(document.createTextNode(cidades.childNodes[i].firstChild.nodeValue));
+		select_cidades1.appendChild(node_option);
 	}
 }
 
@@ -94,23 +159,24 @@ function exibeEstadoCidade2() {
 }
 
 function obterCidades2(obj, codcidade) {
-	codestado = obj.options[obj.options.selectedIndex].value;
+	var codestado = obj.options[obj.options.selectedIndex].value;
 	if (codestado == "0") {
 		removeAllChildren(document.getElementById("selectcidade2"));
-		node_option = document.createElement("option");
+		var node_option = document.createElement("option");
 		node_option.setAttribute("value", "0");
 		node_option.appendChild(document.createTextNode("Selecione a Cidade"));
 		document.getElementById("selectcidade2").appendChild(node_option);
 	}
 	else {
-		AjaxRequest();
+		AjaxRequest1();
 		var url = "/ajax.php?acao=getcidades&codestado=" + codestado;
-		Ajax.onreadystatechange = function () {
-			if ((Ajax.readyState == 4) && (Ajax.status == 200))
+		Ajax1.onreadystatechange = function () {
+			if ((Ajax1.readyState == 4) && (Ajax1.status == 200)){
 				listaCidades2(codcidade);
+			}
 		}
-		Ajax.open("GET", url, true);
-		Ajax.send(null);
+		Ajax1.open("GET", url, true);
+		Ajax1.send(null);
 	}
 }
 
@@ -118,14 +184,14 @@ function listaCidades2(codcidade) {
 	var select_cidades = document.getElementById("selectcidade2");
 	removeAllChildren(select_cidades);
 
-	node_option = document.createElement("option");
+	var node_option = document.createElement("option");
 	node_option.setAttribute("value", "0");
 	node_option.appendChild(document.createTextNode("Selecione a Cidade"));
 	select_cidades.appendChild(node_option);
 
-	var cidades = Ajax.responseXML.getElementsByTagName("cidades")[0];
+	var cidades = Ajax1.responseXML.getElementsByTagName("cidades")[0];
 	for (i = 0; i < cidades.childNodes.length; i++) {
-		codcid = cidades.childNodes[i].getAttribute("cod");
+		var codcid = cidades.childNodes[i].getAttribute("cod");
 		node_option = document.createElement("option");
 		node_option.setAttribute("value", codcid);
 		if (codcid == codcidade)

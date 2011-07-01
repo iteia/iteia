@@ -18,18 +18,17 @@ $agendadas = $newsbo->getAgendadas();
 $enviadas = $newsbo->getEnviadas($inicial, $mostrar);
 $paginacao = Util::paginacao($pagina, $mostrar, $enviadas['total'], 'home_newsletter.php?buscar=1');
 
-$paginatitulo = 'Destaque';
-$item_menu = "home";
-$item_submenu = "newsletter_inserir";
+$paginatitulo = 'Boletim';
+$item_menu = "boletim";
+$item_submenu = "inicio";
 include('includes/topo.php');
 ?>
 <script type="text/javascript" src="jscripts/funcoes.js"></script>
 <script type="text/javascript" src="jscripts/home_newsletter.js"></script>
 
-    <h2>Newsletter</h2>
-    <div id="op-comentario">
-      <strong>In&iacute;cio</strong> | <a href="home_newsletter_inserir.php">Criar newsletter</a> | <a href="home_newsletter_listas.php">Listas de emails</a> | <a href="home_newsletter_emails_cadastrar.php">Cadastrar emails</a></div>
-    <h3 class="titulo">Newsletter agendadas</h3>
+    <h2>Boletim</h2>
+    
+    <h3 class="titulo">Boletim agendados</h3>
 
 <form action="home_newsletter.php" method="get" enctype="multipart/form-data" id="form-result">
 <input type="hidden" name="buscar" id="buscar" value="1" />
@@ -40,7 +39,7 @@ include('includes/topo.php');
       <table width="100%" border="1" cellpadding="0" cellspacing="0" id="table-conteudo">
         <thead>
           <tr>
-            <th class="col-1" scope="col"><input name="checkbox" type="checkbox" id="check-all" />            </th>
+            <th class="col-1" scope="col"><input name="checkbox" type="checkbox" id="check-all1" />            </th>
             <th class="col-data" scope="col">Data</th>
             <th class="col-titulo" scope="col">Nome da lista</th>
             <th class="col-conteudo" scope="col">Conte&uacute;dos</th>
@@ -52,7 +51,7 @@ include('includes/topo.php');
         <tbody>
 <?php foreach($agendadas as $key => $value): ?>
           <tr>
-            <td class="col-1"><input type="checkbox" name="cod[]" value="<?=$value['cod_newsletter'];?>" class="check" /></td>
+            <td class="col-1"><input type="checkbox" name="cod[]" value="<?=$value['cod_newsletter'];?>" class="check check1" /></td>
            
             <td class="col-data"><?=date('d/m/Y, H:i', strtotime($value['data_envio']));?></td>
             <td class="col-titulo"><?=$value['titulo'];?></td>
@@ -73,7 +72,7 @@ include('includes/topo.php');
       <hr class="both" />
     </div>
 	
-    <h3 class="titulo">Newsletter enviadas</h3>
+    <h3 class="titulo">Boletim enviados</h3>
     
 	<div class="box">
    <div class="view">Exibindo
@@ -98,7 +97,7 @@ include('includes/topo.php');
         <tbody>
 <?php foreach($enviadas['resultado'] as $key => $value): ?>
           <tr>
-            <td class="col-1"><input type="checkbox" name="cod[]" value="<?=$value['cod_newsletter'];?>" class="check" /></td>
+            <td class="col-1"><input type="checkbox" name="cod[]" value="<?=$value['cod_newsletter'];?>" class="check check2" /></td>
            
             <td class="col-data"><?=date('d/m/Y, H:i', strtotime($value['data_envio']));?></td>
             <td class="col-titulo"><?=$value['titulo'];?></td>

@@ -9,6 +9,26 @@ if ($buscar) {
 	$buscabo = new BuscaiTeiaBO;
 	$dados = $_GET;
 	
+	if($dados['periodo'] != 0){
+		$dados['data2'] = date('d/m/Y');
+		
+		switch((int)$dados['periodo']){
+			case 1:
+				$datainicio = mktime(0, 0, 0, date("m")  , date("d")-1, date("Y")); //ha 24 horas
+			break;
+			case 2:
+				$datainicio = mktime(0, 0, 0, date("m")  , date("d")-7, date("Y")); //Semana Passada
+			break;
+			case 3:
+				$datainicio = mktime(0, 0, 0, date("m")-1  , date("d"), date("Y")); //ultimo mes
+			break;
+			case 4:
+				$datainicio = mktime(0, 0, 0, date("m")  , date("d"), date("Y")-1); //ultimo ano
+			break;
+		}
+		$dados['data1'] = date('d/m/Y',$datainicio);
+	}
+	
 	if ($dados['data2']) {
 		$data_itens = explode('/', $dados['data2']);
 		$dados['dia2'] = (int)$data_itens[0];
@@ -38,6 +58,8 @@ if ($buscar) {
 	if (!$dados['cidades']) $dados['cidades'] = array();
 	if ($dados['estados']) $dados['estados'] = explode(',', $dados['estados']);
 	if (!$dados['estados']) $dados['estados'] = array();
+	if ($dados['paises']) $dados['paises'] = explode(',', $dados['paises']);
+	if (!$dados['paises']) $dados['paises'] = array();
 
 	$dados['extras'] = array(
 		'conteudo' => (int)$dados['conteudo'], // conteudos relacionados / autores
@@ -50,10 +72,11 @@ if ($buscar) {
 		'autor' => (int)$dados['autor'], // conteudos -> autor
 		'cidades' => $dados['cidades'], // cidades -> colaboradores/autores
 		'estados' => $dados['estados'], // estados -> colaboradores/autores
+		'paises' => $dados['paises'], // paises -> colaboradores/autores
 	);
 
 	$dados_todos = $dados;
-	$memid1 = $buscabo->efetuaBusca($dados_todos);
+        $memid1 = $buscabo->efetuaBusca($dados_todos);
 	$link_resultado = 'busca_resultado.php?id1='.$memid1;
 	
 	if (in_array(2, $dados['formatos']) || !count($dados['formatos'])) {
@@ -96,6 +119,7 @@ if ($buscar) {
 		$dados_eventos['formatos'] = array(7);
 		$memid7 = $buscabo->efetuaBusca($dados_eventos);
 		$link_resultado .= '&id7='.$memid7;
+                
 	}
 	
 	if (in_array(8, $dados['formatos']) || !count($dados['formatos'])) {
@@ -118,6 +142,7 @@ if ($buscar) {
 		$memid10 = $buscabo->efetuaBusca($dados_colaboradores);
 		$link_resultado .= '&id10='.$memid10;
 	}
+
 	//print_r($dados);
 	header('location: '.$link_resultado);
 }

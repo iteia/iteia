@@ -1,16 +1,15 @@
 <?php
-include('verificalogin.php');
-include_once(ConfigGerenciadorVO::getDirClassesRaiz()."util/Util.php");
+include_once('verificalogin.php');
+include_once(ConfigGerenciadorVO::getDirClassesRaiz().'util/Util.php');
 
 include_once("classes/bo/PrincipalBO.php");
 $indexbo = new PrincipalBO;
 
 $usuariodados = $indexbo->getUsuarioDados();
-
 // notificacoes (autorizacoes)
 include_once("classes/bo/NotificacaoBO.php");
 $notifbo = new NotificacaoBO;
-$notificacoes = $notifbo->getListaNotificacao(0, 6);
+$notificacoes = $notifbo->getListaNotificacao(1, 6);
 
 // listapublica
 include_once("classes/bo/ListaPublicaBO.php");
@@ -29,6 +28,10 @@ $listarecente = $recentebo->getListaConteudoRecente(0, 6);
 
 $paginatitulo = 'Painel';
 $item_menu = $item_submenu = 'index';
+
+if(isset($_GET['debug'])){
+	print_r($notificacoes);
+}
 include('includes/topo.php');
 ?>
 <script type="text/javascript" src="jscripts/comentarios.js"></script>
@@ -41,19 +44,18 @@ include('includes/topo.php');
     
     <div id="shortcut">
         <div id="insert">
-          <div id="insert-title">Clique nos &iacute;cones abaixo para inserir:</div>
+          <div id="insert-title">Clique nos &iacute;cones abaixo para publicar:</div>
           <ul>
             <li class="icon-img"><a href="conteudo_edicao_imagem.php" title="Inserir nova imagem">Inserir nova imagem</a></li>
             <li class="icon-video"><a href="conteudo_edicao_video.php" title="Inserir novo v&iacute;deo">Inserir novo v&iacute;deo</a></li>
             <li class="icon-audio"><a href="conteudo_edicao_audio.php" title="Inserir novo &aacute;udio">Inserir novo &aacute;udio</a></li>
-            <li class="icon-text"><a href="conteudo_edicao_texto.php" title="Inserir novo texto">Inserir novo texto</a></li>
-            <?php if ($_SESSION['logado_dados']['nivel'] < 5): /*if ($_SESSION['logado_como'] > 1):*/ ?>
-            	<li class="entenda"><a href="conteudo_tipo.php">saiba mais</a></li>
-            <?php endif; ?>
+            <li class="icon-text"><a href="conteudo_edicao_texto.php" title="Inserir novo texto">Inserir novo texto</a></li>            
             
-            <?php if ($_SESSION['logado_dados']['nivel'] >= 5): /*if ($_SESSION['logado_como'] > 1):*/ ?>
-			<li class="icon-news"><a href="noticia_edicao.php" title="Inserir nova not&iacute;cia">Inserir nova not&iacute;cia</a></li>
-            <?php endif; ?>
+			<?php if ($_SESSION['logado_dados']['nivel'] < 5){ /*if ($_SESSION['logado_como'] > 1):*/
+            	//echo "<li class=\"entenda\"><a href=\"conteudo_tipo.php\">saiba mais</a></li>";
+			} ?>
+			
+            <li class="icon-news"><a href="noticia_edicao.php" title="Inserir nova not&iacute;cia">Inserir nova not&iacute;cia</a></li>
 			<?php /*if (count($_SESSION['logado_dados']['grupo_responsavel'])): /*if ($_SESSION['logado_como'] > 1):*/ ?>
             <li class="icon-event"><a href="agenda_edicao.php" title="Inserir novo evento">Inserir novo evento</a></li>
             <?php /*endif;*/ ?>
@@ -88,37 +90,13 @@ include('includes/topo.php');
               
               <table width="100%" border="1" cellspacing="0" cellpadding="0" >
                 <tbody>
-                <?php
-                foreach ($notificacoes as $key => $value):
-                	if ((int)$value['cod_tipo']):
-                		if (($value['cod_tipo'] == 150) or ($value['cod_tipo'] == 250)):
-                ?>
-                  <tr>
-                  <td class="col-alerta"></td>
-                  <td class="col-ico"><span class="<?=($value['cod_tipo'] == 250 ? 'colaborador' : 'autor'); ?>">Autor</span></td>
-                  <td class="col-msg"><? if($value['cod_tipo'] == 250){ echo "Colaborador:"; } else { echo "Autor:"; } ?> <?=htmlentities($value['nome']);?><br />
-                    Solicita aprova&ccedil;&atilde;o de cadastro</td>
-                  <td class="col-ver"><a href="<? if($value['cod_tipo']==150){ echo $value['url_arquivo']; } else {  echo "index_exibir_colaborador_pendente.php?cod=$value[cod_colaborador]"; }?>" title="Clique para visualizar">Ver</a></td>
-                </tr>
-                <?php
-                		else:
-           		?>
-				<tr>
-                  <td class="col-alerta"><?=Util::iif($value['cod_colaborador'], '<span>alerta</span>', '&nbsp;');?></td>
-                  <td class="col-ico"><?=$value['img_formato'];?></td>
-                  <td class="col-msg">Autor: <a href="<?=ConfigVO::URL_SITE.$value['url'];?>"><?=htmlentities($value['nome']);?></a><br />
-                  <?php if ($value['cod_tipo'] == 5): ?>
-				  Modificou este conteúdo e pediu nova aprovação:
-				  <?php endif; ?>
-                    <strong><?=htmlentities($value['titulo']);?></strong></td>
-                  <td class="col-ver"><a href="<?=$value['url_arquivo'];?>" title="Clique para visualizar">Ver</a></td>
-                </tr>
-           		<?php
-                		endif;
-                	endif;
-                endforeach;
-                ?>
-
+                <?php foreach ($notificacoes as $key => $value): ?>
+					<tr>
+						<td class="col-ico"><?=$value['imagem'];?></td>
+						<td class="col-msg"><?=$value['mensagem'];?></td>
+						<td class="col-ver"><a href="<?=$value['visualizacao'];?>">Ver</a></td>
+					</tr>
+					<?php endforeach; ?>
                 </tbody>
               </table>
           </div>
@@ -150,7 +128,7 @@ include('includes/topo.php');
                 <?php
                 	endif;
                 endforeach;
-                ?> 
+                ?>
                 </tbody>
               </table>
           </div>

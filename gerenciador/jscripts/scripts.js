@@ -63,6 +63,34 @@ $(document).ready(function() {
 	$('table tbody .check').blur().parent().parent().removeClass("oven");
 	}
 	});
+
+	var ifChecked1 = "0";
+	$("input#check-all1").click(function() {
+		if(ifChecked == "0") {
+			$("td").find("input[class*=check1]").attr("checked","checked");
+			ifChecked = "1";
+			$('table tbody .check1').blur().parent().parent().addClass("oven");
+		}
+		else {
+			$("td").find("input[class*=check1]").attr("checked","");
+			ifChecked = "0";
+			$('table tbody .check1').blur().parent().parent().removeClass("oven");
+		}
+	});
+	
+	var ifChecked2 = "0";
+	$("input#check-all2").click(function() {
+		if(ifChecked == "0") {
+			$("td").find("input[class*=check2]").attr("checked","checked");
+			ifChecked = "1";
+			$('table tbody .check2').blur().parent().parent().addClass("oven");
+		}
+		else {
+			$("td").find("input[class*=check2]").attr("checked","");
+			ifChecked = "0";
+			$('table tbody .check2').blur().parent().parent().removeClass("oven");
+		}
+	});
 });
 
 // cores da tr impar

@@ -10,15 +10,21 @@ class BuscaDAO {
 
 	protected $banco = null;
 	protected $cidades = null;
+	protected $segmentos = null;
 
 	public function __construct() {
 		$this->banco = ConexaoDB::singleton();
 		$this->estados = new EstadoDAO();
+		$this->segmentos = new SegmentoDAO();
 	}
 
    public function getListaTodosEstados($get){
         return $this->estados->getListaEstados($get);
    }
+
+   public function getListaTodosCanais(){
+        return $this->segmentos->getListaSegmentosCadastro();
+   }   
 
 	private function getConteudoVideo($codconteudo, $codformato) {
 		if ($codformato == 4) {

@@ -1,6 +1,5 @@
 <?php
 include_once("ConteudoDAO.php");
-//include_once("inc_interjornal/classes/DataHora.kmf");
 
 class AgendaDAO extends ConteudoDAO {
 
@@ -36,6 +35,8 @@ class AgendaDAO extends ConteudoDAO {
 		$agevo->setTelefone($sql_row["telefone"]);
 		$agevo->setValor($sql_row["valor"]);
 		$agevo->setSite($sql_row["site"]);
+		
+		$agevo->setDataHora($sql_row["data_inicial"].' '.$sql_row["hora_inicial"]);
 		return $agevo;
 	}
 
@@ -113,10 +114,10 @@ class AgendaDAO extends ConteudoDAO {
 	// ===================================================================
 	// portal
 	public function getListaAgendaPortal($get, $inicial, $mostrar, $home=false) {
-
+        
 	    $array = array();
 	    $where = "WHERE t1.cod_formato = 6 and t1.excluido='0' and t1.cod_sistema = ".ConfigVO::getCodSistema();
-
+        
         if ($get['somes']) {
             $where .= " and t2.data_inicial like '".substr($get['somes'], 0, 4)."-".substr($get['somes'], 4, 2)."%'";
         } elseif ($get['dia']) {
@@ -124,22 +125,24 @@ class AgendaDAO extends ConteudoDAO {
         } else {
             $inthoje = date('N');
 			$diahoje = date('d');
-			
+            
 			$iniciosemana = ($diahoje - $inthoje);
 			$fimsemana = ($diahoje + (7 - $inthoje)) - 1;
-			
+            
 			$inicio = date('Y-m-d', mktime(0, 0, 0, date('m'), $iniciosemana, date('Y')));
 			$fim = date('Y-m-d', mktime(0, 0, 0, date('m'), $fimsemana, date('Y')));
-			
+            
 			if ($home)
-				$where .= " and (t2.data_inicial >= '".$inicio."' and t2.data_final <= '".$fim."')";
+				//$where .= " and (t2.data_inicial >= '".$inicio."' and t2.data_final <= '".$fim."')";
+                //$where .= " and (t2.data_inicial >= '".$inicio."' and t2.data_inicial <= '".$fim."')";
+				$where .= " and (t2.data_inicial >= '".date('Y-m-d')."')";
 			else
 				$where .= " and (t2.data_inicial >= '".date('Y-m-d')."' /*and t2.data_final <= '".date('Y-m-d')."') or t2.data_inicial like '".date('Y-m-')."%')*/)";
 			//$where .= " and (t2.data_inicial like '".date('Y-m-')."%' and t2.data_final >= '".date('Y-m-d')."')";
         }
 
         $sql = "SELECT t1.*, t2.*, t3.titulo AS url_agenda FROM Conteudo AS t1 INNER JOIN Agenda AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) INNER JOIN Urls AS t3 ON (t1.cod_conteudo=t3.cod_item) AND t3.tipo='4' $where";
-
+		
         $array['total'] = $this->banco->numRows($this->banco->executaQuery($sql));
         $query = $this->banco->executaQuery("$sql ORDER BY t2.data_inicial, t2.hora_inicial LIMIT $inicial,$mostrar");
 
@@ -154,9 +157,9 @@ class AgendaDAO extends ConteudoDAO {
 		$row = $this->banco->fetchArray($query);
 		return (int)$row[0];
 	}
-	
+
 	public function getDadosAgenda($codconteudo) {
-    	$sql = "SELECT t1.*, t2.*, t5.nome AS colaborador, t9.titulo AS url_colaborador FROM Conteudo AS t1 INNER JOIN Agenda AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) LEFT JOIN Usuarios AS t5 ON (t1.cod_colaborador=t5.cod_usuario) LEFT JOIN Urls AS t9 ON (t1.cod_colaborador=t9.cod_item) WHERE t1.cod_conteudo='".$codconteudo."' AND t5.cod_tipo = 1 AND t9.tipo = 1";
+    	$sql = "SELECT t1.*, t2.* FROM Conteudo AS t1 INNER JOIN Agenda AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) WHERE t1.cod_conteudo='".$codconteudo."'";
     	$query = $this->banco->executaQuery($sql);
     	return $this->banco->fetchArray($query);
     }

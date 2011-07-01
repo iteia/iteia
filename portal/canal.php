@@ -18,7 +18,7 @@ include ('includes/topo.php');
 		<div id="rss"><a href="/feeds.php?formato=8&amp;canal=<?=$codcanal?>" title="Assine e receba atualizações">Assine</a><br /> <a href="/rss" title="Saiba o que é RSS e como utilizar">O que é isso?</a></div>
         <?php if($dadoscanal['descricao']):?>
 		<div class="caption principal">
-          <p><?=$dadoscanal['descricao'];?></p>
+          <p><?=Util::autoLink($dadoscanal['descricao']);?></p>
         </div>
 		<?php endif; ?>
 		<?php if ($dadoscanal['imagem']): ?>
@@ -35,15 +35,15 @@ include ('includes/topo.php');
             <ul>
              <li id="b-twitter"><a href="http://twitter.com/home/?status=<?=urlencode(Util::bitly(ConfigVO::URL_SITE.'canal.php?cod='.$codcanal).' '.$titulo.' #iteia')?>">twitter</a></li>
                <li id="b-delicious"><a href="http://del.icio.us/post?url=<?=urlencode(ConfigVO::URL_SITE.'canal.php?cod='.$codcanal.' '.$titulo.' #iteia');?>">delicious</a></li>
-				  <li id="b-facebook"><a href="http://www.facebook.com/share.php?u=<?=ConfigVO::URL_SITE.'canal.php?cod='.$codcanal;?>">facebook</a></li>
-              <li id="b-yahoo"><a href="http://buzz.yahoo.com/buzz?targetUrl=<?=Util::bitly(ConfigVO::URL_SITE.'canal.php?cod='.$codcanal);?>">Yahoo buzz</a></li>
-              <li id="b-digg"><a href="http://digg.com/submit?phase=2&amp;url=<?=Util::bitly(ConfigVO::URL_SITE.'canal.php?cod='.$codcanal);?>">digg it </a></li>
+				  <li id="b-facebook"><a href="http://www.facebook.com/share.php?u=<?=ConfigVO::URL_SITE.'canal.php?cod='.$codcanal;?>" name="fb_share" type="icon_link" share_url="<?=ConfigVO::URL_SITE.'canal.php?cod='.$codcanal;?>">facebook</a></li>
+              <?php /*<li id="b-yahoo"><a href="http://buzz.yahoo.com/buzz?targetUrl=<?=Util::bitly(ConfigVO::URL_SITE.'canal.php?cod='.$codcanal);?>">Yahoo buzz</a></li>
+              <li id="b-digg"><a href="http://digg.com/submit?phase=2&amp;url=<?=Util::bitly(ConfigVO::URL_SITE.'canal.php?cod='.$codcanal);?>">digg it </a></li>*/?>
             </ul>
           </div>
 		  </div>
 		  
 		<?=$canalbo->getConteudosRelacionados($codcanal)?>
-        <div class="todos"><a href="/busca_action.php?buscar=1&amp;canal=<?=$codcanal?>&amp;formatos=2,3,4,5" title="Listar conteúdos deste canal"><strong>Ver todos</strong></a></div>
+        <div class="todos"><a href="/busca_action.php?buscar=1&amp;canal=<?=$codcanal?>&amp;formatos=2,3,4,5,6,7" title="Listar conteúdos deste canal"><strong>Ver todos</strong></a></div>
       </div>
       <div class="lateral">
         <div class="participantes-canal">

@@ -9,6 +9,7 @@ include_once("classes/bo/SenhaBO.php");
 $senhabo = new SenhaBO;
 $exibir_form = true;
 $sucesso = false;
+$erro = false;
 
 if ($editar) {
 	try {
@@ -17,6 +18,7 @@ if ($editar) {
 		$sucesso = true;
 	} catch (Exception $e) {
 		$erro_mensagens = $e->getMessage();
+		$erro = true;
 	}
 }
 
@@ -35,17 +37,23 @@ body { background:none;}
 -->
 </style>
 </head>
-<body>
+<body style="padding: 10px;">
 <?php if ($sucesso): ?>
 <div class="box box-alerta">
       Senha alterada com sucesso.</div>
-<?php 
+<?php
 endif;
 if ($exibir_form):
 ?>
 <form action="cadastro_alterar_senha.php" method="post" id="lightbox">
+<?php
+if ($erro) {
+?>
 <div class="box box-alerta">
       Todos os campos s&atilde;o obrigat&oacute;rios</div>
+<?php
+}
+?>
       <input type="hidden" name="editar" value="1" />
       <input type="hidden" name="codusuario" value="<?=$codusuario;?>" />
   <label for="senha">Senha atual</label>

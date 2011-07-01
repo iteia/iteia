@@ -2,9 +2,13 @@
 class ConexaoVideosDB {
 
 	const SERVIDOR = "192.168.0.100";
-	const USUARIO = "";
-	const SENHA = "";
+	const USUARIO = "eduardo";
+	const SENHA = "eduardo";
 	const DATABASE = "iteia_geral";
+	//const SERVIDOR = "192.168.0.159";
+	//const USUARIO = "fundarpe";
+	//const SENHA = "fund123";
+	//const DATABASE = "fundarpe";
 
 	static private $instance;
 	private $conexao;

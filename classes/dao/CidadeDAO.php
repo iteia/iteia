@@ -27,4 +27,11 @@ class CidadeDAO {
 		$sql_row = $this->banco->fetchArray($sql_result);
 		return $sql_row["cidade"];
 	}
+	
+	public function getCodCidade($cidade, $codestado) {
+		$sql = "select cod_cidade from Cidades where cidade = '".$cidade."' and cod_estado='".$codestado."';";
+		$sql_result = $this->banco->executaQuery($sql);
+		$sql_row = $this->banco->fetchArray($sql_result);
+		return $sql_row["cod_cidade"];
+	}
 }

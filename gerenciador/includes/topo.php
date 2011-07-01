@@ -25,11 +25,20 @@ include_once("classes/util/NavegacaoUtil.php");
 <?php if (!$nao_carregar_thickbox): ?>
 <script type="text/javascript" src="jscripts/thickbox/thickbox-compressed.js"></script>
 <?php endif; ?>
+
 <script type="text/javascript" src="jscripts/scripts.js"></script>
 <script type="text/javascript" src="jscripts/funcoes.js"></script>
 
 <script type="text/javascript" src="jscripts/jquery.ajaxQueue.js"></script>
 <script type="text/javascript" src="jscripts/jquery.bgiframe.min.js"></script>
+
+<?php if ($crop): ?>
+		<script src="jscripts/jquery-1.3.2.min.js"></script>
+		<script src="jcrop/js/jquery.Jcrop.js"></script>
+		<link rel="stylesheet" href="jcrop/css/jquery.Jcrop.css" type="text/css" />
+<?php endif; ?>
+
+<link rel="stylesheet" type="text/css" href="css/jquery.autocomplete.css" />
 
 </head>
 <body>
@@ -42,14 +51,15 @@ include_once("classes/util/NavegacaoUtil.php");
       <li id="editar-cadastro"><a href="cadastro_meu.php">Meu cadastro</a></li>
       <li id="logout"><a href="logout.php">Sair</a></li>
     </ul>
+    
     <ul id="main-menu">
       <li<?=NavegacaoUtil::menuAtivo("index", $item_menu)?>><a href="index.php">Painel</a></li>
 <?php if (($_SESSION['logado_dados']['nivel'] == 7) || ($_SESSION['logado_dados']['nivel'] == 8)): ?>
       <li<?=NavegacaoUtil::menuAtivo("home", $item_menu)?>><a href="home.php">Destaques</a></li>
 <?php endif; ?>
       <li<?=NavegacaoUtil::menuAtivo("conteudo", $item_menu)?>><a href="conteudo.php">Conte&uacute;do</a></li>
-<?php if ($_SESSION['logado_dados']['nivel'] >= 5): /*if ($_SESSION['logado_como'] > 1):*/ ?>
       <li<?=NavegacaoUtil::menuAtivo("noticias", $item_menu)?>><a href="noticias.php">Not&iacute;cias</a></li>
+<?php if ($_SESSION['logado_dados']['nivel'] >= 5): /*if ($_SESSION['logado_como'] > 1):*/ ?>
       <li<?=NavegacaoUtil::menuAtivo("banners", $item_menu)?>><a href="banners.php">Anúncios</a></li>
 <?php endif; ?>
 <?php /*if ($_SESSION['logado_dados']['nivel'] >= 5): /*if ($_SESSION['logado_como'] > 1):*/ ?>
@@ -60,7 +70,9 @@ include_once("classes/util/NavegacaoUtil.php");
 <?php endif; ?>
       <!--<li<?=NavegacaoUtil::menuAtivo("grupo", $item_menu)?>><a href="grupo.php">Grupos</a></li>-->
 	  <li<?=NavegacaoUtil::menuAtivo("comentarios", $item_menu)?>><a href="comentarios.php">Coment&aacute;rios</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("boletim", $item_menu)?>><a href="home_newsletter.php">Boletim</a></li>
     </ul>
+    
 <?php if ($item_menu == 'index'): ?>
 	<ul id="submenu">
       <li<?=NavegacaoUtil::menuAtivo("index", $item_submenu)?>><a href="index.php">In&iacute;cio</a></li>
@@ -68,47 +80,63 @@ include_once("classes/util/NavegacaoUtil.php");
       <li<?=NavegacaoUtil::menuAtivo("lista_publica", $item_submenu)?>><a href="index_lista_notificacao.php">Lista de autoriza&ccedil;&otilde;es</a></li>
 <?php endif; ?>
       <li<?=NavegacaoUtil::menuAtivo("conteudo_recente", $item_submenu)?>><a href="index_lista_recentes.php">Conte&uacute;dos recentes </a></li>
+      <?php if (($_SESSION['logado_dados']['nivel'] == 7) || ($_SESSION['logado_dados']['nivel'] == 8)): /*if ($_SESSION['logado_como'] == 3):*/ ?>
       <li<?=NavegacaoUtil::menuAtivo("comentarios", $item_submenu)?>><a href="comentarios.php">Coment&aacute;rios recentes</a></li>
+      <?php endif; ?>
     </ul>
 <?php endif; ?>
+
 <?php if ($item_menu == 'conteudo' && !$nao_carregar == 'conteudo'): ?>
     <ul id="submenu">
-      <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="conteudo.php">In&iacute;cio</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="conteudo.php">Todos Conte&uacute;dos</a></li>
 <?php if (($_SESSION['logado_dados']['nivel'] == 7) || ($_SESSION['logado_dados']['nivel'] == 8)): /*if ($_SESSION['logado_como'] == 3):*/ ?>
       <li<?=NavegacaoUtil::menuAtivo("formatos", $item_submenu)?>><a href="conteudo_formatos.php">Categorias</a></li>
       <li<?=NavegacaoUtil::menuAtivo("segmentos", $item_submenu)?>><a href="conteudo_segmentos.php">Canais</a></li>
       <li<?=NavegacaoUtil::menuAtivo("tags", $item_submenu)?>><a href="conteudo_tags.php">Tags</a></li>
       <li<?=NavegacaoUtil::menuAtivo("atividades", $item_submenu)?>><a href="conteudo_atividades.php">Atividades</a></li>
 <?php endif; ?>
-      <li<?=NavegacaoUtil::menuAtivo("inserir", $item_submenu)?>><a href="conteudo_tipo.php">Inserir</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("licenca", $item_submenu)?>><a href="conteudo_licencas_padrao.php">Licen&ccedil;as</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("inserir", $item_submenu)?>><a href="conteudo_tipo.php">Publicar</a></li>
     </ul>
 <?php endif; ?>
+
 <?php if ($item_menu == 'noticias'): ?>
     <ul id="submenu">
-     <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="noticias.php">In&iacute;cio</a></li>
-     <li<?=NavegacaoUtil::menuAtivo("inserir", $item_submenu)?>><a href="noticia_edicao.php">Inserir</a></li>
-	 <li><a href="noticias_ajuda.php?height=200&amp;width=550" title="Ajuda" class="thickbox">Ajuda</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="noticias.php">Todas Not&iacute;cias</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("inserir", $item_submenu)?>><a href="noticia_edicao.php">Publicar</a></li>
+	 <?php //<li><a href="noticias_ajuda.php?height=200&amp;width=550" title="Ajuda" class="thickbox">Ajuda</a></li>?>
+     <li<?=NavegacaoUtil::menuAtivo("ajuda", $item_submenu)?>><a href="noticias_ajuda.php">Ajuda</a></li>
     </ul>
 <?php endif; ?>
+
 <?php if ($item_menu == 'agenda'): ?>
     <ul id="submenu">
-     <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="agenda.php">In&iacute;cio</a></li>
-     <li<?=NavegacaoUtil::menuAtivo("inserir", $item_submenu)?>><a href="agenda_edicao.php">Inserir</a></li>
-	 <li><a href="agenda_ajuda.php?height=400&amp;width=550" title="Ajuda" class="thickbox">Ajuda</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="agenda.php">Todos eventos</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("inserir", $item_submenu)?>><a href="agenda_edicao.php">Publicar</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("ajuda", $item_submenu)?>><a href="agenda_ajuda.php">Ajuda</a></li>
     </ul>
 <?php endif; ?>
 
 <?php if ($item_menu == 'cadastro'): ?>
-
+    <ul id="submenu">
+     <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="cadastro.php">Todos usu&aacute;rios</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("administrador", $item_submenu)?>><a href="cadastro_administradores.php">Administradores</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("autor", $item_submenu)?>><a href="cadastro_autores.php">Autores</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("colaborador", $item_submenu)?>><a href="cadastro_colaboradores.php">Colaboradores</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("wiki", $item_submenu)?>><a href="cadastro_autores_wiki.php">Wiki</a></li>
+     <li<?=NavegacaoUtil::menuAtivo("ajuda", $item_submenu)?>><a href="cadastro_ajuda.php">Ajuda</a></li>
+    </ul>
 <?php endif; ?>
 
 <?php if ($item_menu == 'banners'): ?>
 	<ul id="submenu">
-      <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="banners.php">In&iacute;cio</a></li>
-      <li<?=NavegacaoUtil::menuAtivo("inserir", $item_submenu)?>><a href="banners_edicao.php">Inserir</a></li>
-      <li><a href="banners_ajuda.php?height=170&amp;width=550" title="Ajuda" class="thickbox">Ajuda</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="banners.php">Todos an&uacute;ncios</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("inserir", $item_submenu)?>><a href="banners_edicao.php">Publicar</a></li>
+      <?php //<li><a href="banners_ajuda.php?height=170&amp;width=550" title="Ajuda" class="thickbox">Ajuda</a></li>?>
+      <li<?=NavegacaoUtil::menuAtivo("ajuda", $item_submenu)?>><a href="banners_ajuda.php">Ajuda</a></li>
     </ul>
 <?php endif; ?>
+
 <?php if ($item_menu == 'grupo'): ?>
 	<ul id="submenu">
 <?php if ($_SESSION['logado_dados']['nivel'] >= 5): /*if ($_SESSION['logado_como'] > 1):*/ ?>
@@ -122,14 +150,12 @@ include_once("classes/util/NavegacaoUtil.php");
       <li><a href="grupo_ajuda.php?height=200&amp;width=550" title="Ajuda" class="thickbox">Ajuda</a></li>
     </ul>
 <?php endif; ?>
+
 <?php if ($item_menu == 'home'): ?>
 	<ul id="submenu">
 	<?php /*if (($_SESSION['logado_dados']['nivel'] == 7) || ($_SESSION['logado_dados']['nivel'] == 8)): /*if ($_SESSION['logado_como'] == 3):*/ ?>
-      <li<?=NavegacaoUtil::menuAtivo("destaque_home", $item_submenu)?>><a href="home.php">In&iacute;cio</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("destaque_home", $item_submenu)?>><a href="home.php">Todos destaques</a></li>
       <li<?=NavegacaoUtil::menuAtivo("destaque_inserir", $item_submenu)?>><a href="home_playlist.php">Inserir</a></li>
-<?php if (($_SESSION['logado_dados']['nivel'] == 7) || ($_SESSION['logado_dados']['nivel'] == 8)): /*if ($_SESSION['logado_como'] == 3):*/ ?>
-<li<?=NavegacaoUtil::menuAtivo("newsletter_inserir", $item_submenu)?>><a href="home_newsletter.php">Newsletter</a></li>
-<?php endif; ?>
       <?php /*endif;*/ ?>
     </ul>
 <?php endif; ?>
@@ -137,11 +163,25 @@ include_once("classes/util/NavegacaoUtil.php");
 //print_r($_SESSION);
 if ($item_menu == 'comentarios'): ?>
     <ul id="submenu">
-      <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="comentarios.php">In&iacute;cio</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="comentarios.php">Todos coment&aacute;rios</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("aprovados", $item_submenu)?>><a href="comentarios_aprovados.php">Aprovados</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("rejeitados", $item_submenu)?>><a href="comentarios_rejeitados.php">Rejeitados</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("aguardando", $item_submenu)?>><a href="comentarios_aguardando.php">Aguardando aprova&ccedil;&atilde;o</a></li>
+      <!--<li<?=NavegacaoUtil::menuAtivo("spam", $item_submenu)?>><a href="">Spam</a></li>-->
 	<?php if (($_SESSION['logado_dados']['nivel'] == 7) || ($_SESSION['logado_dados']['nivel'] == 8)): /*if ($_SESSION['logado_como'] == 3):*/ ?>
       <li<?=NavegacaoUtil::menuAtivo("opcoes", $item_submenu)?>><a href="comentarios_opcoes.php">Op&ccedil;&otilde;es</a></li>
 	<?php endif; ?>
-      <!-- <li><a href="#?height=400&amp;width=550" title="Ajuda" class="thickbox">Ajuda</a></li> -->
+      <li<?=NavegacaoUtil::menuAtivo("ajuda", $item_submenu)?>><a href="comentarios_ajuda.php">Ajuda</a></li>
+    </ul>
+<?php endif; ?>
+
+<?php if ($item_menu == 'boletim'): ?>
+    <ul id="submenu">
+      <li<?=NavegacaoUtil::menuAtivo("inicio", $item_submenu)?>><a href="home_newsletter.php">Todos boletins</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("lista_email", $item_submenu)?>><a href="home_newsletter_listas.php">Listas de emails</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("cadastrar_email", $item_submenu)?>><a href="home_newsletter_emails_cadastrar.php">Cadastrar emails</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("criar_boletim", $item_submenu)?>><a href="home_newsletter_inserir.php">Criar boletim</a></li>
+      <li<?=NavegacaoUtil::menuAtivo("bloqueados_boletim", $item_submenu)?>><a href="home_newsletter_bloqueados.php">Emails Bloqueados</a></li>
     </ul>
 <?php endif; ?>
   </div>

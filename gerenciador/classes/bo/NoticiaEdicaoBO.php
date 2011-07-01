@@ -34,6 +34,11 @@ class NoticiaEdicaoBO extends ConteudoBO {
 		$this->dadosform["home_foto_credito"] = substr(trim($this->dadosform["home_foto_credito"]), 0, 100);
 		$this->dadosform["home_foto_legenda"] = substr(trim($this->dadosform["home_foto_legenda"]), 0, 200);
 		$this->dadosform["tags"] = $this->dadosform["tags"];
+		
+		$this->dadosform["codclassificacao"] = (int)$this->dadosform["codclassificacao"];
+		$this->dadosform["codsegmento"] = (int)$this->dadosform["codsegmento"];
+		$this->dadosform["codcanal"] = (int)$this->dadosform["codcanal"];
+		$this->dadosform["codsubarea"] = (int)$this->dadosform["codsubarea"];
 	}
 
 	protected function validaDados() {
@@ -82,6 +87,11 @@ class NoticiaEdicaoBO extends ConteudoBO {
 		$this->notvo->setHomeFotoLegenda($this->dadosform["home_foto_legenda"]);
 		$this->notvo->setUrl(Util::geraUrlTitulo($this->dadosform["titulo"]));
 		$this->notvo->setTags(Util::geraTags($this->dadosform['tags']));
+		
+		$this->notvo->setCodClassificacao($this->dadosform['codclassificacao']);
+		$this->notvo->setCodSegmento($this->dadosform['codsegmento']);
+		$this->notvo->setCodSubArea($this->dadosform['codsubarea']);
+		$this->notvo->setCodCanal($this->dadosform['codcanal']);
 	}
 
 	protected function editarDados() {
@@ -139,6 +149,11 @@ class NoticiaEdicaoBO extends ConteudoBO {
 		$this->dadosform["url"] = $notvo->getUrl();
 		$this->dadosform["situacao"] = $notvo->getSituacao();
 		$this->dadosform["publicado"] = $notvo->getPublicado();
+		
+		$this->dadosform["codclassificacao"] = $notvo->getCodClassificacao();
+		$this->dadosform["codsegmento"] = $notvo->getCodSegmento();
+		$this->dadosform["codsubarea"] = $notvo->getCodSubArea();
+		$this->dadosform["codcanal"] = $notvo->getCodCanal();
 	}
 
 	public function excluirImagem($cod) {

@@ -75,12 +75,15 @@ class SegmentoEdicaoBO extends ConteudoBO {
 			Header('Location: conteudo_segmentos.php');
 			die;
 		}
-		
 		return $this->segdao->getListaSegmentos();
 	}
 	
-	public function getSegmentosPai() {
-		return $this->segdao->getSegmentosPai();
-	}
+	//public function getSegmentosPai() {
+	//	return $this->segdao->getSegmentosPai();
+	//}
+    
+	public function getSegmentosPai($palavrachave, $inicial) {
+		return $this->segdao->getSegmentosPai($palavrachave, $inicial);
+	}    
 	
 }

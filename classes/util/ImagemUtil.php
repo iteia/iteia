@@ -46,6 +46,10 @@ class ImagemUtil {
 		38 => array(90, 90, true),
 		39 => array(180, 150, true),
 		40 => array(300, 255, false),
+		41 => array(300, 0, false),
+		42 => array(250, 0, false),
+		43 => array(212, 150, true),
+		44 => array(110, 83, true)
 	);
 
 	private static function getDirImagem(&$tipo) {
@@ -89,10 +93,10 @@ class ImagemUtil {
 						$imagem->cropThumbnailImage($dados_img[0], $dados_img[1]);
 					else
 						$imagem->thumbnailImage($dados_img[0], $dados_img[1]);
-					
+
 					if ($tipo == 2)
 						$imagem->setCompressionQuality(80);
-						
+
 					$imagem->writeImage($nome_img_cache);
 				}
 				else
@@ -103,7 +107,7 @@ class ImagemUtil {
 			$imagem->newImage(1, 1, new ImagickPixel("rgb(255,255,255)"));
 			$imagem->setImageFormat("png");
 		}
-		
+
 		$imagem->setImagePage($dados_img[0], $dados_img[1], 0, 0);
 
 		header("Content-Type: image/".$imagem->getImageFormat());

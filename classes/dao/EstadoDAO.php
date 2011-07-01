@@ -11,7 +11,7 @@ class EstadoDAO {
 
 	public function getListaEstados() {
 		$lista_estados = array();
-		$sql = "select cod_estado, estado, sigla from Estados order by estado;";
+		$sql = "select cod_estado, estado, sigla from Estados order by sigla;";
 		$sql_result = $this->banco->executaQuery($sql);
 		while ($sql_row = $this->banco->fetchArray($sql_result))
 			$lista_estados[] = $sql_row;

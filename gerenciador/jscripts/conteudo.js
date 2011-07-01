@@ -57,21 +57,16 @@ function enviarConteudoListaPublica(cod_conteudo) {
 	$('#confirmado').show();
 }
 
-function aprovarConteudo(redir, cod_conteudo) {
-	document.location = 'index_exibir_notificacao.php?cod='+cod_conteudo+'&aprovar=1';
-	//$('#lightbox').load('ajax_conteudo.php?get=aprovar_conteudo&cod_conteudo='+cod_conteudo);
-	//window.location = 'ajax_conteudo.php?get=redirecionar_conteudo&cod_conteudo='+cod_conteudo;
-	//if (redir == 1)
-	//	window.location = 'index_lista_publica.php';
-	//else if (redir == 2)
-	//document.location = 'index_lista_notificacao.php';
+function aprovarConteudo() {
+	$.get('ajax_conteudo.php?get=aprovar_conteudo&codconteudo=' + $('#codconteudo').val(), function html(html) {
+		window.location.href = 'index_lista_notificacao.php';
+	});
 }
 
 function reprovarConteudo() {
-	$('#lightbox').submit();
-	//document.location = 'index_exibir_notificacao.php?cod='+$('#codconteudo').val()+'&comentario='+$('#textarea').val().html()+'&reprovar=1';
-	//$('#lightbox').load('ajax_conteudo.php?get=reprovar_conteudo&cod_conteudo='+$('#codconteudo').val()+'&comentario='+$('#textarea').val());
-	//document.location = 'index_lista_notificacao.php';
+	$.get('ajax_conteudo.php?get=reprovar_conteudo&codconteudo=' + $('#codconteudo').val() + '&motivo=' + $('#motivo').val(), function html(html) {
+		window.location.href = 'index_lista_notificacao.php';
+	});
 }
 
 function buscaConteudoNavegacao(carregar) {
@@ -153,7 +148,8 @@ function buscaAgendaNavegacaoPopUp(carregar) {
 }
 
 function submeteAcoesConteudo(acao, campo, url) {
-	var lista_checkboxes = $("input[@name=codconteudo]");
+	//var lista_checkboxes = $("input[@name=codconteudo]");
+	var lista_checkboxes = $("input[name=codconteudo]");
 	var lista_marcados = new Array;
 
 	for (i = 0; i < lista_checkboxes.length; i++) {

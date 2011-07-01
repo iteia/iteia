@@ -57,9 +57,9 @@ class UsuarioContatoBO {
 		$mensagem .= "<p>Você recebeu um email de contato do portal iTEIA.</p><br />";
 
 		$mensagem .= "<p>Dados do contato:</p>";
-		$mensagem .= "<p><strong>Nome:</strong> ".$this->dadosform['nome'];
+		$mensagem .= "<p><strong>Nome:</strong> ".utf8_decode($this->dadosform['nome']);
 		$mensagem .= "<p><strong>Email:</strong> ".$this->dadosform['email'];
-		$mensagem .= "<p><strong>Mensagem:</strong> ".$this->dadosform['mensagem'].'<br />';
+		$mensagem .= "<p><strong>Mensagem:</strong> ".utf8_decode($this->dadosform['mensagem']).'<br />';
 
 		$texto_email = eregi_replace("<!--%URL%-->", ConfigVO::getUrlSite(), $texto_email);
 		$texto_email = eregi_replace("<!--%CORPO_EMAIL%-->", $mensagem, $texto_email);

@@ -34,13 +34,19 @@ class AtividadeDAO {
 		return $ativo;
 	}
 	
-	public function getListaAtividades($dados) {
+	public function getListaAtividades($dados, $limite) {
 		$array = array();
 		
 		if ($dados)
 			$where = " AND atividade LIKE '%".$dados."%'";
+
+		if (isset($limite))
+			$limite = $limite.",30";
 		
-		$query = $this->banco->sql_select('*', 'Usuarios_Atividades', "excluido='0' $where and cod_sistema='".ConfigVO::getCodSistema()."'", "", "atividade");
+		$array['total'] = $this->banco->numRows($this->banco->executaQuery("SELECT t1.* FROM Usuarios_Atividades AS t1 WHERE t1.cod_sistema='".ConfigVO::getCodSistema()."' $where ORDER BY t1.cod_atividade"));
+		
+		//$query = $this->banco->sql_select('*', 'Usuarios_Atividades', "excluido='0' $where and cod_sistema='".ConfigVO::getCodSistema()."'", "", "atividade" . $limite);
+		$query = $this->banco->sql_select('*', 'Usuarios_Atividades', "excluido='0' $where and cod_sistema='".ConfigVO::getCodSistema()."'", "$limite", "atividade");
 		while ($row = $this->banco->fetchArray($query))
 			$array[] = array(
 				'cod' => $row['cod_atividade'],

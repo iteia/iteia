@@ -8,12 +8,15 @@ $newsbo = new Newsletter_ListaEdicaoBO;
 include_once('classes/bo/BuscaNewsletterListaBO.php');
 
 $buscabo = new BuscaNewsletterListaBO();
-$pagina  = (int)GlobalSiteUtil::iif($_GET['pagina'], $_GET['pagina'], 1);
+//$pagina  = (int)GlobalSiteUtil::iif($_GET['pagina'], $_GET['pagina'], 1);
+$pagina  = (int)Util::iif($_GET['pagina'], $_GET['pagina'], 1);
 $inicial = ($pagina - 1) * 10;
 
 $editar	= (int)$_POST['editar'];
 
 $erro = false;
+
+//echo $editar;die;
 if ($editar) {
 	try {
 		$cod_lista_ok = $newsbo->editar($_POST, $_FILES);
@@ -24,19 +27,18 @@ if ($editar) {
 }
 
 $resultado = $buscabo->getNewsletterUsuariosListasBusca($_GET, $inicial, 10);
-$paginacao = GlobalSiteUtil::paginacao($pagina, 10, $resultado['total'], 'newsletter_listar.kmf?buscar=1', ' ');
+//$paginacao = GlobalSiteUtil::paginacao($pagina, 10, $resultado['total'], 'newsletter_listar.kmf?buscar=1', ' ');
+$paginacao = Util::paginacao($pagina, 10, $resultado['total'], 'newsletter_listar.kmf?buscar=1', ' ');
 
-$paginatitulo = 'Destaque';
-$item_menu = "home";
-$item_submenu = "newsletter_inserir";
+$paginatitulo = 'Boletim';
+$item_menu = "boletim";
+$item_submenu = "lista_email";
 include('includes/topo.php');
 ?>
 <script type="text/javascript" src="jscripts/funcoes.js"></script>
 <script type="text/javascript" src="jscripts/home_newsletter.js"></script>
 
-    <h2>Newsletter</h2>
-    <div id="op-comentario">
-      <a href="home_newsletter.php">In&iacute;cio</a> | <a href="home_newsletter_inserir.php">Criar newsletter</a> | <strong>Listas de emails</strong> | <a href="home_newsletter_emails_cadastrar.php">Cadastrar emails</a></div>
+    <h2>Boletim</h2>
     
 <?php if ($erro_mensagem): ?>
 <div class="box box-alerta">
@@ -105,14 +107,18 @@ foreach($newsbo->getListas() as $key => $value):
 	//if ($value['lista'] != $lista):
 ?>
         <tr>
-          <td class="col-1"><input type="checkbox" class="check" name="lista[]" value="<?=$value['cod_lista'];?>" /></td>
+          <td class="col-1">
+            <?php if($value['cod_lista']!=6): ?>
+            <input type="checkbox" class="check" name="lista[]" value="<?=$value['cod_lista'];?>" />
+            <?php endif; ?>
+          </td>
           <td class="col-titulo"><strong><?=htmlentities($value['titulo']);?></strong></td>
           <td class="col-titulo">&nbsp;</td>
           <td class="col-editar">&nbsp;</td>
         </tr>
 <?php
 //endif;
-	if (count($resultado['resultado'][$value['cod_lista']])):
+	if (count($resultado['resultado'][$value['cod_lista']]) && $value['cod_lista'] !=6):
 		foreach($resultado['resultado'][$value['cod_lista']] as $keya => $valuea):
 ?>
         <tr>

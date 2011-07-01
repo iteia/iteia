@@ -39,9 +39,13 @@ include('includes/topo.php');
       <a href="cadastro_colaboradores_busca_popup.php?height=330&amp;width=310" title="Busca avan&ccedil;ada" class="thickbox">Busca avan&ccedil;ada</a>
     </form>
 
-    <p class="descricao"> <a href="cadastro_colaborador.php">Publique novos colaboradores</a>, gerencie as informa&ccedil;&otilde;es sobre o colaborador que voc&ecirc; representa ou sobre os autores vinculados</u> a ela. <br />
-       <br />
-    Gerencie as informa&ccedil;&otilde;es sobre os colaboradores que voc&ecirc; representa. </p>
+    <p class="descricao">
+	<?php if (($_SESSION['logado_dados']['nivel'] == 5) || ($_SESSION['logado_dados']['nivel'] == 6)): ?>
+	Cadastre <a href="cadastro_autor.php">novos autores</a> ou gerencie os autores vinculados ao colaborador que voc&ecirc; representa.<br />
+	<?php elseif (($_SESSION['logado_dados']['nivel'] == 7) || ($_SESSION['logado_dados']['nivel'] == 8)): ?>
+    Clique aqui para cadastrar <a href="cadastro_colaborador.php">novos colaboradores</a> ou <a href="cadastro_autor.php">novos autores</a>.
+    <?php endif; ?>
+    </p>
 
 	<!--
     <form id="busca" method="get" action="cadastro.php">
@@ -93,7 +97,7 @@ include('includes/topo.php');
     -->
 
     <form method="get" id="form-result" action="cadastro_colaboradores.php">
-          <h3 class="titulo"><?=Util::iif($buscar, 'Resultado da busca', 'Mais recentes');?></h3>
+          <h3 class="titulo"><?=Util::iif($buscar, 'Resultado da busca', 'Colaboradores');?></h3>
 
 	<input type="hidden" name="buscar" value="1" />
 	<input type="hidden" name="palavrachave" value="<?=$cadbo->getValorCampo('palavrachave')?>" />
@@ -102,56 +106,8 @@ include('includes/topo.php');
 	<input type="hidden" name="de" value="<?=$cadbo->getValorCampo('de')?>" />
 	<input type="hidden" name="ate" value="<?=$cadbo->getValorCampo('ate')?>" />
 	<input type="hidden" id="acao" name="acao" value="0" />
-<div id="resultado" class="box">
-
-      <div class="view">Exibindo
-        <select name="mostrar" onchange="submeteBuscaCadastro();" id="select3">
-          <option value="10"<?=Util::iif($mostrar == 10, ' selected="selected"');?>>10</option>
-          <option value="20"<?=Util::iif($mostrar == 20, ' selected="selected"');?>>20</option>
-          <option value="30"<?=Util::iif($mostrar == 30, ' selected="selected"');?>>30</option>
-        </select>
-        de <strong><?=$paginacao['num_total'];?></strong></div>
-
-	  <div class="nav">P&aacute;ginas: <?=Util::iif($paginacao['anterior']['num'], "<a href=\"".$paginacao['anterior']['url']."\">&laquo; Anterior</a>");?> <?=$paginacao['page_string'];?> <?=Util::iif($paginacao['proxima']['num'], "<a href=\"".$paginacao['proxima']['url']."\">Pr&oacute;xima &raquo;</a>");?></div>
-
-	  <table width="100%" border="1" cellspacing="0" cellpadding="0" id="table-cadastro">
-        <thead>
-          <tr>
-            <th class="col-1" scope="col"><input name="checkbox" type="checkbox" id="check-all" />            </th>
-            <th class="col-titulo" scope="col">Nome</th>
-            <th class="col-tipo" scope="col">Tipo</th>
-            <th class="col-uf" scope="col">Estado</th>
-            <th class="col-situacao" scope="col">Situa&ccedil;&atilde;o</th>
-			<th class="col-editar" scope="col">Editar</th>
-          </tr>
-        </thead>
-        <tbody>
-        <?php
-		foreach ($cadastros as $key => $value):
-			if (intval($value['cod'])):
-		?>
-          <tr>
-            <td class="col-1"><input name="codusuario[]" type="checkbox" class="check" value="<?=$value['cod'];?>" /></td>
-            <td class="col-titulo"><a href="<?=$value['url'];?>" title="Clique para visualizar"><?=$value['nome'];?></a></td>
-            <td class="col-tipo"><?=$value['tipo'];?></td>
-            <td class="col-uf"><?=$value['estado'];?></td>
-            <td class="col-situacao"><?=$value['situacao'];?></td>
-            <td class="col-editar"><a href="<?=$value['url_editar'];?>" title="Editar">Editar</a></td>
-          </tr>
-        <?php
-			endif;
-		endforeach;
-		?>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="6" class="selecionados"><strong>Selecionados:</strong> <a href="javascript:submeteAcoesCadastro('1');">Apagar</a> | <a href="javascript:submeteAcoesCadastro('2');">Ativar</a> | <a href="javascript:submeteAcoesCadastro('3');">Desativar</a></td>
-          </tr>
-        </tfoot>
-      </table>
-      <div class="nav">P&aacute;ginas: <?=Util::iif($paginacao['anterior']['num'], "<a href=\"".$paginacao['anterior']['url']."\">&laquo; Anterior</a>");?> <?=$paginacao['page_string'];?> <?=Util::iif($paginacao['proxima']['num'], "<a href=\"".$paginacao['proxima']['url']."\">Pr&oacute;xima &raquo;</a>");?></div>
-            <hr class="both" />
-    </div>
+    
+    <?php include('includes/cadastro_lista_usuario.php');?>
 </form>
   </div>
 <?php if (count($cadastros) == 2 && $buscar): ?>

@@ -1,7 +1,8 @@
+
 /* Tema para o gerenciador */
 /* Instituto intercidadania */
 /* URL: www.intercidadania.org.br 	 */
-/* Codificação: Billy Blay 		 */
+/* CodificaÃ§Ã£o: Billy Blay 		 */
  
 @import "reset.css";
 /*
@@ -255,9 +256,10 @@ tfoot td select, .view select, select#n-home {
 .col-1 {
 	width:22px;
 }
-.col-remover, .col-adicionar, .col-aprovar, .col-situacao, .col-ico, .col-participantes, .col-tempo select, .col-acoes {
+.col-remover, .col-adicionar, .col-aprovar, .col-situacao, .col-ico, .col-participantes, .col-tempo select {
 	width:60px;
 }
+.col-acoes { width:100px}
 th.col-titulo, th.col-autor, th.col-local {
 	text-align:left;
 }
@@ -392,12 +394,17 @@ th, .col-img-mini {
 #lightbox .labels {
 	position:relative;
 	width:440px;
-	
  }
+
 #lightbox .restaurar {
 	position:absolute;
 	right:0px;
 	}
+.form-tooltip legend { font-weight: bold; color: #5D5D5D}
+#lightbox .input-txt, #lightbox textarea{width: 530px !important}
+#lightbox .input-txt.menor4 { width: 300px !important}
+#lightbox .input-txt.counter { width:48px !important}
+
 /* */
  
 #busca {
@@ -501,11 +508,10 @@ a.remover {
 	vertical-align:middle;
 }
 .bt-buscar, .bt-adicionar, .bt-remover, .bt-gravar, .bt, .bt-sim, .bt-nao {
-	background:url(../tema/penc/img/bt-search.gif) no-repeat;
-	width:70px;
+	width:88px;
 	height:28px;
 	border:none;
-	color:#fff;
+	color:#fff!important;
 	font-weight:bold;
 	font-size:11px;
 	cursor:pointer;
@@ -516,9 +522,9 @@ a.bt {
 	text-align:center;
 	padding-top:8px;
 	height:19px;
+	width:88px
 }
 .bt-adicionar, .bt-remover {
-	background:url(../tema/penc/img/bt-2.gif) no-repeat;
 	width:90px;
 }
 #botoes {
@@ -738,7 +744,7 @@ select {
 	padding-left:20px;
 	display:block;
 }
-/* =================================== SituaÃ§Ãµes */
+/* =================================== SituaÃƒÂ§ÃƒÂµes */
 .pendente, .ativo, .inativo {}
  
 .ativo { color:#55B00B; }
@@ -946,6 +952,21 @@ div.fechada {
 /* icones consultar no tema/padrao.css */
  
 /* comentarios */
+#comentario td { padding:15px 3px;}
+.acoes-coment { margin-top:10px}
+.acoes-coment .rej { color: #F00}
+.acoes-coment .aprv { color: #49B82A}
+.acoes-coment .span { color: #FFA200}
+.acoes-coment a {
+background: #f0f0f0;
+color: #333;
+border: 1px solid #999;
+font-weight:bold;
+margin:0 2px;
+padding:2px 6px}
+
+.line { border-bottom: 1px solid #CFCFCF; padding-bottom:5px;}
+
 p.dash {
 	border-bottom:1px dashed #999;
 	padding-bottom:5px;
@@ -987,13 +1008,13 @@ p.dash {
 	width:480px;
 }
 .descricao a {
-	font-size:1.5em;
+	/*font-size:1.5em;*/
 	text-decoration:underline;
 }
 /* ficha tecnica */
- 
+#ficha-tecnica { display:none;}
 #ficha-tecnica .both select { width:145px;}
-#ficha-tecnica .add { margin-left:10px;}
+/*#ficha-tecnica .add { margin-left:10px;}*/
 #ficha-tecnica caption { font-weight:bold;}
  
 /*Nova home*/	
@@ -1193,3 +1214,14 @@ p.dash {
 #unificar label {
 	cursor:pointer;
 	}
+	
+/* privacidade */
+.privacidade { position:relative;}
+.exibir { 
+	position: absolute;
+	right: 12px;
+	top: 15px;
+	width: 237px;
+}
+.exibir p { background:#eaeaea; padding:10px; margin-top:10px}
+.exibir input { vertical-align:middle;}

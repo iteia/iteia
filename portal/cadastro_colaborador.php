@@ -40,6 +40,15 @@ jQuery(document).ready(function() {
 		return false;
 	});
 });
+
+function habilitaCampo(){
+    if(document.getElementById('tipo_doc').value == 5){
+        document.getElementById('orgao_doc').disabled = false;
+    }else{
+        document.getElementById('orgao_doc').value = '';
+        document.getElementById('orgao_doc').disabled = true; 
+    }
+}
 -->
 </script>
 
@@ -164,7 +173,7 @@ if ($msgerro) {
 			<div id="d_tipo">
             <label for="tipo_doc">Tipo:</label>
             <br />
-            <select id="tipo_doc" name="codtipo_autor" class="slc mini">
+            <select id="tipo_doc" name="codtipo_autor" class="slc mini" onchange="habilitaCampo();">
 				<option></option>
 				<option value="1" <?=($cadbo->getValorCampo('codtipo_autor') == 1 ? 'selected="selected"' : '');?>>Certidão de nascimento</option>
 				<option value="2" <?=($cadbo->getValorCampo('codtipo_autor') == 2 ? 'selected="selected"' : '');?>>CNH</option>
@@ -180,7 +189,7 @@ if ($msgerro) {
           </div>
           <div id="d_orgao">
             <label for="orgao_doc">Orgão expedidor:</label><br />
-            <input type="text" class="txt small" name="orgao_autor" value="<?=$cadbo->getValorCampo('orgao_autor')?>" id="orgao_doc"/>
+            <input type="text" class="txt small" name="orgao_autor" value="<?=$cadbo->getValorCampo('orgao_autor')?>" id="orgao_doc" disabled/>
         </div>
         </fieldset>
 
@@ -251,12 +260,14 @@ if ($msgerro) {
         <em><small>(Nome de acesso ao sistema. São permitidos apenas letras (a-z), números (0-9) e o sinal (-). Ex. jose-luiz)</small></em><br />
         <input type="text" class="txt medium<?=$cadbo->verificaErroCampo('finalendereco_autor')?>" maxlength="30" name="finalendereco_autor" id="final_endereco_autor" value="<?=$cadbo->getValorCampo('finalendereco_autor')?>" onkeyup="contarCaracteres(this, 'cont_final_endereco_autor', 30); exibeTexto(this, 'texto_final_endereco_autor'); lowercase('final_endereco_autor');" /><input type="text" class="txt contador" disabled="disabled" id="cont_final_endereco_autor" value="<?=30 - strlen($cadbo->getValorCampo('finalendereco_autor'))?>" size="4" />
         <p>O endereço de sua página será: http://www.iteia.org.br/<strong id="texto_final_endereco_autor"></strong></p>
-
+<!--
         <label for="pass">Senha: </label>
         <em><small>(Mínimo 6 caracteres)</small></em><br />
         <input type="password" name="senha_autor" class="txt small<?=$cadbo->verificaErroCampo('senha_autor')?>" id="pass"/><br/>
         <label for="rePass">Repetir senha:</label><br />
         <input type="password" name="senha2_autor" class="txt small<?=$cadbo->verificaErroCampo('senha_autor')?>" id="rePass"/><br/>
+-->
+<br/>
         <p><strong>Termos de uso</strong></p>
 		<p class="caption">Leia os termos e indique que você os aceitou para continuar o processo de cadastro.</p>
 

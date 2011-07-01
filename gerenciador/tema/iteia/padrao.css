@@ -1,3 +1,4 @@
+
 /* Tema para o Intereditor iteia */
 /* CodificaÃ§Ã£o: Billy Blay 		*/
 
@@ -110,10 +111,7 @@ top:3px;
 }
 
 .bt-buscar, .bt-gravar, .bt, .bt-sim, .bt-nao,
-#botoes input, #botoes a {
-background:transparent url(img/bt-search.gif) no-repeat 0 0!important;}
-
-.bt-adicionar, .bt-remover { background:transparent url(img/bt-2.gif) no-repeat 0 0!important; }
+#botoes input, #botoes a, .bt-adicionar, .bt-remover { background:transparent url(img/bt-2.gif) no-repeat 0 0!important; }
 html a.bt { padding:5px 0;}
 
 html .nav strong {

@@ -25,23 +25,23 @@ $i=0;
 foreach ($canais as $indice => $canal) {
 
 	if($canal['dados']['cod_segmento']){
-	
+
+		$url_canal = 'canal.php?cod='.$canal['dados']['cod_segmento'];
+		if ($canal['dados']['url'])
+			$url_canal = $canal['dados']['url'];
+
 	$temul = false;
 	if ($temcount == 1)
 		echo '<ul>';
 	echo '<li'.($temcount == 1 ? ' class="no-border"':'').'>';
-	
 	echo '<div class="capa">';
 	if ($canal['dados']['imagem'])
-		echo '<a href="/canal.php?cod='.$canal['dados']['cod_segmento'].'" title="Ir para página deste canal"><img src="/exibir_imagem.php?img='.$canal['dados']['imagem'].'&amp;tipo=1&amp;s=35" alt="Capa do canal" width="140" height="105" /></a>';
+		echo '<a href="/'.$url_canal.'" title="Ir para página deste canal"><img src="/exibir_imagem.php?img='.$canal['dados']['imagem'].'&amp;tipo=1&amp;s=35" alt="Capa do canal" width="140" height="105" /></a>';
 	echo '</div>';
-		
-	echo '<h1><a href="/canal.php?cod='.$canal['dados']['cod_segmento'].'" title="Ir para página deste canal">'.$canal['dados']['nome'].'</a></h1>';
-    //echo '<a href="/busca_resultado.php?buscar=1&amp;novabusca=1&amp;canal='.$canal['dados']['cod_segmento'].'&amp;audios=1&amp;videos=1&amp;textos=1&amp;imagens=1" title="Listar todo conteúdo deste canal" class="info">'.$canal['total'].' conteúdos</a>';
-	
-	echo '<a href="/busca_action.php?buscar=1&amp;canal='.$canal['dados']['cod_segmento'].'&amp;formatos=2,3,4,5" title="Listar todo conteúdo deste canal" class="info">'.$canal['total'].' conteúdos</a>';
-	
-	echo '</li>';
+	echo '<h1><span class="tag-canal"><a href="/'.$url_canal.'" title="Ir para página deste canal">'.$canal['dados']['nome'].'</a></span></h1>';
+	//echo '<a href="/busca_action.php?buscar=1&amp;canal='.$canal['dados']['cod_segmento'].'&amp;formatos=2,3,4,5" title="Listar todo conteúdo deste canal" class="info">'.$canal['total'].' conteúdos</a>';
+    	echo '<a href="/busca_action.php?buscar=1&amp;canal='.$canal['dados']['cod_segmento'].'&amp;formatos=2,3,4,5,6,7" title="Listar todo conteúdo deste canal" class="info">'.$canal['total'].' conteúdos</a>';
+    echo '</li>';
 
 	if ($temcount == $colspan):
     	$temcount -= $colspan;

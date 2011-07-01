@@ -58,7 +58,13 @@ class ConteudoVO {
 		$this->cod_segmento = $cod_segmento;
 	}
 	public function getCodSegmento() {
-		return $this->cod_segmento;
+        $retorno;
+        if($this->cod_subarea != 0)
+            $retorno = $this->cod_subarea;
+        else
+            $retorno = $this->cod_segmento;
+        //return $retorno;
+        return $this->cod_segmento;
 	}
 	
 	public function setCodSubArea($cod_subarea) {

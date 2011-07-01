@@ -1,6 +1,9 @@
 <?php
 if (count($_SESSION["sess_conteudo_autores_ficha"][$this->dados_get['sessao_id']])) {
 ?>
+      <div class="box box-amarelo">
+		<h3>Ficha t&eacute;cnica desta obra</h3>
+        <div >
             <table width="100%" border="1" cellspacing="0" cellpadding="0" id="table-cadastro">
             <caption>
               Ficha t&eacute;cnica desta obra
@@ -32,7 +35,7 @@ if (count($_SESSION["sess_conteudo_autores_ficha"][$this->dados_get['sessao_id']
 <?php
 		if ($autor['wiki']) {
 ?>
-                <a href="conteudo_ficha_tecnica.php?cod=<?=$autor['codautor']?>&height=430&width=570&sessao_id=<?=$this->dados_get['sessao_id'];?>" title="Editar Ficha t&eacute;cnica" title="Editar" class="thickbox">Editar</a>
+                <a href="http://www4.iteia.org.br/gerenciador/conteudo_ficha_tecnica.php?cod=<?=$autor['codautor']?>&height=430&width=570&sessao_id=<?=$this->dados_get['sessao_id'];?>" title="Editar Ficha t&eacute;cnica" title="Editar" class="thickbox">Editar</a>
                 <!--
 <a href="javascript:abreEdicaoAutorFicha('<?=$autor['codautor']?>');" title="Editar">Editar</a>
 -->
@@ -46,7 +49,9 @@ if (count($_SESSION["sess_conteudo_autores_ficha"][$this->dados_get['sessao_id']
 	}
 ?>
             </tbody>
-          </table>	
+          </table>
+			</div>
+      </div>
 <?php
 }
 ?>

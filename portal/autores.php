@@ -38,7 +38,7 @@ foreach ($usuariosativos as $key => $value):
 				<?php if ($value['cod_estado']): ?>
 				<a href="/busca_action.php?buscar=1&amp;formatos=9&amp;cidades=<?=$value['cod_cidade']?>" title="Listar autores por cidade"><?=$value['cidade']?></a> - <a href="/busca_action.php?buscar=1&amp;formatos=9&amp;estados=<?=$value['cod_estado']?>" title="Listar autores por estado"><?=$value['estado']?></a><br />
 				<?php endif; ?>
-				<a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5&amp;autor=<?=$value['cod'];?>" title="Listar os conteúdos deste autor" class="info"><?=$value['num_conteudo'];?> conteúdos</a>
+				<a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5,6,7&amp;autor=<?=$value['cod'];?>" title="Listar os conteúdos deste autor" class="info"><?=$value['num_conteudo'];?> conteúdos</a>
 				<div class="hr"><hr /></div>
 			</li>
 <?php
@@ -54,7 +54,8 @@ endforeach;
 if (!$temul)
 	echo '</ul>';
 ?>
-			<div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=9&amp;ordem=3" title="Listar autores"><strong>Ver todos</strong></a></div>
+			<!--<div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=9&amp;ordem=3" title="Listar autores"><strong>Ver todos</strong></a></div>-->
+			<div class="todos"><a href="/busca_resultado.php?id1=689542a36f3b471d1f19&amp;id9=5b5d806acfae9e635194" title="Listar autores"><strong>Ver todos</strong></a></div>
 		</div>
 		<div class="lateral">
 			<div class="autor" id="cadastre"><strong>Ainda não é cadastrado?<br />
@@ -74,7 +75,7 @@ foreach ($usuariosrecentes as $key => $value):
 				<?php if ($value['cod_estado']): ?>
 				<a href="/busca_action.php?buscar=1&amp;formatos=9&amp;cidades=<?=$value['cod_cidade']?>" title="Listar autores por cidade"><?=$value['cidade']?></a> - <a href="/busca_action.php?buscar=1&amp;formatos=9&amp;estados=<?=$value['cod_estado']?>" title="Listar autores por estado"><?=$value['estado']?></a><br />
 				<?php endif; ?>
-				<a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5&amp;autor=<?=$value['cod'];?>" title="Listar os conteúdos deste autor" class="info"><?=$value['num_conteudo'];?> conteúdos</a>
+				<a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5,6,7&amp;autor=<?=$value['cod'];?>" title="Listar os conteúdos deste autor" class="info"><?=$value['num_conteudo'];?> conteúdos</a>
 				<div class="hr"><hr /></div>
 			</li>
 <?php
@@ -82,7 +83,8 @@ foreach ($usuariosrecentes as $key => $value):
 endforeach;
 ?>
         </ul>
-        <div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=9" title="Listar autores"><strong>Ver todos</strong></a></div>
+        <!--<div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=9" title="Listar autores"><strong>Ver todos</strong></a></div>-->
+		<div class="todos"><a href="/busca_resultado.php?id1=4dd62256849d702f8363&amp;id9=5b78f3e0638600a485ab" title="Listar autores"><strong>Ver todos</strong></a></div>
     </div>
 </div>
 </div>

@@ -1,4 +1,7 @@
 <?php
+session_start();
+//error_reporting(E_ALL);
+//ini_set("display_errors",1);
 include_once("ConexaoDB.php");
 
 class TagDAO {
@@ -40,16 +43,26 @@ class TagDAO {
 	}
 	
 	public function unificarTags($tags, $tag) {
-		// cadastro a nova tag no banco
+		// cadastro da nova tag no banco
+        //ob_start();
+        //print_r($tags);
+        //$value = ob_get_contents();
+        //ob_end_clean();
+        //$_SESSION['querover'][] = $value;
 		$this->banco->sql_insert('Tags', array('tag' => $tag, 'cod_sistema' => ConfigVO::getCodSistema()));
 		$cod_tag_novo = $this->banco->insertId();
 		
 		foreach ($tags as $cod_tag) {
 			$query = $this->banco->executaQuery("SELECT * FROM Conteudo_Tags WHERE cod_tag='".$cod_tag."'");
+            //$_SESSION['querover'][] = "SELECT * FROM Conteudo_Tags WHERE cod_tag='".$cod_tag."'";
 			$this->banco->executaQuery("DELETE FROM Tags WHERE cod_tag = '".$cod_tag."'");
+            //$_SESSION['querover'][] = "DELETE FROM Tags WHERE cod_tag = '".$cod_tag."'";
 				while ($trow = $this->banco->fetchObject($query)) {
+                    //$_SESSION['querover'][] = "Tem conteudo com a tag codigo $cod_tag";
 					$this->banco->executaQuery("DELETE FROM Conteudo_Tags WHERE cod_tag = '".$cod_tag."'");
+                    //$_SESSION['querover'][] = "DELETE FROM Conteudo_Tags WHERE cod_tag = '".$cod_tag."'";
 					$this->banco->executaQuery("REPLACE Conteudo_Tags VALUES ('".$trow->cod_conteudo."', '".$cod_tag_novo."')");
+                    //$_SESSION['querover'][] = "REPLACE Conteudo_Tags VALUES ('".$trow->cod_conteudo."', '".$cod_tag_novo."')";
 				}
 		}
 		
@@ -76,18 +89,21 @@ class TagDAO {
 		return (bool)$this->banco->numRows($query);                                                              
 	}
 	
-	public function getListaTags($dados) {
+	public function getListaTags($dados, $limite = 0) {
 		$array = array();
 		
 		if ($dados)
 			$where = " AND tag LIKE '%".$dados."%'";
+			
+		if (isset($limite))
+			$limite = " LIMIT ".$limite.",30";
 		
 		//$query = $this->banco->executaQuery("SELECT t1.* FROM Tags AS t1 WHERE t1.cod_sistema='".ConfigVO::getCodSistema()."' AND t1.cod_tag IN (SELECT cod_tag FROM Conteudo_Tags WHERE cod_tag=t1.cod_tag) ORDER BY t1.tag");
-		$query = $this->banco->executaQuery("SELECT t1.* FROM Tags AS t1 WHERE t1.cod_sistema='".ConfigVO::getCodSistema()."' $where ORDER BY t1.tag");
+		$array['total'] = $this->banco->numRows($this->banco->executaQuery("SELECT t1.* FROM Tags AS t1 WHERE t1.cod_sistema='".ConfigVO::getCodSistema()."' $where ORDER BY t1.tag"));
+
+		$query = $this->banco->executaQuery("SELECT t1.* FROM Tags AS t1 WHERE t1.cod_sistema='".ConfigVO::getCodSistema()."' $where ORDER BY t1.tag" . $limite);
 		while ($row = $this->banco->fetchObject($query)) {
-			
 			$total = $this->banco->fetchObject($this->banco->executaQuery("SELECT COUNT(cod_tag) AS total FROM Conteudo_Tags WHERE cod_tag='".$row->cod_tag."'"));
-			
 			$array[] = array(
 				'cod' => $row->cod_tag,
 				'tag' => $row->tag,
@@ -96,5 +112,5 @@ class TagDAO {
 		}
 		return $array;
 	}
-	
+
 }

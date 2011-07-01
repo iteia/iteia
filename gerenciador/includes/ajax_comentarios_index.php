@@ -10,7 +10,7 @@
             foreach($lista_comentarios as $key => $value):
             	if ((int)$value['cod']):
             ?>
-              <li class="text<?=Util::iif($i % 2, ' bg');?>">
+              <li class="text<?=Util::iif($i % 2, ' bg');?>" >
               <p><a href="<?=ConfigVO::URL_SITE.$value['url'];?>" title="Este link ser&aacute; aberto numa nova janela" target="_blank">.../<?=$value['url'];?></a><br />
                   <?=$value['comentario'];?><br />
                     <span class="sign"><strong><?=$value['autor'];?></strong> comentou em <?=date('d.m.Y - H\\hi', strtotime($value['data']));?></span><br />

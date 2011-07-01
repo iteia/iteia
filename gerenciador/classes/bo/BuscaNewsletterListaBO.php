@@ -15,7 +15,8 @@ class BuscaNewsletterListaBO {
 		if ((int)$dadosget['acao'] == 1) {
 			if (count($dadosget['lista'])) {
 				foreach($dadosget['lista'] as $value)
-					$this->listadao->apagarTodaLista($value);
+					//$this->listadao->apagarTodaLista($value);
+                    $this->listadao->apagarLista($value);
 			}
 			if (count($dadosget['cod'])) {
 				foreach($dadosget['cod'] as $value) {

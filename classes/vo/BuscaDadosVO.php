@@ -8,6 +8,7 @@ class BuscaDadosVO {
 	private $codlicenca = 0;
 	private $codestado = 0;
 	private $codcidade = 0;
+	private $codpais = 0;
 	private $listaformatos = array();
 	private $parametros_extra = array();
 
@@ -61,6 +62,13 @@ class BuscaDadosVO {
 	}
 	public function getCodCidade() {
 		return $this->codcidade;
+	}
+	
+	public function setCodPais($codpais) {
+		$this->codpais = $codpais;
+	}
+	public function getCodPais() {
+		return $this->codpais;
 	}
 
 	public function setListaFormatos($listaformatos) {

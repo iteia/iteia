@@ -2,14 +2,17 @@
 include_once("ConteudoBO.php");
 include_once(ConfigGerenciadorVO::getDirClassesRaiz()."vo/TextoVO.php");
 include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/TextoDAO.php");
+include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
 
 class TextoEdicaoBO extends ConteudoBO {
 
 	private $textovo = null;
 	private $textodao = null;
+	private $usrdao = null;
 
 	public function __construct() {
 		$this->textodao = new TextoDAO;
+		$this->usrdao = new UsuarioDAO;
 		parent::__construct();
 	}
 
@@ -18,26 +21,25 @@ class TextoEdicaoBO extends ConteudoBO {
 		$this->dadosform["codtexto"] = (int)$this->dadosform["codtexto"];
 		$this->dadosform['imgtemp'] = trim($this->dadosform['imgtemp']);
 		$this->dadosform["titulo"] = substr(trim($this->dadosform["titulo"]), 0, 100);
-		//$this->dadosform["descricao"] = substr(trim(Util::removeTags($this->dadosform["descricao"])), 0, 2000);
 		$this->dadosform["descricao"] = substr(trim($this->dadosform["descricao"]), 0, 20000);
 		$this->dadosform["codclassificacao"] = (int)$this->dadosform["codclassificacao"];
 		$this->dadosform["codsegmento"] = (int)$this->dadosform["codsegmento"];
 		$this->dadosform["codcanal"] = (int)$this->dadosform["codcanal"];
-		
+
 		$this->dadosform["pertence_voce"] = (int)$this->dadosform["pertence_voce"];
 		$this->dadosform["codcolaborador"] = (int)$this->dadosform["codcolaborador"];
-		
+
 		$this->dadosform["pedir_autorizacao"] = (int)$this->dadosform["pedir_autorizacao"];
 		$this->dadosform["colaboradores_lista"] = strip_tags(trim($this->dadosform["colaboradores_lista"]));
-		
+
 		$this->dadosform["foto_credito"] = substr(trim($this->dadosform["foto_credito"]), 0, 100);
 		$this->dadosform["foto_legenda"] = substr(trim($this->dadosform["foto_legenda"]), 0, 200);
-		
+
 		$this->dadosform["tags"] = $this->dadosform["tags"];
 		$this->dadosform["permitir_comentarios"] = (int)$this->dadosform["permitir_comentarios"];
-		
+
 		$this->dadosform["sessao_id"] = trim($this->dadosform["sessao_id"]);
-		
+
 		$this->dadosform["contsegmento"] = (int)$this->dadosform["contsegmento"];
 		$this->dadosform["contsubarea"] = (int)$this->dadosform["contsubarea"];
 		$this->dadosform["codsubarea"] = (int)$this->dadosform["codsubarea"];
@@ -47,43 +49,38 @@ class TextoEdicaoBO extends ConteudoBO {
 		if (!$this->dadosform["titulo"]) $this->erro_campos[] = "titulo";
 
 		if (!$this->dadosform["descricao"]) $this->erro_campos[] = "descricao";
-
-		if (is_uploaded_file($this->arquivos["arquivo"]["tmp_name"])) {
-			if ($this->arquivos["arquivo"]["size"] > 104857600) {
-				$this->erro_mensagens[] = "Arquivo está com mais de 100MB";
-				$this->erro_campos[] = "arquivo";
-			}
+		
+		for($i=0; $i<sizeof($this->arquivos['arquivo']['name']);$i++){
+			if (is_uploaded_file($this->arquivos["arquivo"]["tmp_name"][$i])) {
+				if ($this->arquivos["arquivo"]["size"][$i] > 104857600) {
+					$this->erro_mensagens[] = "Arquivo ".$this->arquivos['arquivo']['name'][$i]." está com mais de 100MB";
+					$this->erro_campos[] = "arquivo";
+				}
+			}			
 		}
-		
+
 		if ($this->dadosform["contsegmento"] && !$this->dadosform["codsegmento"]) $this->erro_campos[] = "codsegmento";
-		//if ($this->dadosform["contsubarea"] && !$this->dadosform["codsubarea"]) $this->erro_campos[] = "codsubarea";
-		
-		//if ($this->dadosform["pertence_voce"] == 1) {
-		//	if (!count($_SESSION['sess_conteudo_autores_ficha'])) {
-		//		$this->erro_mensagens[] = "Selecione ao menos um autor na Ficha técnica";
-		//		$this->erro_campos[] = "ficha";
-		//	}
-		//}
-		
-		//if ($_SESSION['logado_dados']['nivel'] >= 6 && !$this->dadosform["codtexto"] && !$this->dadosform["codcolaborador"]) {
-		//	$this->erro_mensagens[] = "Selecione um colaborador para vincular a este conteúdo";
-		//	$this->erro_campos[] = "colaborador";
-		//}
-		
+		if (!count($_SESSION['sess_conteudo_autores_ficha'][$this->dadosform['sessao_id']])) {
+			if ($this->dadosform['pertence_voce'] == 1 || $_SESSION['logado_dados']['nivel'] == 2)
+				$this->erro_mensagens[] = "Na Ficha Técnica selecione a atividade exercida por você e clique em [+]Adicionar";
+			else
+				$this->erro_mensagens[] = "Selecione ao menos um autor na Ficha técnica";
+			$this->erro_campos[] = "ficha";
+		}
+
 		if ($_SESSION['logado_dados']['nivel'] == 2) {
 			if (!$this->dadosform["pedir_autorizacao"]) {
 				$this->erro_mensagens[] = "Selecione um tipo de Autorização";
 				$this->erro_campos[] = "autorizacao";
 			}
 			if ($this->dadosform["pedir_autorizacao"] == 2) {
-				include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
-				$usrdao = new UsuarioDAO;
-			
-				if (!count($usrdao->getCheckColabadoresAprovacao($this->dadosform["colaboradores_lista"]))) {
+				if (!count($this->usrdao->getCheckColabadoresAprovacao($this->dadosform["colaboradores_lista"]))) {
 					$this->erro_mensagens[] = "Selecione ao menos um colaborador para solicitar aprovação";
 					$this->erro_campos[] = "colaboradores_lista";
 				}
 			}
+		}else{
+			$this->validaColaborador();
 		}
 
 		foreach ($this->direitosbo->validaDados($this->dadosform) as $errodir)
@@ -95,19 +92,11 @@ class TextoEdicaoBO extends ConteudoBO {
 
 	protected function setDadosVO() {
 		$this->textovo = new TextoVO;
-		$this->textovo->setCodConteudo((int)$this->dadosform["codtexto"]);
-
-		/*if ($_SESSION['logado_como'] == 1) // se for enviada por um autor
-			$this->textovo->setCodAutor($_SESSION['logado_cod']);
-		else
-			$this->textovo->setCodColaborador($_SESSION['logado_cod']);*/
+		$this->textovo->setCodConteudo($this->dadosform["codtexto"]);
 		$this->textovo->setCodAutor($_SESSION['logado_cod']);
 		
-		//if ($_SESSION['logado_dados']['nivel'] >= 6)
-		//	$this->textovo->setCodColaborador($this->dadosform["codcolaborador"]);
-		//else
-			$this->textovo->setCodColaborador($_SESSION['logado_dados']['cod_colaborador']);
-			
+        $this->textovo->setCodColaborador(($this->dadosform['colaborador_aprov'] ? $this->dadosform['colaborador_aprov'] : 0));
+        
 		$this->textovo->setCodClassificacao($this->dadosform['codclassificacao']);
 		$this->textovo->setCodSegmento($this->dadosform['codsegmento']);
 		$this->textovo->setCodSubArea($this->dadosform['codsubarea']);
@@ -115,7 +104,7 @@ class TextoEdicaoBO extends ConteudoBO {
 		$this->textovo->setTags(Util::geraTags($this->dadosform['tags']));
 		$this->textovo->setCodLicenca($this->direitosbo->getCodLicenca($this->dadosform["direitos"], $this->dadosform["cc_usocomercial"], $this->dadosform["cc_obraderivada"]));
 
-		if (!(int)$this->dadosform["codtexto"])
+		if (!$this->dadosform["codtexto"])
 			$this->textovo->setRandomico(Util::geraRandomico());
 		else
 		  $this->textovo->setRandomico($this->textodao->getRandomico($this->dadosform["codtexto"]));
@@ -123,66 +112,51 @@ class TextoEdicaoBO extends ConteudoBO {
 		$this->textovo->setTitulo($this->dadosform["titulo"]);
 		$this->textovo->setDescricao($this->dadosform["descricao"]);
 
-		if (!(int)$this->dadosform["codtexto"]) {
+		if (!$this->dadosform["codtexto"]) {
 			$this->textovo->setDataHora(date("Y-m-d H:i:s"));
-
-			//if ($_SESSION['logado_como'] == 1)
-			if ($_SESSION['logado_dados']['nivel'] == 2)
-				$this->textovo->setSituacao(0);
-			else
-				$this->textovo->setSituacao(1);
-
-			//$this->textovo->setSituacao(0); // é cadastrado como inativo
-			if ($_SESSION['logado_dados']['nivel'] >= 5)
-				$this->textovo->setPublicado(1); // é cadastrado como publicado
-			else
-				$this->textovo->setPublicado(0); // é cadastrado como pendente
-
+			$this->textovo->setSituacao(1);
+			$this->textovo->setPublicado(($_SESSION['logado_dados']['nivel'] >= 5 ? 1 : 0));
+			//$this->textovo->setSituacao(($_SESSION['logado_dados']['colaborador_responsavel'] == 1 ? 1 : 0));
+			//$this->textovo->setPublicado(($_SESSION['logado_dados']['colaborador_responsavel'] == 1 ? 1 : 0));
 		}
-		
+
 		$this->textovo->setFotoCredito($this->dadosform["foto_credito"]);
 		$this->textovo->setFotoLegenda($this->dadosform["foto_legenda"]);
+
+		$colaboradores = explode(';', $this->dadosform["colaboradores_lista"]);
+		if (count($colaboradores)) {
+			$arrayColab = array();
+			foreach ($colaboradores as $nome) {
+				if ($nome) {
+					$usuario = $this->usrdao->getBuscaDadosUsuarioNome($nome, 1);
+					$arrayColab[$usuario['cod_usuario']] = $usuario['cod_usuario'];
+				}
+			}
+			$this->textovo->setListaColaboradoresRevisao(array_unique($arrayColab));
+		}
+		
+		if($_SESSION['logado_dados']['nivel'] == 2){
+			$this->dadosform["pedir_autorizacao"] = 2;
+		}
 		
 		$this->textovo->setPedirAutorizacao($this->dadosform["pedir_autorizacao"]);
-			
-		// buscar os cod_usuarios dos colaboradores selecionados pra jogar na vo
-			
-		$colaboradores = explode(';', $this->dadosform["colaboradores_lista"]);
-		$arrayColab = array();
-			
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
-		$usrdao = new UsuarioDAO;
-			
-		foreach ($colaboradores as $nome) {
-			if ($nome) {
-				$usuario = $usrdao->getBuscaDadosUsuarioNome($nome, 1);
-				$arrayColab[$usuario['cod_usuario']] = array('cod_usuario' => $usuario['cod_usuario']);
-			}
-		}
-			
-		$this->textovo->setListaColaboradoresRevisao(array_unique($arrayColab));
-
-		//if ($_SESSION['logado_como'] == 1) // se for enviada por um autor
-		//if (!(int)$this->dadosform["codtexto"])
-			//$this->textovo->setPublicado(0); // é cadastrado como pendente
-			// se for por um autor, fica pendente ate ir pra lista publica ou pra aprovação
-			// se for colaborador, fica pendente ate ele definir autores
-			// se for administrador, fica pendente ate ele definir um colaborador ou definir autores
-		//else
-		//	$this->textovo->setPublicado(1); // é cadastrado como aprovado
-
 		$this->textovo->setUrl(Util::geraUrlTitulo($this->dadosform["titulo"]));
 		$this->textovo->setPermitirComentarios($this->dadosform['permitir_comentarios']);
-		
 		$this->textovo->setListaAutores($_SESSION["sess_conteudo_autores_ficha"][$this->dadosform["sessao_id"]]);
 	}
 
 	protected function editarDados() {
 		if (!$this->textovo->getCodConteudo()) {
 			$codtexto = $this->textodao->cadastrar($this->textovo);
+			$listaArquivos = $this->textodao->cadastrarArquivos($this->arquivos,$codtexto);
 		} else {
 			$this->textodao->atualizar($this->textovo);
 			$codtexto = $this->textovo->getCodConteudo();
+			
+			if($this->arquivos){
+				$listaArquivos = $this->textodao->cadastrarArquivos($this->arquivos,$codtexto);
+			}
+			$listaArquivos = array_merge($listaArquivos,$this->textodao->getListArquivos($codtexto));
 		}
 
 		if ($this->dadosform['imgtemp']) {
@@ -192,16 +166,28 @@ class TextoEdicaoBO extends ConteudoBO {
 			$this->removerImagensCache($nomearquivo_parcial);
 			$this->textodao->atualizarFoto($nomearquivo_final, $codtexto);
 		}
-
-		if (is_uploaded_file($this->arquivos["arquivo"]["tmp_name"])) {
-			$nomearquivo_original = $this->arquivos["arquivo"]["name"];
-			$nomearquivo = "textoarquivo_".$this->textovo->getRandomico();
-			copy($this->arquivos["arquivo"]["tmp_name"], ConfigVO::getDirArquivos().$nomearquivo);
-			$this->textovo->setNomeArquivoOriginal($nomearquivo_original);
-			$this->textovo->setArquivo($nomearquivo);
-			$this->textovo->setTamanho($this->arquivos["arquivo"]["size"]);
-			$this->textodao->atualizarArquivo($this->textovo, $codtexto);
+		for($i=0; $i<sizeof($this->arquivos['arquivo']['name']);$i++){
+			if (is_uploaded_file($this->arquivos["arquivo"]["tmp_name"][$i])) {
+				$nomearquivo_original = $this->arquivos["arquivo"]["name"][$i];
+				$nomearquivo = "textoarquivo_".$this->textovo->getRandomico()."_".$i;
+				copy($this->arquivos["arquivo"]["tmp_name"][$i], ConfigVO::getDirArquivos().$nomearquivo);
+				$this->textovo->setCodArquivo($listaArquivos[$i]);
+				$this->textovo->setNomeArquivoOriginal($nomearquivo_original);
+				$this->textovo->setArquivo($nomearquivo);
+				$this->textovo->setTamanho($this->arquivos["arquivo"]["size"][$i]);
+			}
 		}
+		$this->textodao->atualizarArquivo($this->textovo, $codtexto);
+		
+		//if (is_uploaded_file($this->arquivos["arquivo"]["tmp_name"])) {
+		//	$nomearquivo_original = $this->arquivos["arquivo"]["name"];
+		//	$nomearquivo = "textoarquivo_".$this->textovo->getRandomico();
+		//	copy($this->arquivos["arquivo"]["tmp_name"], ConfigVO::getDirArquivos().$nomearquivo);
+		//	$this->textovo->setNomeArquivoOriginal($nomearquivo_original);
+		//	$this->textovo->setArquivo($nomearquivo);
+		//	$this->textovo->setTamanho($this->arquivos["arquivo"]["size"]);
+		//	$this->textodao->atualizarArquivo($this->textovo, $codtexto);
+		//}
 		unset($_SESSION['sess_conteudo_autores_ficha'][$this->dadosform["sessao_id"]]);
 		$this->dadosform = array();
 		$this->arquivos = array();
@@ -218,14 +204,15 @@ class TextoEdicaoBO extends ConteudoBO {
 		$this->dadosform["descricao"] = $textovo->getDescricao();
 		$this->dadosform["datahora"] = $textovo->getDataHora();
 		$this->dadosform["imagem_visualizacao"] = $textovo->getImagem();
-		$this->dadosform["arquivo"] = $textovo->getArquivo();
+		//$this->dadosform["arquivo"] = $textovo->getArquivo();
+		$this->dadosform["arquivo"] = $textovo->getListAnexos();
 		$this->dadosform["nome_arquivo_original"] = $textovo->getNomeArquivoOriginal();
 
 		$dados_direito = $this->direitosbo->setDadosCamposEdicao($textovo->getCodLicenca());
 		$this->dadosform = array_merge($this->dadosform, $dados_direito);
 
 		$this->dadosform["codlicenca"] = $textovo->getCodLicenca();
-		
+
 		$this->dadosform["foto_credito"] = $textovo->getFotoCredito();
 		$this->dadosform["foto_legenda"] = $textovo->getFotoLegenda();
 
@@ -241,36 +228,35 @@ class TextoEdicaoBO extends ConteudoBO {
 		$this->dadosform["permitir_comentarios"] = $textovo->getPermitirComentarios();
 
 		$this->setSessionAutoresFicha($codtexto, $this->textodao, $this->dadosform['sessao_id']);
-		
+
 		foreach ((array)$_SESSION['sess_conteudo_autores_ficha'][$this->dadosform["sessao_id"]] as $key => $value) {
 			if ($this->dadosform["codautor"] == $value['codautor']) {
 				$this->dadosform["pertence_voce"] = 1;
 				break;
 			}
 		}
-		
+
 	}
-	
-	public function DownloadArquivo($codtexto) {
-		$dados_arquivo = $this->textodao->getArquivoTexto($codtexto);
+
+	public function DownloadArquivo($codarquivo) {
+		$dados_arquivo = $this->textodao->getArquivoTexto($codarquivo);
         Util::force_download(file_get_contents(ConfigVO::getDirArquivos().$dados_arquivo['arquivo']), $dados_arquivo['nome_arquivo_original'], '', $dados_arquivo['tamanho']);
-		die;	
+		die;
 	}
 
 	// metodos comuns a todo os formartos
-
 	public function excluirImagem($codtexto) {
 		return $this->textodao->excluirImagem($codtexto);
 	}
 
-	public function excluirArquivo($codtexto) {
-		return $this->textodao->excluirArquivo($codtexto);
+	public function excluirArquivo($codanexo) {
+		return $this->textodao->excluirArquivo($codanexo);
 	}
-	
-	public function getPostadorConteudo($codtexto) {
-		return $this->textodao->getPostadorConteudo($codtexto);
+
+	public function getPostadorConteudo($codusuario) {
+		return $this->getColaboradorConteudo($codusuario);
 	}
-	
+
 	public function getAutoresFichaConteudo($codtexto) {
 		return $this->textodao->getAutoresFichaTecnicaCompletaConteudo($codtexto);
 	}
@@ -279,14 +265,17 @@ class TextoEdicaoBO extends ConteudoBO {
 		return $this->textodao->getAutoresConteudo($codtexto);
 	}
 
-	public function getColaboradorConteudo($codtexto) {
-		return $this->textodao->getColaboradorConteudo($codtexto);
+	public function getColaboradorConteudo($codusuario) {
+		include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
+		$usrdao = new UsuarioDAO;
+		$usuario = $usrdao->getUsuarioDados($codusuario);
+		return $usuario;
 	}
 
 	public function getSegmentoConteudo($codtexto) {
 		return $this->textodao->getSegmentoConteudo($codtexto);
 	}
-	
+
 	public function getSubAreaConteudo($codtexto) {
 		return $this->textodao->getSubAreaConteudo($codtexto);
 	}
@@ -306,16 +295,16 @@ class TextoEdicaoBO extends ConteudoBO {
 	public function getLicenca($codtexto) {
 		return $this->textodao->getLicenca($codtexto);
 	}
-	
+
 	public function getColaboradorConteudoAprovado($codusuario) {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
+		include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
 		$usrdao = new UsuarioDAO;
 		$usuario = $usrdao->getUsuarioDados($codusuario);
 		return $usuario['nome'];
 	}
-	
+
 	public function getListaColaboradoresAprovacao($codtexto) {
-		return $this->textodao->getListaColaboradoresAprovacao($codtexto);
+		return $this->textodao->conteudoEnviadoParaColaboradores($codtexto);
 	}
 
 }

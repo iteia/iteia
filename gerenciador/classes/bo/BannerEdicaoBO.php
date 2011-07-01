@@ -2,6 +2,7 @@
 include_once(dirname(__FILE__)."/../vo/ConfigGerenciadorVO.php");
 include_once(ConfigGerenciadorVO::getDirClassesRaiz()."vo/BannerVO.php");
 include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/BannerDAO.php");
+include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
 
 class BannerEdicaoBO {
 
@@ -28,12 +29,20 @@ class BannerEdicaoBO {
 	}
 
 	protected function validaDados() {
-		if (!$this->dadosform["titulo"]) $this->erro_campos[] = "titulo";		
+		if (!$this->dadosform["titulo"]){
+            $this->erro_campos[] = "titulo";
+            $this->erro_mensagens[] = "Preencha o campo t&iacute;tulo";
+        }
 
 		if (!$this->dadosform["codbanner"] && !$this->dadosform["imgtemp"]) {
 			$this->erro_campos[] = "imagem";
 			$this->erro_mensagens[] = "Falta a Imagem do banner";
 		}
+        $url = $this->dadosform["url"];
+        if (!$url){
+            $this->erro_campos[] = "url";
+            $this->erro_mensagens[] = "Preencha o campo endere&ccedil;o URL";
+        }
 
 		if ($this->dadosform["data_inicial"] && !checkdate(substr($this->dadosform["data_inicial"], 3, 2), substr($this->dadosform["data_inicial"], 0, 2), substr($this->dadosform["data_inicial"], 6, 2))) {
 			$this->erro_campos[] = "data_inicial";
@@ -50,7 +59,7 @@ class BannerEdicaoBO {
 	protected function setDadosVO() {
 		$this->banvo = new BannerVO;
 		$this->banvo->setCodBanner((int)$this->dadosform["codbanner"]);
-		$this->banvo->setCodColaborador($_SESSION['logado_cod']);
+		$this->banvo->setCodUsuario($_SESSION['logado_cod']);
 		$this->banvo->setTitulo($this->dadosform["titulo"]);
 		$this->banvo->setUrl($this->dadosform["url"]);
 		$this->banvo->setPrioridade($this->dadosform["prioridade"]);
@@ -83,7 +92,7 @@ class BannerEdicaoBO {
 	public function setDadosCamposEdicao($codbanner) {
 		$banvo = $this->bandao->getBannerVO($codbanner);
 		$this->dadosform["codbanner"] = $banvo->getCodBanner();
-		$this->dadosform["codcolaborador"] = $banvo->getCodColaborador();
+		$this->dadosform["codusuario"] = $banvo->getCodUsuario();
 		$this->dadosform["colaborador"] = $banvo->getColaborador();
 		$this->dadosform["titulo"] = $banvo->getTitulo();
 		$this->dadosform["url"] = $banvo->getUrl();
@@ -136,8 +145,8 @@ class BannerEdicaoBO {
 			unlink($arquivo);
 	}
 
-    public function executaAcao($cod, $acao) {
+        public function executaAcao($cod, $acao) {
 		$this->bandao->executaAcao($cod, $acao);
 	}
-	
+
 }

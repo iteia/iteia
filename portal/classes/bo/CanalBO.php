@@ -39,8 +39,13 @@ class CanalBO {
 			$html .= '<li'.(!isset($conteudos[$key + 1]) ? ' class="no-border"' : '').'>';
 			$html .= '<small>'.date('d.m.Y H\\hi', strtotime($contvo->getDataHora())).'</small>';
 			$html .= '<h1><a href="'.$contvo->getUrl().'" title="Ir para página deste conteúdo">'.htmlentities($contvo->getTitulo()).'</a></h1>';
+			$html .= '<div class="capa">';
 			if ($contvo->getImagem())
-				$html .= '<div class="capa"><span class="'.Util::getIconeConteudo($contvo->getCodFormato()).'"><a href="'.Util::getFormatoConteudoBusca($contvo->getCodFormato()).'.php" title="Ir para página de imagens">Imagens</a></span> <a href="'.$contvo->getUrl().'" title="Ir para página deste conteúdo"><img src="/exibir_imagem.php?img='.$contvo->getImagem().'&amp;tipo='.$conteudo['cod_formato'].'&amp;s=34" alt="" width="100" height="75" /></a></div>';
+				$html .= '<span class="'.Util::getIconeConteudo($contvo->getCodFormato()).'"><a href="'.Util::getFormatoConteudoBusca($contvo->getCodFormato()).'.php" title="Ir para página de imagens">Imagens</a></span> <a href="'.$contvo->getUrl().'" title="Ir para página deste conteúdo"><img src="/exibir_imagem.php?img='.$contvo->getImagem().'&amp;tipo='.($conteudo['cod_formato'] > 5 ? 'a' : $conteudo['cod_formato']).'&amp;s=34" alt="" width="100" height="75" /></a>';
+			else
+				$html .= '<span class="'.Util::getIconeConteudo($conteudo['cod_formato']).' no-image"><a href="/'.Util::getFormatoConteudoBusca($conteudo['cod_formato']).'" title="Ir para página do conteudo">Textos</a></span>';
+			
+			$html .= '</div>';
 			$html .= '<p>'.Util::cortaTexto(nl2br($contvo->getDescricao()), 150).'</p>';
 			$html .= '<div class="hr"><hr /></div>';
 			$html .= '</li>';
@@ -70,12 +75,13 @@ class CanalBO {
 		}
 		
 		foreach ($array_tags as $tag)
-			$html .= (($html != '') ? ' ' : ' ').'<a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5&amp;tag='.urlencode($tag).'" class="common0 size0">'.$tag.'</a>';
+			$html .= (($html != '') ? ' ' : ' ').'<a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5,6,7&amp;tag='.urlencode($tag).'" class="common0 size0">'.$tag.'</a>';
 			
 		return $html;
 	}
 	
 	public function getAutores($codcanal) {
+		$array_usuarios = array();
 		$conteudos = $this->segdao->getCodConteudoPorCodSegmento($codcanal, 10);
 		include_once(ConfigPortalVO::getDirClassesRaiz()."dao/ConteudoExibicaoDAO.php");
 		$contdao = new ConteudoExibicaoDAO;
@@ -129,8 +135,19 @@ class CanalBO {
 				$notdao = new NoticiaDAO;
 				$contvo = $notdao->getNoticiaVO($codconteudo);
 				break;
+			case 6:
+				include_once(ConfigPortalVO::getDirClassesRaiz()."dao/AgendaDAO.php");
+				include_once(ConfigPortalVO::getDirClassesRaiz()."vo/AgendaVO.php");
+				$agedao = new AgendaDAO;
+				$contvo = $agedao->getAgendaVO($codconteudo);
+				break;
 		}
 		return $contvo;
 	}
 
+	public function getListaSubcanais($codcanal) {
+		include_once(ConfigPortalVO::getDirClassesRaiz().'dao/SegmentoDAO.php');
+		$ciddao = new SegmentoDAO;
+		return $ciddao->getListaSubAreasCadastroCodCanal($codcanal);
+	}
 }

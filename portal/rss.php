@@ -22,7 +22,7 @@ include ('includes/topo.php');
             <li><strong>Imagem</strong> - <a href="/feeds.php?formato=2"><?=ConfigVO::URL_SITE?>feeds.php?formato=2</a></li>
             <li><strong>Eventos</strong> - <a href="/feeds.php?formato=6"><?=ConfigVO::URL_SITE?>feeds.php?formato=6</a></li>
             <li><strong>Notícias</strong> - <a href="/feeds.php?formato=5"><?=ConfigVO::URL_SITE?>feeds.php?formato=5</a></li>
-            <li><strong>Todos os conteúdos</strong> - <a href="/feeds.php?formato=10"><?=ConfigVO::URL_SITE?>feeds.php</a></li>
+            <li><strong>Todos os conteúdos</strong> - <a href="/feeds.php?formato=10"><?=ConfigVO::URL_SITE?>feeds.php?formato=10</a></li>
         </ul>
       </div>
       <div class="lateral">

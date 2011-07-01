@@ -4,7 +4,9 @@ session_start();
 		
 class ConfigPortalVO {
 
-	const DIR_PENC = "/home/ramom/iteia4/"; //local
+	const DIR_PENC = "/var/www/iteia/"; //local
+	//const DIR_PENC = "/home/rui/iteia4/"; //local
+	//const DIR_PENC = "/home/pages/penc/"; //no ar
 
 	public static function getDirPenc() {
 		return self::DIR_PENC;

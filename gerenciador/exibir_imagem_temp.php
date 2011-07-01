@@ -8,4 +8,4 @@ if (!$width) $width = 144;
 if (!$height) $height = 144;
 
 include_once("classes/bo/ImagemTemporariaBO.php");
-ImagemTemporariaBO::exibir($_GET["img"], $width, $height);
+ImagemTemporariaBO::exibir($_GET["img"], $width, $height,false);

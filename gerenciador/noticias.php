@@ -20,9 +20,9 @@ include('includes/topo.php');
       	<a href="noticia_busca_pop.php?height=330&amp;width=310" title="Busca avan&ccedil;ada" class="thickbox">Busca avan&ccedil;ada</a>
     </form>
     
-    <p class="descricao"><a href="noticia_edicao.php">Publique not&iacute;cias</a> sobre os mais variados acontecimentos relacionados ao(s) colaborador(es) que voc&ecirc; representa ou aos autores vinculados a ele. As not&iacute;cias aparecer&atilde;o na home e na p&aacute;gina do(s) colaborador(es) no portal. <br />
+    <div class="descricao"><a href="noticia_edicao.php">Publique not&iacute;cias</a> sobre os mais variados acontecimentos relacionados ao(s) colaborador(es) que voc&ecirc; representa ou aos autores vinculados a ele. As not&iacute;cias aparecer&atilde;o na home e na p&aacute;gina do(s) colaborador(es) no portal. <br />
       <br />
-    <small>OBS: not&iacute;cias s&atilde;o informa&ccedil;&otilde;es a respeito de novos acontecimentos, de mudan&ccedil;as recentes em alguma situa&ccedil;&atilde;o ou do estado em que algo se encontra.</small></p>
+    <small>OBS: not&iacute;cias s&atilde;o informa&ccedil;&otilde;es a respeito de novos acontecimentos, de mudan&ccedil;as recentes em alguma situa&ccedil;&atilde;o ou do estado em que algo se encontra.</small></div>
     
     <!--
     <form action="noticias.php" method="get" id="busca">

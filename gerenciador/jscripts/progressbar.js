@@ -3,7 +3,7 @@ $(document).ready(function() {
 });
 			
 function showUpload() {
-	$.get("/ajax_uploadprogress.php?id=" + progress_key, function(data) {
+	$.get("/gerenciador/ajax_uploadprogress.php?id=" + progress_key, function(data) {
 		if (!data)
 			return;
 

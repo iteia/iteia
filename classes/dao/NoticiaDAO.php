@@ -89,11 +89,15 @@ class NoticiaDAO extends ConteudoDAO {
 	}
 
 	public function getNoticiaDados($cod) {
+		
 		$select = "SELECT * FROM Noticias WHERE cod_conteudo='$cod'";
+		
 		return $this->banco->fetchArray($this->banco->executaQuery($select));
+		
 	}
 
 	public function getNoticiaDadosPDF($cod) {
+		
 		$select = "SELECT t1.*, t2.* FROM Noticias AS t1 INNER JOIN Conteudo AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) WHERE t1.cod_conteudo='$cod'";
 		return $this->banco->fetchArray($this->banco->executaQuery($select));
 	}
@@ -208,15 +212,17 @@ class NoticiaDAO extends ConteudoDAO {
 	}
 
 	public function getGroupNoticiasDatas($data_anterior) {
+		
 		$arrayDatas = array();
 		$noticias = array();
 
 		$sql_formato = "SELECT %s FROM Conteudo AS t1 LEFT JOIN Urls AS t2 ON (t1.cod_conteudo=t2.cod_item) WHERE t1.excluido='0' AND t1.datahora <= '".date('Y-m-d H:i')."' AND t1.cod_formato='5' AND t2.tipo='4' and t1.cod_sistema = ".ConfigVO::getCodSistema()." %s";
 
-		$campos = 't1.cod_conteudo, t1.datahora, t1.titulo, t2.titulo AS url';
+		$campos = 't1.cod_conteudo, t1.datahora, t1.titulo, t1.cod_segmento, t1.cod_subarea, t2.titulo AS url';
 
 		if (!$data_anterior) {
 			$query = $this->banco->executaQuery(sprintf($sql_formato, 'max(datahora)', ''));
+			//echo sprintf($sql_formato, 'max(datahora)', '');
 			$row = $this->banco->fetchArray($query);
 			$data_anterior = substr($row[0], 0, 10);
 		}
@@ -224,14 +230,17 @@ class NoticiaDAO extends ConteudoDAO {
 		$noticias['total'] = 1;
 
 		$sql1 = sprintf($sql_formato, $campos, "and t1.datahora like '".$data_anterior."%' ORDER BY t1.datahora DESC");
+		//echo $sql1;
 		$result = $this->banco->executaQuery($sql1);
 		while ($row = $this->banco->fetchArray()) {
 			$noticias[$data_anterior][] = array(
     			'cod'       => $row['cod_conteudo'],
+				//'cod_segmento' => $row['cod_segmento'],
+				'cod_segmento' => ($row['cod_subarea']==0)?($row['cod_segmento']):($row['cod_subarea']),
     			'titulo'    => $row['titulo'],
     			'url'    	=> $row['url'],
     			'periodo'   => date('d.m.Y - H:i', strtotime($row['datahora']))
-    		);
+			);
 		}
 
 		$query = $this->banco->executaQuery(sprintf($sql_formato, 'max(datahora)', " and t1.datahora < '".$data_anterior." 00:00:00'"));
@@ -239,6 +248,7 @@ class NoticiaDAO extends ConteudoDAO {
 		$data_anterior = substr($row[0], 0, 10);
 
 		$sql2 = sprintf($sql_formato, $campos, "and t1.datahora like '".$data_anterior."%' ORDER BY t1.datahora DESC");
+		//echo $sql2;
 		$result = $this->banco->executaQuery($sql2);
 		while ($row = $this->banco->fetchArray()) {
 			$noticias[$data_anterior][] = array(
@@ -255,6 +265,7 @@ class NoticiaDAO extends ConteudoDAO {
 	public function getPaginasNoticias() {
 		$lista = array(0 => '');
 		$sql = "SELECT SUBSTRING(t1.datahora, 1, 10) AS datas FROM Conteudo AS t1 LEFT JOIN Urls AS t2 ON (t1.cod_conteudo=t2.cod_item) WHERE t1.excluido='0' AND t1.datahora <= '".date('Y-m-d H:i')."' AND t1.cod_formato='5' AND t2.tipo='4' and t1.cod_sistema = ".ConfigVO::getCodSistema()." group by  datas;";
+		//echo $sql;
 		$result = $this->banco->executaQuery($sql);
 		while ($row = $this->banco->fetchArray())
 			$listatemp[] = $row[0];
@@ -267,9 +278,12 @@ class NoticiaDAO extends ConteudoDAO {
 	}
 
 	public function getUltimasNoticias($lista_ignorar, $total, $secao = 0) {
+		
 		$ultimas = array();
-		$sql = "select CON.cod_conteudo, CON.titulo, CON.datahora, U.titulo as url, N.subtitulo from Conteudo CON, Noticias N, Urls U where CON.cod_conteudo not in ('".implode("','", $lista_ignorar)."') and CON.cod_conteudo = N.cod_conteudo and CON.cod_formato = 5 AND CON.datahora <= '".date('Y-m-d H:i')."' and CON.cod_conteudo = U.cod_item and U.tipo = 4 and CON.Excluido = 0 and CON.cod_sistema = ".ConfigVO::getCodSistema();
-		if ($secao)
+		$sql = "select CON.cod_conteudo, CON.titulo, CON.descricao, CON.datahora,  A.nome_completo as autor, U.titulo as url, N.subtitulo, N.assinatura from Conteudo CON, Noticias N, Urls U, Autores A where CON.cod_conteudo not in ('".implode("','", $lista_ignorar)."') and CON.cod_conteudo = N.cod_conteudo AND CON.cod_autor = A.cod_usuario and CON.cod_formato = 5 AND CON.datahora <= '".date('Y-m-d H:i')."' and CON.cod_conteudo = U.cod_item and U.tipo = 4 and CON.Excluido = 0 and CON.cod_sistema = ".ConfigVO::getCodSistema();
+		//echo $sql;
+        //die;
+        if ($secao)
 			$sql .= " and N.secao = '".$secao."'";
 		$sql .= " order by CON.datahora desc limit ".$total.";";
 		$sql_result = $this->banco->executaQuery($sql);

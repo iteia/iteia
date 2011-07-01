@@ -51,12 +51,14 @@ class ColaboradorExibicaoBO {
 		$colaborador['colaborador']['autores'] 			= $this->colabdao->getAutoresRelacionadosColaborador($this->cod_colaborador, 6);
 		$colaborador['colaborador']['noticias'] 		= $this->notdao->getNoticiaConteudo($this->cod_colaborador);
 		$colaborador['colaborador']['comunicadores'] 	= $this->colabdao->getComunicadoresUsuario($this->cod_colaborador);
+//                $colaborador['colaborador']['data_cadastro'] 	= $this->colabdao->getDataCadastro($this->cod_colaborador);
 
 		foreach((array)$this->contdao->getMaisAcessados('acessos', $this->cod_colaborador, 0, 0, 0, 6) as $key => $value) {
         	$colaborador['colaborador']['mais_acessados'][] = array(
 				'cod_conteudo' 		=> $value['cod_conteudo'],
 				'autores' 			=> Util::getHtmlListaAutores($value['cod_conteudo']),
-				'canal'				=> Util::getHtmlCanal($value['cod_segmento']),
+				//'canal'				=> Util::getHtmlCanal($value['cod_segmento']),
+				'canal'				=> ($value['cod_subarea']==0)?(Util::getHtmlCanal($value['cod_segmento'])):(Util::getHtmlCanal($value['cod_subarea'])),
 				'cod_formato' 		=> $value['cod_formato'],
 				'titulo' 			=> $value['titulo'],
 				'data_cadastro' 	=> $value['data_cadastro'],

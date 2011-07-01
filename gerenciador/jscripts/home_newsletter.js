@@ -65,7 +65,8 @@ function acaoNewsletter(num) {
 }
 
 function executaAcaoHomeSelecionados(num) {
-	var lista_checkboxes = $("input[@name=coditem]");
+	//var lista_checkboxes = $("input[@name=coditem]");
+	var lista_checkboxes = $("input[name=coditem]");
 	var lista_marcados = new Array;
 	for (i = 0; i < lista_checkboxes.length; i++) {
 		var item = lista_checkboxes[i];

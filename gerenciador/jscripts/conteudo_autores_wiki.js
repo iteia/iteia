@@ -104,6 +104,7 @@ function adicionarAutorFicha() {
 			$.get("ajax_conteudo.php?get=adicionar_autorficha_nalista&cod=" + $('#autor_selecionado').val() + "&atividade=" + $('#ficha_atividade').val()+"&sessao_id="+sessao_id, function(html) { $("#mostra_autores_wiki_selecionados").html(html); });
 			//exibeListaAutoresFicha();
 			limparFormularioFicha();
+			tb_remove();
 		}
 	}
 	else {
@@ -121,7 +122,7 @@ function aleatorio(inferior, superior) {
 
 function removerAutorFicha(cod) {
 	$.get("ajax_conteudo.php?get=remover_autor_listaficha&cod=" + cod + "&sessao_id="+sessao_id);
-	cancelarAutorFicha();
+	//cancelarAutorFicha();
 	exibeListaAutoresFicha();
 }
 
@@ -293,5 +294,6 @@ function adicionarAutorWiki() {
 		$.get("ajax_conteudo.php?get=adicionar_autor_wiki&nome=" + $('#nome_autor_wiki').val() + "&nome_completo=" + $('#ficha_nome_completo').val() + "&atividade=" + $('#ficha_atividade').val() + "&codpais=" + $('#pais').val() + "&codestado=" + $('#estado').val() + "&codcidade=" + $('#selectcidade').val() + "&cidade=" + $('#campocidade').val() + "&email=" + $('#ficha_email').val() + "&telefone=" + $('#ficha_telefone').val() + "&falecido=" + marcado + "&descricao=" + encodeURI($('#ficha_descricao').val() + "&sessao_id="+sessao_id), function(html) { $("#mostra_autores_wiki_selecionados").html(html); });
 		//exibeListaAutoresFicha();
 		limparFormularioFicha();
+		tb_remove();
 	}
 }

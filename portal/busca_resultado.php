@@ -1,6 +1,8 @@
 <?php
 include_once('classes/vo/ConfigPortalVO.php');
 include_once(ConfigPortalVO::getDirClassesRaiz().'util/Util.php');
+include_once('classes/bo/AutorExibicaoBO.php');
+include_once(ConfigPortalVO::getDirClassesRaiz()."vo/ConfigVO.php");
 
 $id1 = trim($_GET['id1']);
 $id2 = trim($_GET['id2']);
@@ -80,6 +82,11 @@ if (!$buscabo->getTotal()) {
 	exit();
 }
 
+if($buscabo->getAutor()){
+    $usr1 = new AutorExibicaoBO($buscabo->getAutor());
+    $usr = $usr1->getConteudo();
+}
+
 $paginacao = Util::paginacao($pagina, $buscabo->getMostrar(), $buscabo->getTotal(), $link_resultado.'&amp;tipores='.$tipores);
 
 $js_busca = true;
@@ -91,7 +98,32 @@ include ('includes/topo.php');
 <div id="conteudo">
     <div class="principal">
 		<h2 class="midia">Resultado de busca</h2>
-        <div class="msg">Mostrando de <strong><?=$paginacao['inicio'];?></strong> a <strong><?=$paginacao['fim'];?></strong> de <strong><?=$buscabo->getTotal();?></strong> resultados encontrados<?php if ($buscabo->getPalavraChave()): ?> para a busca por <strong class="palavra">"<?=$buscabo->getPalavraChave()?>"</strong><?php endif; ?><?php if ($tag): ?> com a tag <strong class="palavra">"<?=$tag?>"</strong><?php endif; ?>.</div>
+        <div class="msg">
+            <?php if($usr){/*print_r($usr['autor']);*/?>
+            <div class="caption"> 
+                            <?php if ($usr['autor']['imagem']): ?>
+                <div class="foto"><strong>
+                        <img height="75px" width="75px" src="/exibir_imagem.php?img=<?=$usr['autor']['imagem']?>&amp;tipo=c&amp;s=28" alt="Imagem de: <?=$usr['autor']['nome'];?>" />
+                </strong></div>
+                            <?php endif; ?>
+                      <h1 class="midia no-margin-b"><?=$usr['autor']['nome']?></h1>
+                      <p><a href="/busca_action.php?buscar=1&amp;formatos=9,10&amp;cidades=<?=$usr['autor']['cod_cidade']?>" title="Listar autores por cidade"><?=$usr['autor']['cidade']?></a> - <a href="/busca_action.php?buscar=1&amp;formatos=9,10&amp;estados=<?=$usr['autor']['cod_estado']?>"><?=$usr['autor']['sigla']?></a><br>
+                          Cadastrado em: <?php $datcad = strtotime($usr['autor']['datacadastro']); echo date("d/m/Y",$datcad);?><br>
+            <?php
+            if (is_array($usr['colaboradores']) && count($usr['autor']['colaboradores'])) {
+            ?>
+                                    Vinculado ao colaborador:
+                                    <?php foreach ($usr['colaboradores'] as $colaborador): ?>
+                                    <a href="/<?=$colaborador['url'];?>" title="Ir para página do colaborador" id="vinculado"><?=$colaborador['nome'];?></a>
+                                    <?php endforeach; ?>
+            <?php
+            }else{
+                echo"<br>";
+            }
+            ?>
+            </div>
+            <?}?>
+            Mostrando de <strong><?=$paginacao['inicio'];?></strong> a <strong><?=$paginacao['fim'];?></strong> de <strong><?=$buscabo->getTotal();?></strong> resultados encontrados<?php if ($buscabo->getPalavraChave()): ?> para a busca por <strong class="palavra">"<?=$buscabo->getPalavraChave()?>"</strong><?php endif; ?><?php if ($tag): ?> com a tag <strong class="palavra">"<?=$tag?>"</strong><?php endif; ?>.</div>
 		<table cellspacing="0" cellpadding="0" border="0" id="resultado-busca">
 			<tbody>
 <?php

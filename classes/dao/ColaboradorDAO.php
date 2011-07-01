@@ -39,11 +39,15 @@ class ColaboradorDAO extends UsuarioDAO {
     	$this->banco->sql_delete('Colaboradores_Integrantes', "cod_colaborador='".$codusuario."'");
 		if (count($usuariovo->getListaIntegrantes())) {
 			foreach($usuariovo->getListaIntegrantes() as $key => $value) {
-				$this->banco->sql_insert('Colaboradores_Integrantes', array('cod_colaborador' => $codusuario, 'cod_autor' => $value['cod_usuario'], 'responsavel' => $value['responsavel']));
+				$this->insereAutorIntegrante($codusuario, $value['cod_usuario'], $value['responsavel']);
 			}
 		}
     }
     
+	public function insereAutorIntegrante($codcolaborador, $codautor, $responsavel = 0) {
+		$this->banco->sql_insert('Colaboradores_Integrantes', array('cod_colaborador' => $codcolaborador, 'cod_autor' => $codautor, 'responsavel' => $responsavel));
+	}
+	
     private function atualizarUsuariosNiveis(&$usuariovo, $codusuario) {
     	// pego todos os intergrantes (autores) do colaborador
     	$query = $this->banco->executaQuery("SELECT cod_autor FROM Colaboradores_Integrantes WHERE cod_colaborador='".$codusuario."'");
@@ -84,14 +88,14 @@ class ColaboradorDAO extends UsuarioDAO {
 		$colaboradorvo->setAdministrador($sql_row->administrador);
 		$colaboradorvo->setUrl($sql_row->titulo);
 		
-		$sql = "SELECT t1.cod_autor, t1.responsavel, t2.nome, t2.imagem FROM Colaboradores_Integrantes AS t1 INNER JOIN Usuarios AS t2 ON (t1.cod_autor=t2.cod_usuario) WHERE t1.cod_colaborador='".$codcolaborador."'";
+		$sql = "SELECT t1.cod_autor, t1.responsavel, t2.nome, t2.imagem, t3.* FROM Colaboradores_Integrantes AS t1 INNER JOIN Usuarios AS t2 ON (t1.cod_autor=t2.cod_usuario) LEFT JOIN Autores AS t3 ON (t2.cod_usuario=t3.cod_usuario) WHERE t1.cod_colaborador='".$codcolaborador."'";
 		$sql_result = $this->banco->executaQuery($sql);
 		$arrayIntegrantes = array();
 		while ($sql_row = $this->banco->fetchObject()) {
 			$arrayIntegrantes[] = array(
 				'cod_usuario' 	=> $sql_row->cod_autor,
 				'responsavel' 	=> $sql_row->responsavel,
-				'nome' 			=> $sql_row->nome,
+				'nome' 			=> ($sql_row->nome ? $sql_row->nome : $sql_row->nome_completo),
 				'imagem' 		=> $sql_row->imagem
 			);
 		}
@@ -109,7 +113,7 @@ class ColaboradorDAO extends UsuarioDAO {
 	}
 	
 	public function getAutoresParticipantes($codcolaborador) {
-		$sql = "SELECT t1.cod_usuario, t1.nome, t3.titulo AS url FROM Usuarios AS t1 INNER JOIN Colaboradores_Integrantes AS t2 ON (t1.cod_usuario=t2.cod_autor) INNER JOIN Urls AS t3 ON (t1.cod_usuario=t3.cod_item) WHERE t2.cod_colaborador='".$codcolaborador."' AND t3.tipo='2'";
+		$sql = "SELECT t1.cod_usuario, t1.nome, t3.titulo AS url, t2.responsavel FROM Usuarios AS t1 INNER JOIN Colaboradores_Integrantes AS t2 ON (t1.cod_usuario=t2.cod_autor) INNER JOIN Urls AS t3 ON (t1.cod_usuario=t3.cod_item) WHERE t2.cod_colaborador='".$codcolaborador."' AND t3.tipo='2'";
         $query1 = $this->banco->executaQuery($sql);
         $lista = array();
     	while ($row = $this->banco->fetchArray($query1))
@@ -130,53 +134,24 @@ class ColaboradorDAO extends UsuarioDAO {
     	$sql = "INSERT INTO Conteudo_Notificacoes (cod_tipo, cod_colaborador, data_cadastro) VALUES ('250', '".$codusuario."', NOW())";
 		$this->banco->executaQuery($sql);
     }
-	
-	 public function aprovarColaborador($codautor) {
-		$this->banco->sql_update('Usuarios', array('situacao' => 3), "cod_usuario='".$codautor."'");
-		$this->banco->executaQuery("DELETE FROM Conteudo_Notificacoes WHERE cod_colaborador='".$codautor."' AND cod_tipo='250'");
-		$dados= $this->getUsuarioDados($codautor);
+
+	public function getListaColaboradoresPorNome($nome) {
+		$array = array();
+
+		// usuarios - nome artistico
+		$where = " WHERE t1.disponivel = 1 AND t1.situacao = 3 AND t1.cod_sistema = ".ConfigVO::getCodSistema()." AND t1.cod_tipo = 1 AND t1.nome LIKE '%".utf8_decode($nome)."%'";
+		$sql = "SELECT t1.cod_usuario, t1.nome FROM Usuarios AS t1". $where;
+		$query = $this->banco->executaQuery($sql . " ORDER BY t1.nome ASC LIMIT 30");
+
+		while ($row = $this->banco->fetchArray($query)) {
+			$dadosusuario = $this->getUsuarioDados($row['cod_usuario']);
+			$array[$row['cod_usuario']] = array(
+				'cod' 		=> $row['cod_usuario'],
+				'nome' 		=> $dadosusuario['nome'],
+			);
+		}
 		
-		include(ConfigVO::getDirUtil().'/htmlMimeMail5/htmlMimeMail5.php');
-
-		$mail = new htmlMimeMail5();
-    	$texto_email = file_get_contents(ConfigVO::DIR_SITE.'/portal/templates/template_email_gerenciador.html');
-
-		$conteudo .= "<p>Seu cadastro foi aceito no Pernambuco Nação Cultural.</p>\n";
-		$conteudo .= "<p>O seu nome de usuário e senha de acesso ao gerenciador de conteúdo:</p>\n<p>Usuário: <strong>".$dados['login']."</strong><br />\nSenha: <strong>".$dados['senha']."</strong><br />\n</p>\n";
-    	
-		$texto_email = eregi_replace("<!--%URL_IMG%-->", ConfigVO::URL_SITE, $texto_email);
-		$texto_email = eregi_replace("<!--%CORPO_EMAIL%-->", $conteudo, $texto_email);
-
-		//$mail->setHtml($texto_email);
-		//$mail->setReturnPath($dados['email']);
-		//$mail->setFrom("\"Portal Penc\" <gerenciador@fundarpe.org.br>");
-		//$mail->setSubject("Pernambuco Nação Cultural - Cadastro de Autor");
-    	//$mail->send(array($dados['email']));
+		return $array;
 	}
-
-	public function reprovarColaborador($codautor, $comentario) {
-		$this->banco->sql_update('Usuarios', array('disponivel' => 0, 'situacao' => 2), "cod_usuario='".$codautor."'");
-		$this->banco->executaQuery("DELETE FROM Conteudo_Notificacoes WHERE cod_colaborador='".$codautor."' AND cod_tipo='250'");
-		$dados= $this->getUsuarioDados($codautor);
-
-		$this->banco->executaQuery("DELETE FROM Urls WHERE cod_item = '".$codautor."' AND tipo='2' AND cod_sistema = '".ConfigVO::getCodSistema()."'");
-		
-		include(ConfigVO::getDirUtil().'/htmlMimeMail5/htmlMimeMail5.php');
-
-		$mail = new htmlMimeMail5();
-    	$texto_email = file_get_contents(ConfigVO::DIR_SITE.'/portal/templates/template_email_gerenciador.html');
-
-		$conteudo .= "<p>O seu cadastro não foi aceito no Pernambuco Nação Cultural.</p>\n<p>Motivo da rejeição: <strong>".$comentario."</strong></p>\n";
-    	
-		$texto_email = eregi_replace("<!--%URL_IMG%-->", ConfigVO::URL_SITE, $texto_email);
-		$texto_email = eregi_replace("<!--%CORPO_EMAIL%-->", $conteudo, $texto_email);
-
-		//$mail->setHtml($texto_email);
-		//$mail->setReturnPath($dados['email']);
-		//$mail->setFrom("\"Portal Penc\" <gerenciador@fundarpe.org.br>");
-		//$mail->setSubject("Pernambuco Nação Cultural - Cadastro de Autor");
-    	//$mail->send(array($dados['email']));
-	}
-
     
 }

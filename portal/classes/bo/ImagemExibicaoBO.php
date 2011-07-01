@@ -1,6 +1,7 @@
 <?php
 include_once(ConfigPortalVO::getDirClassesRaiz().'vo/ConfigVO.php');
 include_once(ConfigPortalVO::getDirClassesRaiz().'dao/ImagemDAO.php');
+include_once(ConfigPortalVO::getDirClassesRaiz()."util/Util.php");
 
 class ImagemExibicaoBO {
 
@@ -46,11 +47,11 @@ class ImagemExibicaoBO {
 
     public function DownloadArquivo($codconteudo, $codimagem) {
 		$zip = new ZipArchive();	
-		$arquivozip = '/tmp/fs_album_'.md5(time()).'.zip';
+		$arquivozip = '/tmp/conteudo/fs_album_'.md5(time()).'.zip';
 		$zip->open($arquivozip, ZIPARCHIVE::CREATE);
 	
 		foreach($this->imgdao->getArquivoImagem($codconteudo) as $value)
-			$zip->addFile(ConfigVO::getDirGaleria().$value['imagem'], $value['imagem']);
+			$zip->addFile(ConfigVO::getDirGaleria().$value['imagem'], Util::removeAcentos($value['imagem']));
 	
 		$zip->close();
 		Util::force_download(file_get_contents($arquivozip), 'iteia_galeria_'.$codconteudo.'.zip');

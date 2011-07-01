@@ -10,152 +10,143 @@ class ConteudoDAO {
 	}
 
 	public function cadastrarConteudo(&$conteudovo) {
-		// cadastra conteudo
-		$this->banco->sql_insert('Conteudo', array('cod_formato' => $conteudovo->getCodFormato(), 'cod_sistema' => ConfigVO::getCodSistema(), 'cod_classificacao' => $conteudovo->getCodClassificacao(), 'cod_segmento' => $conteudovo->getCodSegmento(), 'cod_subarea' => $conteudovo->getCodSubArea(), 'cod_canal' => $conteudovo->getCodCanal(), 'cod_licenca' => $conteudovo->getCodLicenca(), 'cod_colaborador' => $conteudovo->getCodColaborador(), 'cod_autor' => $conteudovo->getCodAutor(), 'randomico' => $conteudovo->getRandomico(), 'titulo' => $conteudovo->getTitulo(), 'descricao' => $conteudovo->getDescricao(), 'datahora' => $conteudovo->getDataHora(), 'data_cadastro' => date('Y-m-d H:i:s'), 'situacao' => $conteudovo->getSituacao(), 'publicado' => $conteudovo->getPublicado()));
+        //print_r($_SESSION);
+        //print_r($conteudovo);die;
+		$this->banco->sql_insert('Conteudo', array(
+			'cod_formato' => $conteudovo->getCodFormato(),
+			'cod_sistema' => ConfigVO::getCodSistema(),
+			'cod_classificacao' => $conteudovo->getCodClassificacao(),
+			'cod_segmento' => $conteudovo->getCodSegmento(),
+			'cod_subarea' => $conteudovo->getCodSubArea(),
+			'cod_canal' => $conteudovo->getCodCanal(),
+			'cod_licenca' => $conteudovo->getCodLicenca(),
+			'cod_colaborador' => $conteudovo->getCodColaborador(),
+			'cod_autor' => $conteudovo->getCodAutor(),
+			'randomico' => $conteudovo->getRandomico(),
+			'titulo' => $conteudovo->getTitulo(),
+			'descricao' => $conteudovo->getDescricao(),
+			'datahora' => $conteudovo->getDataHora(),
+			'data_cadastro' => date('Y-m-d H:i:s'),
+			'situacao' => $conteudovo->getSituacao(),
+			'publicado' => $conteudovo->getPublicado()
+		));
+		
 		$codconteudo = $this->banco->insertId();
 
-		// permitir comentarios
-		$this->banco->sql_insert('Conteudo_Opcoes', array('cod_conteudo' => $codconteudo, 'permitir_comentarios' => $conteudovo->getPermitirComentarios()));
-
-		switch ($conteudovo->getCodFormato()) {
-			case 1: $campo = 'textos'; break;
-			case 2: $campo = 'imagens'; break;
-			case 3: $campo = 'audios'; break;
-			case 4: $campo = 'videos'; break;
-			case 5: $campo = 'jornal'; break;
-			case 6: $campo = 'eventos'; break;
-		}
-
 		if ($codconteudo) {
+			switch ($conteudovo->getCodFormato()) {
+				case 1: $campo = 'textos'; break;
+				case 2: $campo = 'imagens'; break;
+				case 3: $campo = 'audios'; break;
+				case 4: $campo = 'videos'; break;
+				case 5: $campo = 'jornal'; break;
+				case 6: $campo = 'eventos'; break;
+			}
+			
 			$i = 0;
 			$urltitulo = $campo.'/'.$conteudovo->getUrl();
 			do {
 				if ($i)
 					$urltitulo = $campo.'/'.$conteudovo->getUrl().$i;
-				$sql = "INSERT INTO Urls VALUES ('".$urltitulo."', '".$codconteudo."', 4, '".ConfigVO::getCodSistema()."')";
+				$tenta = $this->banco->executaQuery("INSERT INTO Urls VALUES ('".$urltitulo."', '".$codconteudo."', 4, '".ConfigVO::getCodSistema()."')");
+				$i++;
+			}
+			while (!$tenta);
+			
+			$this->banco->sql_insert('Conteudo_Opcoes', array('cod_conteudo' => $codconteudo, 'permitir_comentarios' => $conteudovo->getPermitirComentarios()));
+			$this->banco->executaQuery("UPDATE Usuarios_Estatisticas SET ".$campo." = ".$campo." + 1 WHERE cod_usuario='".$conteudovo->getCodAutor()."'");
+			if ($_SESSION['logado_dados']['nivel'] == 2 || $_SESSION['logado_dados']['nivel'] >= 5)
+				$this->banco->executaQuery("INSERT INTO Conteudo_Autores VALUES ('".$codconteudo."', '".$conteudovo->getCodAutor()."')");
+	
+			$this->cadastrarTags($conteudovo, $codconteudo);
+			$this->atualizarAutoresFichaTecnica($codconteudo, $conteudovo->getListaAutores());
+			if ($conteudovo->getCodFormato() < 5)
+				$this->definirAprovacaoConteudo($codconteudo, 1, $conteudovo->getListaColaboradoresRevisao());
+			
+			return $codconteudo;
+		}
+		return false;
+	}
+	
+	public function atualizarConteudo(&$conteudovo) {
+		$this->banco->sql_update('Conteudo', array(
+			'cod_classificacao' => $conteudovo->getCodClassificacao(),
+			'cod_segmento' => $conteudovo->getCodSegmento(),
+			'cod_subarea' => $conteudovo->getCodSubArea(),
+			'cod_canal' => $conteudovo->getCodCanal(),
+			'cod_licenca' => $conteudovo->getCodLicenca(),
+			'titulo' => $conteudovo->getTitulo(),
+			'descricao' => $conteudovo->getDescricao()),
+			"cod_conteudo='".$conteudovo->getCodConteudo()."'"
+		);
+
+		if ($conteudovo->getCodConteudo()) {
+			switch ($conteudovo->getCodFormato()) {
+				case 1: $campo = 'textos'; break;
+				case 2: $campo = 'imagens'; break;
+				case 3: $campo = 'audios'; break;
+				case 4: $campo = 'videos'; break;
+				case 5: $campo = 'jornal'; break;
+				case 6: $campo = 'eventos'; break;
+			}
+			
+			$query = $this->banco->sql_select('cod_conteudo', 'Conteudo_Opcoes', "cod_conteudo='".$conteudovo->getCodConteudo()."'");
+			if ($this->banco->numRows($query))
+				$this->banco->sql_update('Conteudo_Opcoes', array('permitir_comentarios' => $conteudovo->getPermitirComentarios()), "cod_conteudo='".$conteudovo->getCodConteudo()."'");
+			else
+				$this->banco->sql_insert('Conteudo_Opcoes', array('cod_conteudo' => $conteudovo->getCodConteudo(), 'permitir_comentarios' => $conteudovo->getPermitirComentarios()));
+
+			$pasta_titulo = '';
+			$sql = "SELECT titulo from Urls where cod_item='".$conteudovo->getCodConteudo()."' AND tipo='4' and cod_sistema = '".ConfigVO::getCodSistema()."';";
+			$sql_result = $this->banco->executaQuery($sql);
+			$sql_row = mysql_fetch_array($sql_result);
+			$titulo_atual = $sql_row[0];
+			$titulo_partes = explode('/', $titulo_atual);
+			if ($titulo_partes[1])
+				$pasta_titulo = $campo.'/';
+			$i = 0;
+			$urltitulo = $pasta_titulo.$conteudovo->getUrl();
+			do {
+				if ($i)
+					$urltitulo = $pasta_titulo.$conteudovo->getUrl().$i;
+				$sql = "UPDATE Urls SET titulo='".$urltitulo."' WHERE cod_item='".$conteudovo->getCodConteudo()."' AND tipo='4' and cod_sistema = '".ConfigVO::getCodSistema()."'";
 				$tenta = $this->banco->executaQuery($sql);
 				$i++;
 			}
 			while (!$tenta);
 
-            $this->cadastrarTags($conteudovo, $codconteudo);
-		}
-
-		//$this->cadastrarNotificacao(1, $codconteudo, $conteudovo->getCodAutor(), $conteudovo->getCodColaborador(), 0, '');
-		// atualiza quantidade de conteudo do usuario
-		$this->banco->executaQuery("UPDATE Usuarios_Estatisticas SET $campo = $campo + 1 WHERE cod_usuario='".$_SESSION['logado_cod']."'");
-
-		// se o cadastro for feito por um autor/colaborador participante ou responsavel automaticamente ele é incluido como autor do conteudo
-		if ($_SESSION['logado_dados']['nivel'] == 2 || $_SESSION['logado_dados']['nivel'] >= 5) {
-			$this->banco->executaQuery("INSERT INTO Conteudo_Autores VALUES ('".$codconteudo."', '".$_SESSION['logado_cod']."')");
-		}
-
-		if (count($conteudovo->getListaAutores())) {
-			foreach ($conteudovo->getListaAutores() as $autorficha)
-				$this->banco->executaQuery("INSERT INTO Conteudo_Autores_Ficha VALUES (NULL, '".$codconteudo."', '".$autorficha['codautor']."', '".$autorficha['atividade']."')");
-			if ($_SESSION['logado_dados']['nivel'] == 2)
-				$this->banco->executaQuery("INSERT INTO Conteudo_Autores_Ficha VALUES (NULL, '".$codconteudo."', '".$_SESSION['logado_cod']."', 1)");
-		}
-
-		// autorizações
-		// apenas pra usuarios de nivel 2
-		if ($_SESSION['logado_dados']['nivel'] == 2) {
-
-			// mandar pra lista publica
-			if ($conteudovo->getPedirAutorizacao() == 1) {
-				$this->enviarConteudoListaPublica($codconteudo);
-			}
-
-			// mandar pra colaboradores selecionados
-			if ($conteudovo->getPedirAutorizacao() == 2) {
-				$this->atualizarConteudoColaboradoresRevisaoNova($conteudovo, $codconteudo);
-			}
-
-		}
-
-		return $codconteudo;
-	}
-
-	public function atualizarConteudo(&$conteudovo) {
-		// atualiza conteudo
-		$this->banco->sql_update('Conteudo', array('cod_classificacao' => $conteudovo->getCodClassificacao(),'cod_segmento' => $conteudovo->getCodSegmento(), 'cod_subarea' => $conteudovo->getCodSubArea(), 'cod_canal' => $conteudovo->getCodCanal(), 'cod_licenca' => $conteudovo->getCodLicenca(), 'titulo' => $conteudovo->getTitulo(), 'descricao' => $conteudovo->getDescricao()), "cod_conteudo='".$conteudovo->getCodConteudo()."'");
-
-		// permitir comentarios
-		$query = $this->banco->sql_select('cod_conteudo', 'Conteudo_Opcoes', "cod_conteudo='".$conteudovo->getCodConteudo()."'");
-		if ($this->banco->numRows($query))
-			$this->banco->sql_update('Conteudo_Opcoes', array('permitir_comentarios' => $conteudovo->getPermitirComentarios()), "cod_conteudo='".$conteudovo->getCodConteudo()."'");
-		else
-			$this->banco->sql_insert('Conteudo_Opcoes', array('cod_conteudo' => $conteudovo->getCodConteudo(), 'permitir_comentarios' => $conteudovo->getPermitirComentarios()));
-
-		switch ($conteudovo->getCodFormato()) {
-			case 1: $campo = 'textos'; break;
-			case 2: $campo = 'imagens'; break;
-			case 3: $campo = 'audios'; break;
-			case 4: $campo = 'videos'; break;
-			case 5: $campo = 'jornal'; break;
-			case 6: $campo = 'eventos'; break;
-		}
-
-		$pasta_titulo = '';
-		$sql = "SELECT titulo from Urls where cod_item='".$conteudovo->getCodConteudo()."' AND tipo='4' and cod_sistema = '".ConfigVO::getCodSistema()."';";
-		$sql_result = $this->banco->executaQuery($sql);
-		$sql_row = mysql_fetch_array($sql_result);
-		$titulo_atual = $sql_row[0];
-		$titulo_partes = explode('/', $titulo_atual);
-		if ($titulo_partes[1])
-			$pasta_titulo = $campo.'/';
-
-		$i = 0;
-		$urltitulo = $pasta_titulo.$conteudovo->getUrl();
-		do {
-			if ($i)
-				$urltitulo = $pasta_titulo.$conteudovo->getUrl().$i;
-			$sql = "UPDATE Urls SET titulo='".$urltitulo."' WHERE cod_item='".$conteudovo->getCodConteudo()."' AND tipo='4' and cod_sistema = '".ConfigVO::getCodSistema()."'";
-			$tenta = $this->banco->executaQuery($sql);
-			$i++;
-		}
-		while (!$tenta);
-
-		// se a edição for feita por um autor o conteudo dele é recolocado como inativo
-		if ($_SESSION['logado_dados']['nivel'] == 2) {
-			// defino como inativo e pendente
-			$this->banco->sql_update('Conteudo', array('situacao' => 0, 'publicado' => 0), "cod_conteudo='".$conteudovo->getCodConteudo()."'");
-			// cadastro ele na tabela de edição
-			$this->banco->sql_insert('Conteudo_Edicao', array('cod_conteudo' => $conteudovo->getCodConteudo(), 'data_edicao' => date('Y-m-d H:i:s')));
-			// se o conteudo não tiver autor nativo e (eu) edita-lo fico com ele p/ mim
-			$query = $this->banco->sql_select('cod_autor', 'Conteudo', "cod_conteudo='".$conteudovo->getCodConteudo()."'");
-        	$row = $this->banco->fetchObject();
-        	if (!$row->cod_autor)
-        		$this->banco->sql_update('Conteudo', array('cod_autor' => $_SESSION['logado_cod']), "cod_conteudo='".$conteudovo->getCodConteudo()."'");
-        }
-
-        // autorizações
-		// apenas pra usuarios de nivel 2
-		if ($_SESSION['logado_dados']['nivel'] == 2) {
-
-			// mandar pra lista publica
-			if ($conteudovo->getPedirAutorizacao() == 1) {
-				$this->enviarConteudoListaPublica($conteudovo->getCodConteudo());
-			}
-
-			// mandar pra colaboradores selecionados
-			if ($conteudovo->getPedirAutorizacao() == 2) {
-				$this->atualizarConteudoColaboradoresRevisaoNova($conteudovo, $conteudovo->getCodConteudo());
-			}
-
-		}
-
-		if (($_SESSION['logado_dados']['nivel'] >= 5) || count($_SESSION['logado_dados']['cod_grupo'])) {
-			$this->banco->executaQuery("delete from Conteudo_Autores_Ficha where cod_conteudo = '".$conteudovo->getCodConteudo()."'");
-			if (count($conteudovo->getListaAutores())) {
-				foreach ($conteudovo->getListaAutores() as $autorficha)
-					$this->banco->executaQuery("INSERT INTO Conteudo_Autores_Ficha VALUES (NULL, '".$conteudovo->getCodConteudo()."', '".$autorficha['codautor']."', '".$autorficha['atividade']."')");
+			if ($conteudovo->getCodFormato() < 5) {
 				if ($_SESSION['logado_dados']['nivel'] == 2)
-					$this->banco->executaQuery("INSERT INTO Conteudo_Autores_Ficha VALUES (NULL, '".$conteudovo->getCodConteudo()."', '".$_SESSION['logado_cod']."', 1)");
+					$this->banco->sql_update('Conteudo', array('situacao' => 0, 'publicado' => 0), "cod_conteudo='".$conteudovo->getCodConteudo()."'");
+				$this->definirAprovacaoConteudo($conteudovo->getCodConteudo(), 4, $conteudovo->getListaColaboradoresRevisao(), true);
 			}
+			
+			$this->atualizarTags($conteudovo, $conteudovo->getCodConteudo());
+			$this->atualizarAutoresFichaTecnica($conteudovo->getCodConteudo(), $conteudovo->getListaAutores());
+			
+			return $conteudovo->getCodConteudo();
 		}
-
-        $this->atualizarTags($conteudovo);
+		return false;
+	}
+	
+	private function definirAprovacaoConteudo($codconteudo, $tipo, $listaColaboradores = array(), $edicao = false) {
+		if ($_SESSION['logado_dados']['nivel'] == 2) {
+		//if ($_SESSION['logado_dados']['colaborador_responsavel'] != 1) {
+			include('ConteudoAprovacaoDAO.php');
+			$aprovdao = new ConteudoAprovacaoDAO;
+			if ($edicao)
+				$aprovdao->editarEdicaoNotificacaoAprovacao($codconteudo, $tipo, implode(',', $listaColaboradores));
+			else
+				$aprovdao->cadastrarNotificacaoAprovacao($codconteudo, $tipo, implode(',', $listaColaboradores));
+		}
+	}
+	
+	private function atualizarAutoresFichaTecnica($codconteudo, $autoresLista = array()) {
+		if (count($autoresLista)) {
+			$this->banco->executaQuery("DELETE FROM Conteudo_Autores_Ficha WHERE cod_conteudo = '".$codconteudo."'");
+			foreach ($autoresLista as $autorFicha)
+				$this->banco->executaQuery("INSERT INTO Conteudo_Autores_Ficha VALUES (NULL, '".$codconteudo."', '".$autorFicha['codautor']."', '".$autorFicha['atividade']."')");
+		}
 	}
 
 	public function cadastrarTags(&$conteudovo, $codconteudo) {
@@ -389,6 +380,12 @@ class ConteudoDAO {
 		$sql = "SELECT t1.cod_usuario FROM Usuarios AS t1 LEFT JOIN Conteudo_Notificacoes AS t2 ON (t1.cod_usuario=t2.cod_colaborador) WHERE t1.cod_tipo='2' AND t2.cod_conteudo='".$codconteudo."' AND t1.cod_sistema='".ConfigVO::getCodSistema()."' AND (t2.cod_tipo='5' OR t2.cod_tipo='2') AND t2.cod_colaborador!='0'";
 		$query = $this->banco->executaQuery($sql);
 		return (bool)$this->banco->fetchArray($query);
+	}
+	
+	public function conteudoEnviadoParaColaboradores($codconteudo) {
+		$sql = "SELECT COUNT(1) FROM Conteudo_Aprovacao WHERE cod_conteudo='".$codconteudo."' AND (tipo = 1 OR tipo = 4) AND cod_colaboradores!=''";
+		$row = $this->banco->fetchArray($this->banco->executaQuery($sql));
+		return (bool)$row[0];
 	}
 
 	public function atualizarConteudoColaboradoresRevisao(&$conteudovo) {
@@ -651,7 +648,7 @@ class ConteudoDAO {
 			$codautor = $_SESSION['logado_dados']['cod'];
 		if ($_SESSION['logado_dados']['nivel'] == 5 || $_SESSION['logado_dados']['nivel'] == 6)
 			$codcolaborador = $_SESSION['logado_dados']['cod_colaborador'];
-
+            
 		if ($relacionamento)
 			$where .= " AND t1.situacao='1' AND t1.publicado='1'";
 
@@ -680,7 +677,7 @@ class ConteudoDAO {
 		$array['total'] = $this->banco->numRows($this->banco->executaQuery($sql));
 
 		//echo $sql;
-
+        $_SESSION['sql'] = "$sql ORDER BY $orderby LIMIT $inicial,$mostrar";
 		$query = $this->banco->executaQuery("$sql ORDER BY $orderby LIMIT $inicial,$mostrar");
 		while ($row = $this->banco->fetchArray($query)) {
 			switch($row['cod_formato']) {
@@ -720,16 +717,17 @@ class ConteudoDAO {
 
 			$arrayAutores = array();
 			foreach ($this->getAutoresConteudo($row['cod_conteudo']) as $value)
-				$arrayAutores[] = htmlentities($value['nome']);
+                $arrayAutores[] = htmlentities(Util::iif($value['nome'],$value['nome'],$value['nome_completo']));
+                //$arrayAutores[] = htmlentities($value['nome']);
 
 			$dados_colab = $this->getColaboradorConteudo($row['cod_conteudo']);
-
-			if ($formato == 6) { //agenda
+                        
+			if ($row['cod_formato'] == 6) { //agenda
 				include_once('AgendaDAO.php');
 				include_once(ConfigGerenciadorVO::getDirClassesRaiz()."vo/AgendaVO.php");
 				$agdao = new AgendaDAO;
 				$agvo = $agdao->getAgendaVO($row['cod_conteudo']);
-			}
+                        }
 
 			$array[] = array(
 				'cod' 		=> $row['cod_conteudo'],
@@ -744,7 +742,7 @@ class ConteudoDAO {
 				'cod_autor_colaborador' => $row['cod_autor'],
 			);
 
-			if ($formato == 6) { //agenda
+			if ($row['cod_formato'] == 6) { //agenda
 				$num_indice = count($array) - 4;
 				$array[$num_indice]['agenda_local'] = htmlentities($agvo->getLocal());
 				$ag_data1 = date('d/m/y', strtotime($agvo->getDataInicial()));
@@ -787,20 +785,69 @@ class ConteudoDAO {
 		return $sql_row["randomico"];
 	}
 
+
 	public function getUltimasDoFormato($codformato, $total = 1) {
 		$lista = array();
-		//TODO:ajustar
-
-		//if ($codformato == 4)
-		//	$comp = " AND (IF ((SELECT COUNT(1) FROM Videos WHERE cod_conteudo = t1.cod_conteudo AND arquivo!=''), t1.cod_conteudo IN (SELECT cod_video FROM Videos_Conversao WHERE cod_video=t1.cod_conteudo AND status=1), 1=1))";
-
-		$sql = "SELECT t1.cod_conteudo FROM Conteudo AS t1 WHERE t1.cod_formato = '".$codformato."' AND t1.excluido='0' AND t1.publicado='1' AND t1.situacao='1' and t1.cod_colaborador != 0 and t1.cod_sistema = '".ConfigVO::getCodSistema()."' ".$comp." order by t1.datahora desc limit ".$total.";";
-		$sql_result = $this->banco->executaQuery($sql);
-		while ($sql_row = $this->banco->fetchArray($sql_result))
-			$lista[] = (int)$sql_row["cod_conteudo"];
-		return $lista;
+        $comp ='';
+            
+		if ($codformato == 4) {
+            include_once("ConexaoVideosDB.php");
+            $conversaoDB = ConexaoVideosDB::singleton();
+            
+            //seleciona todos os vídeos
+            $sql = "SELECT * FROM Videos AS t1 ORDER BY t1.cod_conteudo DESC LIMIT 400";
+            $videosCadastrados = $this->banco->executaQuery($sql);
+            
+            //enquanto houver vídeos
+            while($linha = $this->banco->fetchArray($videosCadastrados)){
+                $comp = " AND t1.cod_conteudo = '{$linha['cod_conteudo']}'";
+                //se for vídeo de upload
+                if($linha['arquivo'] != ''){
+                    if(Util::getExtensaoArquivo($linha['arquivo_original']) == 'flv'){
+                        //$comp = " AND t1.cod_conteudo = '{$linha['cod_conteudo']}'";
+                        $this->getConteudoValido($codformato, $total, $lista, $comp);
+                    }else{
+                        //Seleciona registro de Conversão
+                        $sql = "SELECT * FROM Videos_Conversao where arquivo_convertido LIKE '{$linha['arquivo']}'";
+                        $videoConversao = $conversaoDB->executaQuery($sql);
+                        while($linha2 = mysql_fetch_array($videoConversao)){
+                            //se video estiver convertido, adiciona à lista
+                            if($linha2['status'] == '1'){
+                                $arquivo = ConfigVO::getDirVideo().'/convertidos/'.$linha2['arquivo_convertido'];
+                                if(file_exists($arquivo) && filesize($arquivo) != 0){
+                                    //$comp = " AND t1.cod_conteudo = '{$linha['cod_conteudo']}'";
+                                    $this->getConteudoValido($codformato, $total, $lista, $comp);
+                                }
+                            }
+                        }
+                    }
+                }
+                //se for vídeo de youtube
+                else{
+                    if($linha['link'] != ''){
+                        //$comp = " AND t1.cod_conteudo = '{$linha['cod_conteudo']}'";
+                        $this->getConteudoValido($codformato, $total, $lista, $comp);
+                    }
+                }
+                
+                if(count($lista) == $total)
+                    break;
+            }
+		}else{
+            $this->getConteudoValido($codformato, $total, $lista, $comp);
+        }
+        return $lista;
 	}
-
+    
+    private function getConteudoValido($codformato, $total, &$lista, $comp){
+        $sql = "SELECT t1.cod_conteudo FROM Conteudo AS t1 WHERE t1.cod_formato = '".$codformato."' AND t1.excluido='0' AND t1.publicado='1' AND t1.situacao='1' AND t1.cod_colaborador != 0 AND t1.cod_sistema = '".ConfigVO::getCodSistema()."' ".$comp." ORDER BY t1.datahora DESC LIMIT ".$total.";";
+        
+		error_log($sql,0);
+        $sql_result = $this->banco->executaQuery($sql);
+        while ($sql_row = $this->banco->fetchArray($sql_result))
+            $lista[] = (int)$sql_row["cod_conteudo"];
+    }
+    
 	public function getEstatisticas($codconteudo) {
 		$sql = "select num_recomendacoes, num_acessos from Conteudo_Estatisticas where cod_conteudo = '".$codconteudo."';";
 		$sql_result = $this->banco->executaQuery($sql);
@@ -827,17 +874,73 @@ class ConteudoDAO {
 		return array(0 => $lista_foto, 1 => $lista_outras);
 	}
 
+	//public function getMaisAcessadasDoFormato($codformato, $indice = 0, $limite = 4) {
+	//	$lista = array();
+	//	//$sql = "SELECT C.cod_conteudo FROM Conteudo C, Conteudo_Estatisticas CE WHERE C.cod_formato = '".$codformato."' AND C.excluido='0' AND C.publicado='1' AND C.situacao='1' and C.cod_sistema = '".ConfigVO::getCodSistema()."' and C.cod_conteudo = CE.cod_conteudo order by CE.num_acessos desc, C.datahora desc limit ".$indice.", ".$limite.";";
+	//
+	//	$sql = "SELECT C.cod_conteudo, (CE.num_acessos / TIMESTAMPDIFF(DAY, C.data_cadastro, NOW())) AS ordenacao FROM Conteudo C, Conteudo_Estatisticas CE WHERE C.cod_formato = '".$codformato."' AND C.excluido='0' AND C.publicado='1' AND C.situacao='1' and C.cod_sistema = '".ConfigVO::getCodSistema()."' and C.cod_conteudo = CE.cod_conteudo order by ordenacao desc, C.datahora desc limit ".$indice.", ".$limite.";";
+	//
+	//	$sql_result = $this->banco->executaQuery($sql);
+	//	while ($sql_row = $this->banco->fetchArray($sql_result))
+	//		$lista[] = (int)$sql_row["cod_conteudo"];
+	//	return $lista;
+	//}
+    
 	public function getMaisAcessadasDoFormato($codformato, $indice = 0, $limite = 4) {
 		$lista = array();
-		//$sql = "SELECT C.cod_conteudo FROM Conteudo C, Conteudo_Estatisticas CE WHERE C.cod_formato = '".$codformato."' AND C.excluido='0' AND C.publicado='1' AND C.situacao='1' and C.cod_sistema = '".ConfigVO::getCodSistema()."' and C.cod_conteudo = CE.cod_conteudo order by CE.num_acessos desc, C.datahora desc limit ".$indice.", ".$limite.";";
-
-		$sql = "SELECT C.cod_conteudo, (CE.num_acessos / TIMESTAMPDIFF(DAY, C.data_cadastro, NOW())) AS ordenacao FROM Conteudo C, Conteudo_Estatisticas CE WHERE C.cod_formato = '".$codformato."' AND C.excluido='0' AND C.publicado='1' AND C.situacao='1' and C.cod_sistema = '".ConfigVO::getCodSistema()."' and C.cod_conteudo = CE.cod_conteudo order by ordenacao desc, C.datahora desc limit ".$indice.", ".$limite.";";
-
-		$sql_result = $this->banco->executaQuery($sql);
-		while ($sql_row = $this->banco->fetchArray($sql_result))
-			$lista[] = (int)$sql_row["cod_conteudo"];
+        $comp = "";
+        
+        if($codformato == 4){
+            include_once("ConexaoVideosDB.php");
+            $conversaoDB = ConexaoVideosDB::singleton();
+            
+            $indiceLocal = 0;
+            while(count($lista) < $limite){
+                $listaTemp = $this->getMaisAcessadasValidas($codformato, $indiceLocal, 1, $comp);
+                $sql = "SELECT * FROM Videos WHERE cod_conteudo = ".$listaTemp[0];
+                $videosCadastrados = $this->banco->executaQuery($sql);
+                $linha = $this->banco->fetchArray($videosCadastrados);
+                
+                if($linha['arquivo'] != ''){
+                    if(Util::getExtensaoArquivo($linha['arquivo_original']) == 'flv'){
+                        $lista[] = $listaTemp[0];
+                    }else{
+                        //Seleciona registro de Conversão
+                        $sql = "SELECT * FROM Videos_Conversao where arquivo_convertido LIKE '{$linha['arquivo']}'";
+                        $videoConversao = $conversaoDB->executaQuery($sql);
+                        while($linha2 = mysql_fetch_array($videoConversao)){
+                            //se video estiver convertido, adiciona à lista
+                            if($linha2['status'] == '1'){
+                                $arquivo = ConfigVO::getDirVideo().'/convertidos/'.$linha2['arquivo_convertido'];
+                                if(file_exists($arquivo) && filesize($arquivo) != 0){
+                                    $lista[] = $listaTemp[0];
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    if($linha['link'] != ''){
+                        $lista[] = $listaTemp[0];
+                    }
+                }
+                $indiceLocal++;
+            }
+        }else{
+            $lista = $this->getMaisAcessadasValidas($codformato, $indice, $limite, $comp);
+        }
 		return $lista;
 	}
+
+    private function getMaisAcessadasValidas($codformato, $indice, $limite, $comp){
+		$lista = array();
+        $sql = "SELECT C.cod_conteudo, (CE.num_acessos / TIMESTAMPDIFF(DAY, C.data_cadastro, NOW())) AS ordenacao FROM Conteudo C, Conteudo_Estatisticas CE WHERE C.cod_formato = '".$codformato."' AND C.excluido='0' AND C.publicado='1' AND C.situacao='1' and C.cod_sistema = '".ConfigVO::getCodSistema()."' and C.cod_conteudo = CE.cod_conteudo $comp order by ordenacao desc, C.datahora desc limit ".$indice.", ".$limite.";";
+        //echo $sql."<br>";
+        error_log($sql,0);
+        $sql_result = $this->banco->executaQuery($sql);
+        while ($sql_row = $this->banco->fetchArray($sql_result))
+            $lista[] = (int)$sql_row["cod_conteudo"];
+        return $lista;
+    }
 
 	public function getTotalAcessadasDoFormato($codformato) {
 		$sql = "SELECT count(C.cod_conteudo) FROM Conteudo C, Conteudo_Estatisticas CE WHERE C.cod_formato = '".$codformato."' AND C.excluido='0' AND C.publicado='1' AND C.situacao='1' and C.cod_sistema = '".ConfigVO::getCodSistema()."' and C.cod_conteudo = CE.cod_conteudo;";
@@ -907,7 +1010,7 @@ class ConteudoDAO {
             $where = "AND t5.cod_grupo='$codgrupo'";
         }
 
-        $sql = "SELECT t1.cod_conteudo, t1.cod_formato, t1.titulo, t1.data_cadastro, t1.datahora, t1.descricao, t1.imagem, t1.cod_colaborador, t1.cod_autor, t1.cod_segmento, t2.num_acessos, t2.num_recomendacoes, t3.titulo AS url FROM Conteudo AS t1 LEFT JOIN Conteudo_Estatisticas AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) LEFT JOIN Urls AS t3 ON (t1.cod_conteudo=t3.cod_item) $sql_extra WHERE t1.cod_conteudo!='0' AND t1.excluido='0' AND t1.publicado='1' AND t1.situacao='1' AND t3.tipo='4' $colaborador $where AND $formato ORDER BY $orderby DESC LIMIT $limit";
+        $sql = "SELECT t1.cod_conteudo, t1.cod_formato, t1.titulo, t1.data_cadastro, t1.datahora, t1.descricao, t1.imagem, t1.cod_colaborador, t1.cod_autor, t1.cod_segmento, t1.cod_subarea, t2.num_acessos, t2.num_recomendacoes, t3.titulo AS url FROM Conteudo AS t1 LEFT JOIN Conteudo_Estatisticas AS t2 ON (t1.cod_conteudo=t2.cod_conteudo) LEFT JOIN Urls AS t3 ON (t1.cod_conteudo=t3.cod_item) $sql_extra WHERE t1.cod_conteudo!='0' AND t1.cod_sistema='6' AND t1.excluido='0' AND t1.publicado='1' AND t1.situacao='1' AND t3.tipo='4' $colaborador $where AND $formato ORDER BY $orderby DESC LIMIT $limit";
 
         //echo $sql;
 
@@ -986,14 +1089,18 @@ class ConteudoDAO {
     }
 
     public function getAutoresFichaTecnicaCompletaConteudo($codconteudo) {
-    	$sql = "SELECT t1.cod_usuario, t1.nome, t3.atividade, t5.titulo FROM Usuarios AS t1 INNER JOIN Conteudo_Autores_Ficha AS t2 ON (t1.cod_usuario=t2.cod_usuario) LEFT JOIN Usuarios_Atividades AS t3 ON (t2.cod_atividade=t3.cod_atividade) LEFT JOIN Urls AS t5 ON (t1.cod_usuario=t5.cod_item) WHERE t2.cod_conteudo='".$codconteudo."' AND t5.tipo='2' AND t5.titulo != '' AND t5.cod_sistema='".ConfigVO::getCodSistema()."' ORDER BY t2.cod_increment ASC";
-        $query1 = $this->banco->executaQuery($sql);
-        $lista = array();
-    	while ($row = $this->banco->fetchArray($query1))
-    		$lista[] = $row;
-			//$lista .= (($lista != '') ? ', ' : ' ').$row['nome'];
-    	//}
-    	return $lista;
+		if ($codconteudo) {
+			include_once('UsuarioDAO.php');
+			$usrdao = new UsuarioDAO;
+			$sql = "SELECT t1.cod_usuario, t3.atividade FROM Usuarios AS t1 INNER JOIN Conteudo_Autores_Ficha AS t2 ON (t1.cod_usuario=t2.cod_usuario) LEFT JOIN Usuarios_Atividades AS t3 ON (t2.cod_atividade=t3.cod_atividade) WHERE t2.cod_conteudo='".$codconteudo."' ORDER BY t2.cod_increment ASC";
+			$query = $this->banco->executaQuery($sql);
+			$lista = array();
+			while ($row = $this->banco->fetchArray($query)) {
+				$lista[$row['cod_usuario']] = $usrdao->getUsuarioDados($row['cod_usuario']);
+				$lista[$row['cod_usuario']]['atividade'] = $row['atividade'];
+			}
+			return $lista;
+		}
     }
 
 }

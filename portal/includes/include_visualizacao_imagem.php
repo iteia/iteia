@@ -7,7 +7,7 @@ $jsconteudo = 1 ;
 $jsautores = 1;
 $js_galeria = 1;
 $js_texto = 1;
-
+$js_bookmarks = 0;
 $js_ready_complemento = '';
 $contimg = 1;
 foreach ($conteudo['dados_imagens'] as $value) {
@@ -25,7 +25,6 @@ $imagens = array();
 </script>
     <div id="migalhas"><span class="localizador">Você está em:</span> <a href="/" title="Voltar para a página inicial" id="inicio">Início</a> <span class="marcador">&raquo;</span> <a href="/imagens">Imagens</a> <span class="marcador">&raquo;</span> <span class="atual"><?=$titulo?></span></div>
     <div id="conteudo">
-	  <?=$conteudo['canal']?>
       <h2 class="midia">Imagens</h2>
 	  <div id="pagina">
       <h1 class="midia"><?=$titulo?></h1>
@@ -53,7 +52,7 @@ $imagens = array();
 	</div>
       <div class="principal">
 		<div id="funcoes">
-			<div id="views">Visualizações: <?=number_format(intval($conteudo['conteudo']['num_acessos']),'0','.','.');?></div>
+			<div id="views">Visualizações: <strong><?=number_format(intval($conteudo['conteudo']['num_acessos']),'0','.','.');?></strong></div>
 			<div id="vote" class="no-border">Gostou?! Então vote!
 			  <ul>
 				<li id="vote-sim"><tt id="voto1"><?=intval($conteudo['conteudo']['num_recomendacoes']);?></tt> <span>pessoas votaram</span> <a href="javascript:;" onclick="javascript:recomendar(<?=intval($conteudo['conteudo']['cod_conteudo']);?>, <?=intval($conteudo['conteudo']['cod_formato']);?>, 1);">Sim</a> </li>
@@ -68,19 +67,11 @@ $imagens = array();
 				<?php endif; ?>
 				<?php if ($conteudo['permitir_comentarios']): ?>
 				<li id="comente"><a href="#comentar">Comente</a> (<?=$conteudo['comentarios'];?>)</li>
+				<?php //<li id="compartilhe"><a href="#bookmark">Compartilhe</a></li>?>
 				<?php endif; ?>
-				<li id="compartilhe"><a href="#bookmark">Compartilhe</a></li>
 				<li id="denuncie" class="no-border"><a href="/denuncie.php?conteudo=<?=$conteudo['conteudo']['cod_conteudo'];?>">Denuncie</a></li>
 			</ul>
-			<div id="bookmarks"> <a href="/bookmarks" class="link-oq">O que é isso?</a>
-            <ul>
-            <li id="b-twitter"><a href="http://twitter.com/home/?status=<?=urlencode(Util::bitly($conteudo['compartilhar']).' '.$titulo.' #iteia')?>">twitter</a></li>
-               <li id="b-delicious"><a href="http://del.icio.us/post?url=<?=urlencode($conteudo['compartilhar'].' '.$titulo.' #iteia');?>">delicious</a></li>
-				  <li id="b-facebook"><a href="http://www.facebook.com/share.php?u=<?=$conteudo['compartilhar'];?>">facebook</a></li>
-              <li id="b-yahoo"><a href="http://buzz.yahoo.com/buzz?targetUrl=<?=Util::bitly($conteudo['compartilhar']);?>">Yahoo buzz</a></li>
-              <li id="b-digg"><a href="http://digg.com/submit?phase=2&amp;url=<?=Util::bitly($conteudo['compartilhar']);?>">digg it </a></li>
-            </ul>
-          </div>
+          <?php include('includes/bookmarks.php'); ?>
         </div>
       </div>
 		<div class="lateral">
@@ -132,6 +123,9 @@ $imagens = array();
 				<?php else: ?>
 				<div class="capa"><span class="<?=Util::getIconeConteudo($relacionado_autores['cod_formato']);?> no-image"><a href="/<?=Util::getFormatoConteudoBusca($relacionado_autores['cod_formato']);?>" title="Ir para página do conteudo">Textos</a></span></div>
 				<?php endif; ?>
+				<?php if ($relacionado_autores['cod_segmento']): ?>
+				  <div class="tag-canal"><?=Util::getHtmlCanal($relacionado_autores['cod_segmento']);?></div>
+				<?php endif; ?>
 				<strong><a href="/<?=$relacionado_autores['url'];?>" title="Ir para página deste conteúdo"><?=Util::cortaTexto($relacionado_autores['titulo'], 60);?></a></strong><br />
 				<?=Util::getHtmlListaAutores($relacionado_autores['cod_conteudo']);?>
 				<div class="hr"><hr /></div>
@@ -162,6 +156,9 @@ foreach ($conteudo['relacionado'] as $key => $acessado):
             <?php else: ?>
 			<div class="capa"><span class="<?=Util::getIconeConteudo($acessado['cod_formato']);?> no-image"><a href="/<?=Util::getFormatoConteudoBusca($acessado['cod_formato']);?>" title="Ir para página do conteudo">Textos</a></span></div>
 			<?php endif; ?>
+			<?php if ($acessado['cod_segmento']): ?>
+			  <div class="tag-canal"><?=Util::getHtmlCanal($acessado['cod_segmento']);?></div>
+            <?php endif; ?>
             <strong><a href="/<?=$acessado['url'];?>" title="Ir para página deste conteúdo"><?=Util::cortaTexto($acessado['titulo'], 60);?></a></strong><br />
 			<?=Util::getHtmlListaAutores($acessado['cod_conteudo']);?>
             <div class="hr"><hr /></div>
@@ -181,33 +178,32 @@ if (!$temul)
         <div class="todos"><a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5&amp;relacionado=<?=$conteudo['conteudo']['cod_conteudo']?>" title="Listar conteúdos relacionados"><strong>Ver todos</strong></a></div>
     </div>
 <?php endif; ?>
-<?php if ($conteudo['permitir_comentarios']): ?>
+
 	<div id="comentarios" class="principal">
-		<div id="carrega_comentarios"></div>
+		<div id="carrega_comentarios"><?php include('comentarios_carregar.php');?></div>
     </div>
+<?php if ($conteudo['permitir_comentarios']): ?>
     <div id="comentar" class="principal">
-		<form action="javascript:;" id="formcomentario" name="formcomentario">
+		<form action="#comentar" id="formcomentario" name="formcomentario" method="post" onsubmit="return false;">
 			<fieldset>
 				<legend>Deixe um comentário</legend>
-				<div id="resposta_comentario"></div>
+				<div id="resposta_comentario"><?php include('comentarios_enviar.php');?></div>
 				<input type="hidden" value="<?=$conteudo['conteudo']['cod_conteudo']?>" name="cod_conteudo" id="cod1" />
+                <input type="hidden" value="enviar" name="acao" id="acao" />
 				<label for="comentario">Comentário:</label><br />
-				<textarea id="comentario" name="comentario" cols="30" rows="5"></textarea><br />
+				<textarea id="comentario" name="comentario" cols="30" rows="5"><?=$_POST['comentario']?></textarea><br />
 				<label for="seu-nome">Seu nome:</label><br />
-				<input type="text" id="seu-nome" name="nome" class="txt" /><br />
+				<input type="text" id="seu-nome" name="nome" class="txt" value="<?=$_POST['nome']?>" /><br />
 				<label for="seu-email">Seu e-mail (não será publicado):</label><br />
-				<input type="text" id="seu-email" name="email" class="txt" /><br />
+				<input type="text" id="seu-email" name="email" class="txt" value="<?=$_POST['email']?>" /><br />
 				<label for="seu-site">Site / Url (opcional):</label><br />
-				<input type="text" id="seu-site" name="site" class="txt" /><br />
-				<input class="btn" type="image" onclick="javascript:enviarComentario();" src="/img/botoes/bt_enviar.gif" />
+				<input type="text" id="seu-site" name="site" class="txt" value="<?=$_POST['site']?>" /><br />
+				<input class="btn" type="image" onclick="javascript:enviarComentario(this);" src="/img/botoes/bt_enviar.gif" />
 			</fieldset>
         </form>
       </div>
 	</div>
 </div>
-<script type="text/javascript">
-loadComentarios(<?=$conteudo['conteudo']['cod_conteudo'];?>);
-</script>
 <?php endif; ?>
 <?php
 include ('includes/rodape.php');

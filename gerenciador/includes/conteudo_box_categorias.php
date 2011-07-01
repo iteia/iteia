@@ -1,7 +1,15 @@
 <script type="text/javascript">
-function listarSubCanais(codsubcanal) {
-	$('#codsubcanal').load('ajax_conteudo.php?get=subcanais&codcanal=' + $('#codcanal').val() + '&codsubcanal=' + codsubcanal);
+function listarSubCanais(codcanal, codsubcanal) {
+	var canal = $('#codcanal').val();
+	if (codcanal)
+		canal = codcanal;
+	$('#codsubcanal').load('ajax_conteudo.php?get=subcanais&codcanal=' + canal + '&codsubcanal=' + codsubcanal);
 }
+<?php if ($contbo->getValorCampo("codsegmento")): ?>
+$(document).ready(function() {
+	listarSubCanais(<?=$contbo->getValorCampo("codsegmento")?>, <?=$contbo->getValorCampo("codsubarea")?>);
+});
+<?php endif; ?>
 </script>
 <div class="box"  id="classificar">
     <fieldset>

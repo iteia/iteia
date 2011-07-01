@@ -18,19 +18,27 @@ class ComentariosBO {
     public function setDadosForm(&$dadosform) {
 		$this->dadosform = $dadosform;
         $this->dadosform['cod_conteudo'] = (int)$this->dadosform['cod_conteudo'];
-        $this->dadosform['nome'] = strip_tags(trim($this->dadosform['nome']));
+        if($this->dadosform['ajax']){
+            $this->dadosform['nome'] = utf8_decode(strip_tags(trim($this->dadosform['nome'])));
+            $this->dadosform['comentario'] = utf8_decode(substr(strip_tags(trim($this->dadosform['comentario'])), 0, 2000));
+        }else{
+            $this->dadosform['nome'] = strip_tags(trim($this->dadosform['nome']));
+            $this->dadosform['comentario'] = substr(strip_tags(trim($this->dadosform['comentario'])), 0, 2000);
+        }
         $this->dadosform['email'] = strip_tags(trim($this->dadosform['email']));
         $this->dadosform['site'] = strip_tags(trim($this->dadosform['site']));
-        $this->dadosform['comentario'] = substr(strip_tags(trim($this->dadosform['comentario'])), 0, 2000);
     }
 
     private function validaDados() {
 		if (!$this->dadosform['comentario']) $this->erros_campos[] = '<li><a href="#comentario">Escreva seu <strong>comentário</strong></a></li>';
 		if (!$this->dadosform['nome']) $this->erros_campos[] = '<li><a href="#seu-nome">Escreva seu <strong>nome</strong></a></li>';
 		if (!$this->dadosform['email']) $this->erros_campos[] = '<li><a href="#seu-email">Adicione um <strong>e-mail</strong> válido</a></li>';
-		
+
 		if (!Util::checkEmail($this->dadosform['email']) && $this->dadosform['email'])
-			$this->erros_campos[] = 'Por favor, adicione um e-mail válido.';
+			$this->erros_campos[] = '<li><a href="#seu-email">Por favor, adicione um <strong>e-mail</strong> válido</a></li>';
+
+                if($this->dadosform['site'])
+                        $this->dadosform['site'] = Util::VerificaHttp($this->dadosform['site']);
 
         if (count($this->erros_campos))
 			throw new Exception(' ');

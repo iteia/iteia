@@ -89,8 +89,12 @@ class AgendaBO {
 			    $dhoje = date("d");
 				$diacal = $dayarray["mday"];
 				$tdc = '';
-				if($diacal == $dhoje){
+                $title = '';
+                $marcaHoje = date("jFY");
+                $marcaCal = $dayarray["mday"].$dayarray["month"].$dayarray["year"];
+				if($marcaHoje == $marcaCal){
 					$tdc='today';// title="Hoje"';
+                    $title = 'title="Hoje"';
 				}
 
 				if (strlen($diacal) < 2)
@@ -107,7 +111,7 @@ class AgendaBO {
 				elseif ($this->agedao->ExisteAgenda($year."-".$mescal."-".$diacal, 0))
 					$texto_dia = "<a href=\"/".$this->linkagenda."?dia=".$year."-".$mescal."-".$diacal."&amp;mes=".$mes."\">".$diacal."</a>";
 
-				$texto_html .= "<td class=\"$tdc $classiniciodia $classfimdia\"  >".$texto_dia."</td>\n";
+				$texto_html .= "<td $title class=\"$tdc $classiniciodia $classfimdia\"  >".$texto_dia."</td>\n";
 
 				$start = mktime(0, 0, 0, $month, $contdia, $year);
 				$contdia++;
@@ -139,11 +143,6 @@ class AgendaBO {
         $texto_html .= "</div>\n";
 		$texto_html .= "</div>\n";
 
-		//$texto_html .= "<div id=\"doismeses\">\n";
-		//$texto_html .= "<a href=\"".$this->linkagenda."?dia=".$dia."&amp;mes=".$mesant."\" title=\"".htmlentities($mesant_texto)."\" id=\"mesant\">&laquo; ".htmlentities($mesant_texto)."</a>\n";
-		//$texto_html .= "<a href=\"".$this->linkagenda."?dia=".$dia."&amp;mes=".$mesprox."\" title=\"".htmlentities($mesprox_texto)."\" id=\"mesprox\">".htmlentities($mesprox_texto)." &raquo;</a>\n";
-		//$texto_html .= "</div>\n";
-
 		return $texto_html;
 	}
 
@@ -153,14 +152,30 @@ class AgendaBO {
         $conteudo['comentarios'] = $this->comentdao->getQtsComentarios($codconteudo);
 		$conteudo['canal'] = Util::getHtmlCanal($conteudo['cod_segmento']);
         $conteudo['tags'] = $this->getTagsConteudo($codconteudo);
+		$conteudo['relacionado'] = $this->contdao->getConteudoRelacionado($codconteudo, 0, 0);
+		
+		include_once(ConfigPortalVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
+		$usrdao = new UsuarioDAO;
+		$conteudo['publicado'] = $usrdao->getUsuarioDados($conteudo['cod_autor']);
 		return $conteudo;
 	}
+
+    public function exibirConteudo(&$codconteudo) {
+        $conteudo = $this->getDadosAgenda($codconteudo);
+        include('includes/include_visualizacao_agenda.php');
+    }
 
 	private function getTagsConteudo($codconteudo) {
 		$html  = '';
 		foreach($this->contdao->getTagsConteudoNovo($codconteudo) as $tag)
-			$html .= (($html != '') ? ' ' : ' ').'<a href="/busca_resultado?buscar=1&amp;tag='.urlencode($tag['tag']).'" class="common0 size0">'.$tag['tag'].'</a>';
+			$html .= (($html != '') ? ' ' : ' ').'<a href="/busca_action.php?buscar=&amp;formatos=2,3,4,5,6,7&amp;tag='.urlencode($tag['tag']).'" class="common0 size0">'.$tag['tag'].'</a>';
 		return $html;
 	}
+	
+    public function DownloadArquivo($codconteudo, $codimagem) {
+		$dados = $this->agedao->getDadosAgenda($codconteudo);
+		Util::force_download(file_get_contents(ConfigVO::getDirFotos().$dados['imagem']), $dados['imagem']);
+        die;
+    }
 
 }

@@ -7,7 +7,9 @@
   <label for="type">Filtrar por</label>
   <br />
   <select id="relacionar_buscarpor_popup" name="buscarpor_popup">
-          <option value="" selected="selected">Todos</option>
+          <option value="todos" selected="selected">Todos</option>
+          <option value="autor">Autor</option>
+          <option value="email">E-mail</option>
           <option value="comentario">Coment&aacute;rio</option>
           <option value="aprovado">Aprovado</option>
           <option value="rejeitado">Rejeitado</option>

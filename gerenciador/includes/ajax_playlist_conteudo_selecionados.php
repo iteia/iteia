@@ -36,7 +36,7 @@ $tempo_total = $homebuscabo->getTempoTotalPlayList($codplaylist);
 			$html_img = $item["imagem"];
 ?>
               <tr>
-                <td class="col-1"><input type="checkbox" class="check" name="coditem" value="<?=$item["cod_item"]?>" /></td>
+                <td class="col-1"><input type="checkbox" class="check" name="coditem" id="<?=$item["cod_item"]?>" value="<?=$item["cod_item"]?>"/></td>
                 <td class="col-img"><?=$html_img?></td>
                 <td class="col-titulo"><strong><?=utf8_encode($item["titulo"])?></strong><p><?=utf8_encode($item["descricao"])?></p></td>
                 <td class="col-tempo">
@@ -68,3 +68,13 @@ $tempo_total = $homebuscabo->getTempoTotalPlayList($codplaylist);
 
 <script type="text/javascript" src="jscripts/thickbox/thickbox-compressed.js"></script>
 <script type="text/javascript" src="jscripts/scripts.js"></script>
+
+<?php
+if(count($itens_selecionados)!=0){
+echo '<script type="text/javascript">';
+foreach($itens_selecionados as $itemS){
+	  echo 'document.getElementById("'.$itemS.'").checked=true'."\n";
+}
+echo "</script>";
+}
+?>

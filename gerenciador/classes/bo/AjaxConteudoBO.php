@@ -15,6 +15,8 @@ class AjaxConteudoBO {
 			case "listar_imagens_album": $this->listarImagensAlbum(); break;
 			case "imagem_upload": $this->enviaImagemUpload($_FILES); break;
 			case "imagem_conteudo_upload": $this->enviaImagemConteudoUpload($_FILES); break;
+			case "imagem_conteudo_upload_crop": $this->enviaImagemConteudoUploadCrop($_POST); break;
+			case "imagem_banner_upload": $this->enviaImagemBannerUpload($_FILES); break;
 			case "imagem_noticia_upload": $this->enviaImagemNoticiaUpload($_POST, $_FILES); break;
 			case "imagem_texto_upload": $this->enviaImagemTextoUpload($_POST, $_FILES); break;
 			case "remover_imagem_album": $this->removerImagemAlbum(); break;
@@ -77,19 +79,19 @@ class AjaxConteudoBO {
 			case "remover_autor_listaficha": $this->removerAutorFicha(); break;
 			
 			case "unificar_tags": $this->unificarTags(); break;
-			
-			case "aprovar_autor": $this->aprovarAutor(); break;
-			case "reprovar_autor": $this->reprovarAutor(); break;
-			case "aprovar_colaborador": $this->aprovarColaborador(); break;
-			case "reprovar_colaborador": $this->reprovarColaborador(); break;
-			
 			case "subcanais": $this->listarSubCanais(); break;
+			
+			case "aprovar_usuario": $this->aprovarUsuario(); break;
+			case "aprovar_usuario_teste": $this->aprovarUsuarioTeste(); break;
+			case "reprovar_usuario": $this->reprovarUsuario(); break;
+			case "buscar_colaboradores": $this->buscaColaboradores(); break;
 		}
 	}
 	
 	private function listarSubCanais() {
 		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/SegmentoDAO.php");
 		$segdao = new SegmentoDAO;
+		echo '<option value="0">Nenhum Canal</option>';
 		foreach($segdao->getListaSubAreasCadastroCodCanal((int)$this->dados_get['codcanal']) as $key => $value)
 			echo '<option value="'.$value['cod_segmento'].'" '.($this->dados_get['codsubcanal'] == $value['cod_segmento'] ? ' selected="selected"' : '').'>'.utf8_encode($value['nome']).'</option>';
 	}
@@ -99,8 +101,8 @@ class AjaxConteudoBO {
 		$tagdao = new TagDAO;
 		
 		$tags = explode(',', $this->dados_get['codtag']);
-		$tag = Util::geraTags($this->dados_get['tag']);
-		
+        $tag = Util::geraTags(utf8_decode($this->dados_get['tag']));
+        
 		if (count($tags))
 			$tagdao->unificarTags($tags, $tag);
 	}
@@ -153,8 +155,11 @@ class AjaxConteudoBO {
 		$this->dados_get['situacao'] = 3;
 		$limite_resultado = (int)$this->dados_get['limiteresultado'];
 
-		if ($this->dados_get['conteudo_simples'] == 1)
-			$lista_autores = $usuariodao->getListaCadastrosFicha($this->dados_get, 30);
+		if ($this->dados_get['conteudo_simples'] == 1) {
+			include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/AutorDAO.php');
+			$autordao = new AutorDAO;
+			$lista_autores = $autordao->getListaCadastrosFicha($this->dados_get);
+		}
 		else
 			$lista_autores = $usuariodao->getListaCadastros($this->dados_get, 0, $limite_resultado);
 
@@ -165,12 +170,26 @@ class AjaxConteudoBO {
 		}
 	}
 
+	private function buscaColaboradores() {
+                include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/ColaboradorDAO.php');
+                $autordao = new ColaboradorDAO;
+                $lista_autores = $autordao->getListaColaboradoresPorNome($this->dados_get['q']);
+
+		include('includes/ajax_cadastro_colaborador_integrantes_selecao.php');
+	}
+
 	private function adicionarAutorIntegrantes() {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AutorDAO.php");
-		$userdao = new UsuarioDAO;
-		if ($this->dados_get['nome_integrante']) {
-			$dados_usuario = $userdao->getBuscaDadosUsuarioNome($this->dados_get['nome_integrante']);
-			if ($dados_usuario['cod_usuario']) {
+		include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/AutorDAO.php');
+		$autordao = new AutorDAO;
+		if ($this->dados_get['nome_integrante'] || $this->dados_get['cod_usuario']) {
+			
+			if ((int)$this->dados_get['cod_usuario'])
+				$codusuario = (int)$this->dados_get['cod_usuario'];
+			elseif ($this->dados_get['nome_integrante'])
+				$codusuario = $autordao->obterCodUsuarioPorNome($this->dados_get['nome_integrante']);
+			
+			if ($codusuario) {
+				$dados_usuario = $autordao->getUsuarioDados($codusuario);
 				if (!in_array($dados_usuario['cod_usuario'], (array)$_SESSION['sessao_autores_integrantes'][$dados_usuario['cod_usuario']])) {
 					$_SESSION['sessao_autores_integrantes'][(int)$dados_usuario['cod_usuario']] = $dados_usuario;
 				}
@@ -193,11 +212,11 @@ class AjaxConteudoBO {
 		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/ConteudoDAO.php");
 		$contdao = new ConteudoDAO;
 		$lista_tags = $contdao->getBuscaTag($this->dados_get['q']);
-		include("includes/ajax_conteudo_busca_tag.php");
+		include('includes/ajax_conteudo_busca_tag.php');
 	}
 
 	private function listarAudiosAlbum() {
-		include("includes/ajax_conteudo_audiosalbum.php");
+		include('includes/ajax_conteudo_audiosalbum.php');
 	}
 
 	private function removerAudioAlbum() {
@@ -299,10 +318,25 @@ class AjaxConteudoBO {
 
 	private function enviaImagemConteudoUpload(&$arquivos) {
 		include_once('ImagemTemporariaBO.php');
+        $img = "";
 		foreach ($arquivos as $nome => $arquivo) {
-			$img = ImagemTemporariaBO::criar($arquivo);
+            //if($arquivo['size'] <= 20480)
+                $img = ImagemTemporariaBO::criar($arquivo);
+            //else
+            //    $img = "";           
 			echo $img;
 		}
+	}
+	
+	private function enviaImagemConteudoUploadCrop(&$arquivos) {
+		//print_r($arquivos);
+		include_once('ImagemTemporariaBO.php');
+        $img = "";
+            //if($arquivo['size'] <= 20480)
+				$img = ImagemTemporariaBO::crop($arquivos['image'],$arquivos['w'],$arquivos['h'],$arquivos['x1'],$arquivos['y1']);
+            //else
+            //    $img = "";           
+			echo $img;
 	}
 
 	private function enviaImagemNoticiaUpload(&$dados, &$arquivos) {
@@ -483,104 +517,45 @@ class AjaxConteudoBO {
 	}
 
 	private function aprovarConteudo() {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/ConteudoDAO.php");
-		$contdao = new ConteudoDAO;
-		$contdao->aprovarConteudo($this->dados_get['cod_conteudo']);
-	}
+		$codconteudo = (int)$this->dados_get['codconteudo'];
+		if ($codconteudo) {
+			include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/ConteudoExibicaoDAO.php');
+			$condao = new ConteudoExibicaoDAO;
+			$dadosconteudo = $condao->getConteudoResumido($codconteudo, false);
+			
+			foreach($_SESSION['colab_lista'] as $k => $v){
+				$cod_colaborador = $k;
+				if($v['responsavel'])
+					break;
+			}
 
+			if ($cod_colaborador) {
+				include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/ConteudoAprovacaoDAO.php');
+				$aprovdao = new ConteudoAprovacaoDAO;
+				$aprovdao->aprovarConteudo($codconteudo, $cod_colaborador);
+				$aprovdao->editarNotificacaoAprovacao($codconteudo, 3, $_SESSION['logado_cod'], '');
+			}
+		}
+		echo md5(uniqid());
+	}
+	
 	private function reprovarConteudo() {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/ConteudoDAO.php");
-		$contdao = new ConteudoDAO;
-		$contdao->reprovarConteudo($this->dados_get['cod_conteudo'], $this->dados_get['comentario']);
+		$codconteudo = (int)$this->dados_get['codconteudo'];
+		if ($codconteudo) {
+			include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/ConteudoExibicaoDAO.php');
+			$condao = new ConteudoExibicaoDAO;
+			$dadosconteudo = $condao->getConteudoResumido($codconteudo, false);
+			
+			if (isset($_SESSION['logado_dados']['cod_colaborador'])) {
+				include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/ConteudoAprovacaoDAO.php');
+				$aprovdao = new ConteudoAprovacaoDAO;
+				$aprovdao->reprovarConteudo($codconteudo, $_SESSION['logado_dados']['cod_colaborador']);
+				$aprovdao->editarNotificacaoAprovacao($codconteudo, 2, $_SESSION['logado_cod'], $this->dados_get['motivo']);
+			}
+		}
+		echo md5(uniqid());
 	}
 	
-	private function aprovarAutor() {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AutorDAO.php");
-		$autordao = new AutorDAO;
-		$autordao->aprovarAutor($this->dados_get['codautor']);
-		
-		// envia email de aprovação
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/UsuarioDAO.php");
-		$usrdao = new UsuarioDAO;
-		$dados = $usrdao->getUsuarioDados($this->dados_get['codautor']);
-		$dadoscolab = $usrdao->getUsuarioDados($_SESSION['logado_dados']['cod_colaborador']);
-		
-		$texto_email = file_get_contents(ConfigVO::getDirSite()."portal/templates/template_email.html");
-		$mensagem  = "";
-		$mensagem .= "<p>Olá ".$dados['nome'].",</p>";
-		$mensagem .= "<p>A Equipe iTeia tem o prazer em informar que o colaborador ".$dadoscolab['nome']." aprovou o seu cadastro, e você já pode compartilhar seu conteúdo em nossa rede.</p>";
-		$mensagem .= "<p>Seja bem vindo!</p>";
-		
-		$mensagem .= "<br/><p>Seu login: ".$dados['login']."</p>";
-		$mensagem .= "<p>Sua senha: ".$dados['senha']."</p>";
-
-		$mensagem .= "<br/><p>Veja a sua página aqui: ".ConfigVO::URL_SITE.$dados['url']."</p>";
-		$mensagem .= "<p>Página do colaborador: ".ConfigVO::URL_SITE.$dadoscolab['url']."</p>";
-
-		$mensagem .= "<br/><p>Faça login agora e veja como divulgar suas ações culturais.</p>";
-		$mensagem .= "<p>Esperamos pelo seu post!</p>";
-		
-		$mensagem .= "<br/><p>---</p>";
-		$mensagem .= "<p>Equipe Iteia</p>";
-		$mensagem .= "<p>http://www.iteia.org.br</p>";
-		$mensagem .= "<p>http://www.twitter.com/iteia</p>";
-
-		$texto_email = eregi_replace("<!--%URL%-->", ConfigVO::URL_SITE, $texto_email);
-		$texto_email = eregi_replace("<!--%CORPO_EMAIL%-->", $mensagem, $texto_email);
-		Util::enviaemail('[iTEIA] - Parabéns, você agora faz parte da rede iTEIA!', $dados['email'], ConfigVO::getEmail(), $texto_email, $dados['email']);
-	}
-
-	private function reprovarAutor() {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AutorDAO.php");
-		$autordao = new AutorDAO;
-		$autordao->reprovarAutor($this->dados_get['codautor'], $this->dados_get['comentario']);
-	}
-	
-	
-		private function aprovarColaborador() {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/ColaboradorDAO.php");
-		$autordao = new ColaboradorDAO;
-		$autordao->aprovarColaborador($this->dados_get['codautor']);
-		
-		// envia email de aprovação
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/ColaboradorDAO.php");
-		$usrdao = new UsuarioDAO;
-		$dados = $usrdao->getUsuarioDados($this->dados_get['codautor']);
-		$dadoscolab = $usrdao->getUsuarioDados($_SESSION['logado_dados']['cod_colaborador']);
-		
-		$texto_email = file_get_contents(ConfigVO::getDirSite()."portal/templates/template_email.html");
-		$mensagem  = "";
-		$mensagem .= "<p>Olá ".$dados['nome'].",</p>";
-		$mensagem .= "<p>A Equipe iTeia tem o prazer em informar que o colaborador ".$dadoscolab['nome']." aprovou o seu cadastro, e você já pode compartilhar seu conteúdo em nossa rede.</p>";
-		$mensagem .= "<p>Seja bem vindo!</p>";
-		
-		$mensagem .= "<br/><p>Seu login: ".$dados['login']."</p>";
-		$mensagem .= "<p>Sua senha: ".$dados['senha']."</p>";
-
-		$mensagem .= "<br/><p>Veja a sua página aqui: ".ConfigVO::URL_SITE.$dados['url']."</p>";
-		$mensagem .= "<p>Página do colaborador: ".ConfigVO::URL_SITE.$dadoscolab['url']."</p>";
-
-		$mensagem .= "<br/><p>Faça login agora e veja como divulgar suas ações culturais.</p>";
-		$mensagem .= "<p>Esperamos pelo seu post!</p>";
-		
-		$mensagem .= "<br/><p>---</p>";
-		$mensagem .= "<p>Equipe Iteia</p>";
-		$mensagem .= "<p>http://www.iteia.org.br</p>";
-		$mensagem .= "<p>http://www.twitter.com/iteia</p>";
-
-		$texto_email = eregi_replace("<!--%URL%-->", ConfigVO::URL_SITE, $texto_email);
-		$texto_email = eregi_replace("<!--%CORPO_EMAIL%-->", $mensagem, $texto_email);
-		Util::enviaemail('[iTEIA] - Parabéns, você agora faz parte da rede iTEIA!', 'Suporte iTEIA', ConfigVO::getEmail(), $texto_email, $dados['email']);
-	}
-
-	private function reprovarColaborador() {
-		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/ColaboradorDAO.php");
-		$autordao = new ColaboradorDAO;
-		$autordao->reprovarColaborador($this->dados_get['codautor'], $this->dados_get['comentario']);
-	}
-	
-	
-
 	private function redirecionaVisualizacao() {
 		include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/ConteudoDAO.php");
 		$contdao = new ConteudoDAO;
@@ -723,7 +698,7 @@ class AjaxConteudoBO {
 		$_SESSION['sess_conteudo_autores_ficha'][$this->dados_get['sessao_id']][$codautor] = array(
 			'codautor' => $codautor,
 			'nome' => ($this->dados_get['nome']),
-			'wiki' => $caddao->checaAutorWiki($codautor),
+			'wiki' => $autordao->checaAutorWiki($codautor),
 			'atividade' => $this->dados_get['atividade'],
 			'nome_atividade' => $ativdao->getAtividade($this->dados_get['atividade']),
 			'estado' => $estadodao->getSiglaEstado($this->dados_get['codestado']),
@@ -775,7 +750,8 @@ class AjaxConteudoBO {
 		$_SESSION['sess_conteudo_autores_ficha'][$this->dados_get['sessao_id']][$codautor] = array(
 			'codautor' => $codautor,
 			'nome' => ($this->dados_get['nome']),
-			'wiki' => $caddao->checaAutorWiki($codautor),
+			//'wiki' => $caddao->checaAutorWiki($codautor),
+			'wiki' => $autordao->checaAutorWiki($codautor),
 			'atividade' => $this->dados_get['atividade'],
 			'nome_atividade' => $ativdao->getAtividade($this->dados_get['atividade']),
 			'estado' => $estadodao->getSiglaEstado($this->dados_get['codestado']),
@@ -802,25 +778,20 @@ class AjaxConteudoBO {
 		}
 
 		if (!$ja_tem_na_lista) {
-			include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AutorDAO.php");
-			include_once(ConfigGerenciadorVO::getDirClassesRaiz()."vo/AutorVO.php");
-			include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/EstadoDAO.php");
-			include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/AtividadeDAO.php");
-			include_once(ConfigGerenciadorVO::getDirClassesRaiz()."dao/CadastroDAO.php");
-			$autordao = new AutorDAO;
-			$estadodao = new EstadoDAO;
+			include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
+			include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/AtividadeDAO.php');
+			$usrdao = new UsuarioDAO;
 			$ativdao = new AtividadeDAO;
-			$caddao = new CadastroDAO;
-			$autorvo = $autordao->getAutorVO($codautor);
+			$dadosusuario = $usrdao->getUsuarioDados($codautor);
 			$_SESSION['sess_conteudo_autores_ficha'][$this->dados_get['sessao_id']][$codautor] = array(
-				'codautor' => $codautor,
-				'nome' => ($autorvo->getNome()),
-				'atividade' => $this->dados_get['atividade'],
-				'wiki' => $caddao->checaAutorWiki($codautor),
-				'nome_atividade' => $ativdao->getAtividade($this->dados_get['atividade']),
-				'estado' => $estadodao->getSiglaEstado($autorvo->getCodEstado()),
-				'descricao' => $this->dados_get['descricao'],
-				'falecido' => (int)$this->dados_get['falecido'],
+				'codautor' 			=> $codautor,
+				'nome'			 	=> $dadosusuario['nome'],
+				'atividade' 		=> $this->dados_get['atividade'],
+				'wiki' 				=> $usrdao->checaAutorWiki($codautor),
+				'nome_atividade' 	=> $ativdao->getAtividade($this->dados_get['atividade']),
+				'estado' 			=> $dadosusuario['sigla'],
+				'descricao' 		=> $this->dados_get['descricao'],
+				'falecido' 			=> (int)$this->dados_get['falecido'],
 			);
 		}
 		
@@ -842,4 +813,128 @@ class AjaxConteudoBO {
 			unset($_SESSION['sess_conteudo_autores_ficha'][$this->dados_get['sessao_id']][$codautor]);
 	}
 	
+	private function aprovarUsuario() {
+		$codusuario = $this->dados_get['codusuario'];
+		if ($codusuario) {
+			include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
+			$usrdao = new UsuarioDAO;
+			$dadosusuario = $usrdao->getUsuarioDados($codusuario);
+			
+			if ($dadosusuario['cod_usuario'] && ($dadosusuario['situacao'] == 1) && ($dadosusuario['disponivel'] == 1)) {
+				include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioAprovacaoDAO.php');
+				$aprovdao = new UsuarioAprovacaoDAO;
+	
+				$aprovdao->aprovarUsuario($dadosusuario['cod_usuario']);
+				$aprovdao->editarNotificacaoAprovacao($dadosusuario['cod_usuario'], 3, $_SESSION['logado_dados']['cod_colaborador'], '');
+				
+				$dadoscolabadorador = $usrdao->getUsuarioDados($_SESSION['logado_dados']['cod_colaborador']);
+				$texto_email = file_get_contents(ConfigVO::getDirSite().'portal/templates/template_email.html');
+				
+				$mensagem  = "";
+				$mensagem .= "<p>Olá ".$dadosusuario['nome'].",</p>";
+				$mensagem .= "<p>A Equipe iTeia tem o prazer em informar que o colaborador <a href='".ConfigVO::URL_SITE.$dadoscolabadorador['url']."'>".$dadoscolabadorador['nome']."</a> aprovou o seu cadastro, e você já pode compartilhar seu conteúdo em nossa rede.</p>";
+				$mensagem .= "<p>Seja bem vindo!</p>";
+					
+				if ($dadosusuario['login'])
+					$mensagem .= "<br/><p>Seu login: ".$dadosusuario['login']."</p>";
+				
+				if ($dadosusuario['senha'])
+					$mensagem .= "<p>Sua senha: ".$dadosusuario['senha']."</p>";
+			
+				$mensagem .= "<br/><p>Veja a sua página aqui: ".ConfigVO::URL_SITE.$dadosusuario['url']."</p>";
+				//$mensagem .= "<p>Página do colaborador: ".ConfigVO::URL_SITE.$dadoscolabadorador['url']."</p>";
+			
+				$mensagem .= "<br/><p>Faça login agora e veja como divulgar suas ações culturais.</p>";
+				$mensagem .= "<p>Esperamos pelo seu post!</p>";
+					
+				$mensagem .= "<br/><p>---</p>";
+				$mensagem .= "<p>Equipe Iteia</p>";
+				$mensagem .= "<p>http://www.iteia.org.br</p>";
+				$mensagem .= "<p>http://www.twitter.com/iteia</p>";
+			
+				$texto_email = eregi_replace('<!--%URL%-->', ConfigVO::URL_SITE, $texto_email);
+				$texto_email = eregi_replace('<!--%CORPO_EMAIL%-->', $mensagem, $texto_email);
+				if ($dadosusuario['email'])
+					Util::enviaemail('[iTEIA] - Parabéns, você agora faz parte da rede iTEIA!', $dadosusuario['email'], ConfigVO::getEmail(), $texto_email, $dadosusuario['email']);
+			}
+		}
+		echo md5(uniqid());
+	}
+    
+	private function aprovarUsuarioTeste() {
+		$codusuario = $this->dados_get['codusuario'];
+		if ($codusuario) {
+			include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
+			$usrdao = new UsuarioDAO;
+			$dadosusuario = $usrdao->getUsuarioDados($codusuario);
+			
+				include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioAprovacaoDAO.php');
+				$aprovdao = new UsuarioAprovacaoDAO;
+	
+            //$aprovdao->aprovarUsuario($dadosusuario['cod_usuario']);
+            //$aprovdao->editarNotificacaoAprovacao($dadosusuario['cod_usuario'], 3, $_SESSION['logado_dados']['cod_colaborador'], '');
+            
+            $dadoscolabadorador = $usrdao->getUsuarioDados($_SESSION['logado_dados']['cod_colaborador']);
+            $texto_email = file_get_contents(ConfigVO::getDirSite().'portal/templates/template_email.html');
+            
+            $mensagem  = "";
+            $mensagem .= "<p>Olá ".$dadosusuario['nome'].",</p>";
+            $mensagem .= "<p>A Equipe iTeia tem o prazer em informar que o colaborador <a href='".ConfigVO::URL_SITE.$dadoscolabadorador['url']."'>".$dadoscolabadorador['nome']."</a> aprovou o seu cadastro, e você já pode compartilhar seu conteúdo em nossa rede.</p>";
+            $mensagem .= "<p>Seja bem vindo!</p>";
+                
+            if ($dadosusuario['login'])
+                $mensagem .= "<br/><p>Seu login: ".$dadosusuario['login']."</p>";
+            
+            if ($dadosusuario['senha'])
+                $mensagem .= "<p>Sua senha: ".$dadosusuario['senha']."</p>";
+        
+            $mensagem .= "<br/><p>Veja a sua página aqui: ".ConfigVO::URL_SITE.$dadosusuario['url']."</p>";
+            //$mensagem .= "<p>Página do colaborador: ".ConfigVO::URL_SITE.$dadoscolabadorador['url']."</p>";
+        
+            $mensagem .= "<br/><p>Faça login agora e veja como divulgar suas ações culturais.</p>";
+            $mensagem .= "<p>Esperamos pelo seu post!</p>";
+                
+            $mensagem .= "<br/><p>---</p>";
+            $mensagem .= "<p>Equipe Iteia</p>";
+            $mensagem .= "<p>http://www.iteia.org.br</p>";
+            $mensagem .= "<p>http://www.twitter.com/iteia</p>";
+        
+            $texto_email = eregi_replace('<!--%URL%-->', ConfigVO::URL_SITE, $texto_email);
+            $texto_email = eregi_replace('<!--%CORPO_EMAIL%-->', $mensagem, $texto_email);
+            if ($dadosusuario['email'])
+                Util::enviaemail('[iTEIA] - Parabéns, você agora faz parte da rede iTEIA!', $dadosusuario['email'], ConfigVO::getEmail(), $texto_email, $dadosusuario['email']);
+		}
+		echo md5(uniqid());
+	}
+
+	private function reprovarUsuario() {
+		$codusuario = $this->dados_get['codusuario'];
+		if ($codusuario) {
+			include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioDAO.php');
+			$usrdao = new UsuarioDAO;
+			$dadosusuario = $usrdao->getUsuarioDados($codusuario);
+			
+			if ($dadosusuario['cod_usuario'] && ($dadosusuario['situacao'] == 1) && ($dadosusuario['disponivel'] == 1)) {
+				include_once(ConfigGerenciadorVO::getDirClassesRaiz().'dao/UsuarioAprovacaoDAO.php');
+				$aprovdao = new UsuarioAprovacaoDAO;
+				
+				$aprovdao->reprovarUsuario($dadosusuario['cod_usuario']);
+				$aprovdao->editarNotificacaoAprovacao($dadosusuario['cod_usuario'], 2, $_SESSION['logado_dados']['cod_colaborador'], $this->dados_get['motivo']);
+				echo true;
+			}
+		}
+		echo md5(uniqid());
+	}
+	
+    private function enviaImagemBannerUpload(&$arquivos){
+		include_once('ImagemTemporariaBO.php');
+        $img = "";
+		foreach ($arquivos as $nome => $arquivo) {
+            if($arquivo['size'] <= 20480)
+                $img = ImagemTemporariaBO::criar($arquivo);
+            else
+                $img = "";           
+			echo $img;
+		}
+    }
 }

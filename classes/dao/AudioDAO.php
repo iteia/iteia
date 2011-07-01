@@ -71,14 +71,26 @@ class AudioDAO extends ConteudoDAO {
 	}
 	
 	public function getAudiosAlbum($codconteudo) {
-        $sql = "SELECT * FROM Audios WHERE cod_conteudo='".$codconteudo."' AND excluido='0' order by ordem asc";
-        $this->banco->executaQuery($sql);
+		$sql = "SELECT t1.cod_conteudo FROM Conteudo AS t1 WHERE t1.cod_formato = '".$codconteudo."' AND t1.excluido='0' AND t1.publicado='1' AND t1.situacao='1' AND t1.cod_colaborador != 0 AND t1.cod_sistema = '6' ORDER BY t1.datahora DESC LIMIT 10;";
+        //echo $sql; die;
+		$this->banco->executaQuery($sql);
         $array = array();
         while ($row = $this->banco->fetchArray())
             $array[] = $row;
         return $array;
     }
-    
+	
+    public function getDadosAlbum($codconteudo){
+		$sql = "
+				SELECT c.cod_conteudo, c.titulo, c.descricao, a.nome_completo AS Autor, col.entidade AS Colaborador
+				FROM Conteudo AS c
+				LEFT JOIN Colaboradores AS col ON(c.cod_colaborador = col.cod_usuario)
+				INNER JOIN Autores AS a ON(c.cod_autor = a.cod_usuario)
+				WHERE c.cod_conteudo = '".$codconteudo."'";
+		$sql_result = $this->banco->executaQuery($sql);
+		$sql_row = $this->banco->fetchArray($sql_result);
+		return $sql_row;
+	}
 	public function getQtsFaixasAlbum($codconteudo) {
         $sql = "SELECT COUNT(1) FROM Audios WHERE cod_conteudo='".$codconteudo."' AND excluido='0'";
         $row = $this->banco->fetchArray($this->banco->executaQuery($sql));

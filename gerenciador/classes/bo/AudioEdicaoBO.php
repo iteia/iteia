@@ -29,9 +29,27 @@ class AudioEdicaoBO extends ConteudoBO {
 		if (!$this->dadosform["codaudio"] && !count($this->arquivos["audio"]["tmp_name"]))
 			$this->erro_mensagens[] = "Selecione ao menos um arquivo de &aacute;udio";
 			
+		// checar se o primeiro e unico arquivo enviado é um .zip
+		// se for faz a descompactação e trata os audios normalmente
+		if (count($this->arquivos['audio']['tmp_name'][0])) {
+			$extensao = strtolower(Util::getExtensaoArquivo($this->arquivos['audio']['name'][0]));
+			if ($extensao == 'zip') {
+				$zip = new ZipArchive;
+				$zip->open($this->arquivos['audio']['tmp_name'][0], ZIPARCHIVE::CHECKCONS);
+				$zip->extractTo(ConfigVO::getDirTemp());
+
+				unset($this->arquivos['audio']);
+				for($i = 0; $i < $zip->numFiles; $i++) {
+					$this->arquivos['audio']['tmp_name'][$i] = ConfigVO::getDirTemp().$zip->getNameIndex($i);
+					$this->arquivos['audio']['name'][$i] = $zip->getNameIndex($i);
+					$this->arquivos['audio']['size'][$i] = filesize($this->arquivos['audio']['tmp_name'][$i]);
+				}
+			}
+		}
+			
 		if (count($this->arquivos["audio"]["tmp_name"])) {
 			foreach ($this->arquivos["audio"]["tmp_name"] as $key => $value) {
-				if (is_uploaded_file($this->arquivos["audio"]["tmp_name"][$key])) {
+				if (is_file($this->arquivos["audio"]["tmp_name"][$key])) {
 					if ($this->arquivos["audio"]["size"][$key] > 20971520) {
 						$this->erro_mensagens[] = "Um dos &Aacute;udios est&aacute; com mais de 20MB";
 						break;
@@ -42,8 +60,7 @@ class AudioEdicaoBO extends ConteudoBO {
 			// formato audio - mp3
 			
 			foreach ($this->arquivos["audio"]["tmp_name"] as $key => $value) {
-				if (is_uploaded_file($this->arquivos["audio"]["tmp_name"][$key])) {
-					
+				if (is_file($this->arquivos["audio"]["tmp_name"][$key])) {
 					$extensao_audio = strtolower(Util::getExtensaoArquivo($this->arquivos["audio"]["name"][$key]));
 					
 					if ($extensao_audio != 'mp3') {
@@ -93,7 +110,7 @@ class AudioEdicaoBO extends ConteudoBO {
 		// cadastrar varios arquivos de audios ao mesmo tempo
 		foreach ($this->arquivos["audio"]['tmp_name'] as $key => $audio) {
 			
-			if (is_uploaded_file($this->arquivos["audio"]["tmp_name"][$key])) {
+			if (is_file($this->arquivos["audio"]["tmp_name"][$key])) {
 			
 				$this->audvo->setRandomico(Util::geraRandomico());
 				$this->audvo->setFaixa($this->arquivos["audio"]['name'][$key]);

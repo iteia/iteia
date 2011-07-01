@@ -3,10 +3,10 @@
 class ConfigVO {
 	const COD_SISTEMA = 6;
 	const URL_SITE = "http://www4.iteia.org.br/";
-	const DIR_SITE = "/home/ramom/iteia4/"; //local
+	const DIR_SITE = "/home/rui/iteia4/"; //local
 	//const DIR_SITE = "/home/pages/penc/"; //no ar
 	const EMAIL = "eduardo@kmf.com.br"; //local
-	const DIR_CONTEUDO = "/home/ramom/iteia4/conteudo/"; //local
+	const DIR_CONTEUDO = "/home/rui/iteia4/conteudo/"; //local
 	//const DIR_CONTEUDO = "/mnt/fundarpe_conteudo/"; //no ar
 	
 	// endereço de conteudo remoto
@@ -77,7 +77,7 @@ class ConfigVO {
 		return self::DIR_CONTEUDO.'videos/';
 	}
 	public static function getUrlVideo() {
-		return self::URL_SITE.'conteudo/videos/originais/';
+		return self::URL_SITE.'conteudo/videos/convertidos/';
 	}
 	// remoto
 	public static function getUrlVideoRemoto() {

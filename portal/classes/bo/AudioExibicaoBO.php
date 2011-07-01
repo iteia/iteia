@@ -1,6 +1,7 @@
 <?php
 include_once(ConfigPortalVO::getDirClassesRaiz()."dao/AudioDAO.php");
 include_once(ConfigPortalVO::getDirClassesRaiz()."util/PlayerUtil.php");
+include_once(ConfigPortalVO::getDirClassesRaiz()."util/Util.php");
 
 class AudioExibicaoBO {
 
@@ -46,7 +47,7 @@ class AudioExibicaoBO {
         	$zip->open($arquivo, ZIPARCHIVE::CREATE);
         	
         	foreach ($faixas as $value)
-        		$zip->addFile(ConfigVO::getDirAudio() . $value['audio'], $value['arquivo_original']);
+        		$zip->addFile(ConfigVO::getDirAudio() . $value['audio'], Util::removeAcentos($value['arquivo_original']));
         	
         	$zip->close();
         	Util::force_download(file_get_contents($arquivo), 'album_' . $codconteudo . '.zip');
@@ -55,5 +56,4 @@ class AudioExibicaoBO {
         }
 		die;
     }
-
 }

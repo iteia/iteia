@@ -40,6 +40,15 @@ jQuery(document).ready(function() {
 		return false;
 	});
 });
+
+function habilitaCampo(){
+    if(document.getElementById('tipo_doc').value == 5){
+        document.getElementById('orgao_doc').disabled = false;
+    }else{
+        document.getElementById('orgao_doc').value = '';
+        document.getElementById('orgao_doc').disabled = true; 
+    }
+}
 -->
 </script>
 
@@ -92,7 +101,7 @@ if ($msgerro) {
 			<div id="d_tipo">
             <label for="tipo_doc">Tipo:</label>
             <br />
-            <select id="tipo_doc" name="codtipo" class="slc mini">
+            <select id="tipo_doc" name="codtipo" class="slc mini" onchange="habilitaCampo();">
 				<option></option>
 				<option value="1" <?=($cadbo->getValorCampo('codtipo') == 1 ? 'selected="selected"' : '');?>>Certidão de nascimento</option>
 				<option value="2" <?=($cadbo->getValorCampo('codtipo') == 2 ? 'selected="selected"' : '');?>>CNH</option>
@@ -108,7 +117,7 @@ if ($msgerro) {
           </div>
           <div id="d_orgao">
             <label for="orgao_doc">Orgão expedidor:</label><br />
-            <input type="text" class="txt small" name="orgao" value="<?=$cadbo->getValorCampo('orgao')?>" id="orgao_doc"/>
+            <input type="text" class="txt small" name="orgao" value="<?=$cadbo->getValorCampo('orgao')?>" id="orgao_doc" disabled/>
         </div>
         </fieldset>
 
@@ -180,11 +189,14 @@ if ($msgerro) {
         <input type="text" class="txt medium<?=$cadbo->verificaErroCampo('finalendereco')?>" maxlength="30" name="finalendereco" id="final_endereco" value="<?=$cadbo->getValorCampo('finalendereco')?>" onkeyup="contarCaracteres(this, 'cont_final_endereco', 30); exibeTexto(this, 'texto_final_endereco'); lowercase('final_endereco');" /><input type="text" class="txt contador" disabled="disabled" id="cont_final_endereco" value="<?=30 - strlen($cadbo->getValorCampo('finalendereco'))?>" size="4" />
         <p>O endereço de sua página será: http://www.iteia.org.br/<strong id="texto_final_endereco"></strong></p>
 
+<!--
         <label for="pass">Senha: </label>
         <em><small>(Mínimo 6 caracteres)</small></em><br />
         <input type="password" name="senha" class="txt small<?=$cadbo->verificaErroCampo('senha')?>" id="pass"/><br/>
         <label for="rePass">Repetir senha:</label><br />
         <input type="password" name="senha2" class="txt small<?=$cadbo->verificaErroCampo('senha')?>" id="rePass"/><br/>
+-->
+<br/>
         <p><strong>Termos de uso</strong></p>
 		<p class="caption">Leia os termos e indique que você os aceitou para continuar o processo de cadastro.</p>
 

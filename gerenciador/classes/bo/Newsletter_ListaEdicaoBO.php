@@ -84,5 +84,19 @@ class Newsletter_ListaEdicaoBO {
 		else
 			return "";
 	}
+    
+    public function bloquearEmail($mail){
+        if(!$this->listadao->existeAssinatura($mail)){
+            $this->listadao->cadastrarAssinatura($mail, 6);
+        }
+        $this->listadao->descadastrarAssinatura($mail,array('0'));
+        
+        //if($this->listadao->existeAssinatura($mail)){
+        //    $this->listadao->descadastrarAssinatura($mail,array('0'));
+        //}else{
+        //    return $retorno = array("msg" => "E-mail não cadastrado.");
+        //}
+        return false;
+    }
 	
 }

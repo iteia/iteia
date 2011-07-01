@@ -1,6 +1,6 @@
 <?php
 include('verificalogin.php');
-include_once(ConfigGerenciadorVO::getDirClassesRaiz()."util/Util.php");
+include_once(ConfigGerenciadorVO::getDirClassesRaiz().'util/Util.php');
 
 $editar = (int)$_POST['editar'];
 $codcolaborador = (int)$_GET["cod"];
@@ -40,27 +40,17 @@ if ($codcolaborador && !$editar) {
 	$colaboradorbo->setDadosCamposEdicao($codcolaborador);
 	$codestado = $colaboradorbo->getValorCampo("codestado");
 	$codcidade = $colaboradorbo->getValorCampo("codcidade");
-} else {
-	$codestado = 17;
-	$codcidade = 6330;
 }
 
 $codcolaborador = (int)$colaboradorbo->getValorCampo("codcolaborador");
 $rede = (array)$colaboradorbo->getValorCampo("rede");
 ?>
-
 <link rel="stylesheet" type="text/css" href="css/jquery.autocomplete.css" />
-
 <h2>Usu&aacute;rios</h2>
 
 <script language="javascript" type="text/javascript" src="jscripts/ajax.js"></script>
 <script language="javascript" type="text/javascript" src="jscripts/edicao.js"></script>
 <script language="javascript" type="text/javascript" src="jscripts/colaborador.js"></script>
-
-<!--
-<script language="javascript" type="text/javascript" src="jscripts/tiny_mce/tiny_mce.js"></script>
-<script language="javascript" type="text/javascript" src="jscripts/tiny_mce/editor-settings.js"></script>
--->
 
 <script language="javascript" type="text/javascript" src="jscripts/jquery.autocomplete.js"></script>
 <script language="javascript" type="text/javascript" src="jscripts/autocompletar.js"></script>

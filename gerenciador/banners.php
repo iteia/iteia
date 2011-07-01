@@ -2,6 +2,7 @@
 include('verificalogin.php');
 
 include_once("classes/bo/BannersBO.php");
+include_once("classes/bo/BannerEdicaoBO.php");
 include_once(ConfigGerenciadorVO::getDirClassesRaiz()."util/Util.php");
 $bannerbo = new BannersBO;
 
@@ -33,7 +34,7 @@ include('includes/topo.php');
       <a href="banners_busca_pop.php?height=330&amp;width=310" title="Busca avan&ccedil;ada" class="thickbox">Busca avan&ccedil;ada</a>
     </form>
     
-    <p class="descricao"><a href="banners_edicao.php">Publique banners publicit&aacute;rios</a> e chame aten&ccedil;&atilde;o para a&ccedil;&otilde;es ou eventos relacionados &agrave;(s) entidade(s) que voc&ecirc; representa. Os banners aparecer&atilde;o em   diferentes locais do portal, com ordem aleat&oacute;ria. Eles devem ter o tamanho exato de 180 pixels x 150 pixels e podem ser animados (em GIF) ou est&aacute;ticos (em formato de imagem).</p>
+    <div class="descricao"><a href="banners_edicao.php">Publique banners publicit&aacute;rios</a> e chame aten&ccedil;&atilde;o para a&ccedil;&otilde;es ou eventos relacionados &agrave;(s) entidade(s) que voc&ecirc; representa. Os banners aparecer&atilde;o em   diferentes locais do portal, com ordem aleat&oacute;ria. Eles devem ter o tamanho exato de 180 pixels x 150 pixels e podem ser animados (em GIF) ou est&aacute;ticos (em formato de imagem).</div>
     
     <!--
     <form id="busca" method="get" action="banners.php">
@@ -104,6 +105,7 @@ include('includes/topo.php');
           <tr>
             <th class="col-1" scope="col"><input name="checkbox" type="checkbox" id="check-all" />
             </th>
+            <th width="115" class="col-img" scope="col">Miniatura</th>
             <th class="col-titulo" scope="col">T&iacute;tulo</th>
             <th class="col-colaborador" scope="col">Colaborador</th>
             <th class="col-prioridade" scope="col">Prioridade</th>
@@ -115,9 +117,12 @@ include('includes/topo.php');
         	<?php
 				foreach ($banners as $key => $value):
 					if (intval($value['cod'])):
+                        $banner = new BannerEdicaoBO;
+                        $banner->setDadosCamposEdicao($value['cod']);
 			?>
 	          <tr>
 	            <td class="col-1"><input type="checkbox" name="codbanner[]" class="check" value="<?=$value['cod'];?>"  /></td>
+                <td class="col-img"><img src="exibir_imagem.php?img=<?=$banner->getValorCampo('imagem_visualizacao')?>&amp;tipo=a&amp;s=39" width="100" height="83" /></td>
 	            <td class="col-titulo"><a href="banners_publicado.php?cod=<?=$value['cod'];?>"><?=$value['titulo'];?></a></td>
 	            <td class="col-colaborador"><?=$value['nome'];?></td>
 	            <td class="col-prioridade"><?=$value['prioridade'];?></td>

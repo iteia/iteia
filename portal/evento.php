@@ -36,8 +36,8 @@ function mudaCalendario() {
           <div class="description">
 			<?php if ($conteudo['imagem']): ?>
 			<div class="box-imagem">
-			<a href="/exibir_imagem.php?img=<?=$conteudo['imagem'];?>&amp;tipo=1&amp;s=22&amp;TB_iframe=true&amp;height=300&amp;width=300" class="thickbox ampliar-imagem">ampliar</a><br/>
-			<a class="thickbox" href="/exibir_imagem.php?img=<?=$conteudo['imagem'];?>&amp;tipo=1&amp;s=22&amp;TB_iframe=true&amp;height=300&amp;width=300"><img src="/exibir_imagem.php?img=<?=$conteudo['imagem'];?>&amp;tipo=1&amp;s=6" width="180"/></a></div>
+			<a href="/exibir_imagem.php?img=<?=$conteudo['imagem'];?>&amp;tipo=1&amp;s=41&amp;TB_iframe=true&amp;height=300&amp;width=300" class="thickbox ampliar-imagem">ampliar</a><br/>
+			<a class="thickbox" href="/exibir_imagem.php?img=<?=$conteudo['imagem'];?>&amp;tipo=1&amp;s=41&amp;TB_iframe=true&amp;height=300&amp;width=300"><img src="/exibir_imagem.php?img=<?=$conteudo['imagem'];?>&amp;tipo=1&amp;s=6" width="180"/></a></div>
 			<?php endif; ?>
             <p><?=nl2br(Util::autoLink($conteudo['descricao']));?></p>
           </div>
@@ -47,7 +47,10 @@ function mudaCalendario() {
 			até <span class="dtend"><?=date('d/m/Y', strtotime($conteudo['data_final']));?></span>
 			<?php endif; ?>
 			</li>
-            <li><strong>Horário:</strong> <?=date('H:i', strtotime($conteudo['hora_inicial']));?> às <?=date('H:i', strtotime($conteudo['hora_final']));?></li>
+            <li><strong>Horário:</strong> <?=date('H:i', strtotime($conteudo['hora_inicial']));?> 
+                        <?php if($conteudo['hora_final'] != '00:00:00'): ?>
+                        às <?=date('H:i', strtotime($conteudo['hora_final']));?></li>
+                        <?php endif; ?>
             <li><strong>Local:</strong> <span class="location"><?=$conteudo['local'];?></span></li>
 			<?php if ($conteudo['endereco']): ?>
 			<li><strong>Endereço:</strong> <?=$conteudo['endereco'];?></li>
@@ -87,7 +90,7 @@ function mudaCalendario() {
           </div>
        </div>
        </div>
-	   	
+
        <div class="lateral">
 	   <?=$agebo->getHtmlCalendario($mes, $dia); ?>
 		<?php include('includes/banners_lateral.php');?>
@@ -130,7 +133,7 @@ if (!$temul)
     </div>
 <?php endif; ?>
     <div id="comentarios" class="principal">
-		<div id="carrega_comentarios"></div>    
+		<div id="carrega_comentarios"></div>
     </div>
     <div id="comentar" class="principal">
 		<form action="javascript:;" id="formcomentario" name="formcomentario">

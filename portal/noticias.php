@@ -1,4 +1,5 @@
 <?php
+
 include_once('classes/bo/NoticiaExibicaoBO.php');
 include_once(ConfigPortalVO::getDirClassesRaiz()."dao/NoticiaDAO.php");
 $notdao = new NoticiaDAO;
@@ -21,16 +22,25 @@ $topo_class = 'cat-noticias';
 $titulopagina = 'Jornal iTEIA';
 $ativa = 6;
 include ('includes/topo.php');
+
 ?>
-    <div id="migalhas"><span class="localizador">Você está em:</span> <a href="index.php" title="Voltar para a página inicial" id="inicio">Início</a> <span class="marcador">&raquo;</span> <span class="atual">Jornal iTEIA</span></div>
+  <div id="migalhas"><span class="localizador">Você está em:</span> <a href="index.php" title="Voltar para a página inicial" id="inicio">Início</a> <span class="marcador">&raquo;</span> <span class="atual">Jornal iTEIA</span></div>    
 	<h2 class="midia">Jornal <span class="azul">i</span>T<span class="verde">E</span><span class="amarelo">I</span><span class="preto">A</span></h2>
 	<div id="rss"><a href="/feeds.php?formato=5" title="Assine e receba atualizações">Assine</a><br /> <a href="/rss.php" title="Saiba o que é RSS e como utilizar">O que é isso?</a></div>
     <div id="conteudo" class="principal">
       <!--<h2 class="midia">Notícias</h2>-->
 	  <div class="destaque">
       <small><?=date('d.m.Y - H\\hi', strtotime($ultimafoto["datahora"]))?></small><br />
-          <div class="capa"><a href="<?=$ultimafoto['url']?>" title="Leia a matéria completa"><img src="exibir_imagem.php?img=<?=$ultimafoto['imagem']?>&tipo=1&s=33"  /></a></div>
-          <h1><a href="<?=$ultimafoto['url']?>" title="Leia a matéria completa"><?=htmlentities($ultimafoto['titulo'])?></a></h1>
+          <div class="capa">
+			<a href="<?=$ultimafoto['url']?>" title="Leia a matéria completa">
+			  <img src="exibir_imagem.php?img=<?=$ultimafoto['imagem']?>&tipo=1&s=33"  />
+			  </a>
+		  </div>
+          <h1>
+			<a href="<?=$ultimafoto['url']?>" title="Leia a matéria completa">
+			  <?=htmlentities($ultimafoto['titulo'])?>
+			  </a>
+		  </h1>
           <p><?=$ultimafoto['subtitulo']?></p>
           <hr class="separador3px" />
           </div>

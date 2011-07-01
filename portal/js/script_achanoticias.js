@@ -21,11 +21,13 @@ function EfetuarBusca(rodarsubmit) {
 			//$('#buscarpor').attr({name : $('#myselectbox').val()});
 			$('#buscarpor').attr({value : $('#myselectbox').val()});
 		}
-		form_an.action = "/busca_action.php";
+		document.getElementById("termo").name = "palavra";
+		form_an.action = "/busca_action.php?buscar=1";
 		form_an.target = "";
 	}
 	
 	else if (destino_busca == 2) {
+		document.getElementById("termo").name = "assunto";
 		form_an.action = "http://www.achanoticias.com.br/busca.kmf";
 		form_an.target = "_blank";
 	}

@@ -28,7 +28,7 @@ class TagsBO {
 			shuffle($lista_tags);
 		$lista_tags_html = array();
 		foreach ($lista_tags as $tag)
-			$lista_tags_html[] = '<a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5&amp;tag='.urlencode($tag['tag']).'" class="size'.round($this->tamanho_minimo + (($tag['total'] - $menor_tag) * $step)).'">'.$tag['tag'].'</a>';
+			$lista_tags_html[] = '<a href="/busca_action.php?buscar=1&amp;formatos=2,3,4,5,6,7&amp;tag='.urlencode($tag['tag']).'" class="size'.round($this->tamanho_minimo + (($tag['total'] - $menor_tag) * $step)).'">'.$tag['tag'].'</a>';
 
 		return "<p>".implode(' ', $lista_tags_html)."</p>";
 	}

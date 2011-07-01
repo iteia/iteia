@@ -10,6 +10,7 @@ class AutorVO extends UsuarioVO {
 	private $cpf = '';
 	private $tipo_autor = 0;
 	private $cod_nivel = 0;
+	private $exibir_endereco = 0;
 	
 	public function setNomeCompleto($nome_completo) {
 		$this->nome_completo = $nome_completo;
@@ -51,6 +52,13 @@ class AutorVO extends UsuarioVO {
 	}
 	public function getTipoAutor() {
 		return $this->tipo_autor;
+	}
+	
+	public function setExibirEndereco($exibir_endereco) {
+		$this->exibir_endereco = $exibir_endereco;
+	}
+	public function getExibirEndereco() {
+		return $this->exibir_endereco;
 	}
 	
 }

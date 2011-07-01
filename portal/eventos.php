@@ -40,11 +40,11 @@ foreach ($eventos as $key => $value):
 		$li = 1;
 		$datanot = substr($value['data_inicial'], 0, 10);
 		$datanot1 = $data_atual;
-	
+
 	$not = false;
 	if (!isset($eventos[$key + 1]))
 		$not = true;
-	
+
 	$datanot_prox = substr($eventos[$key + 1]['data_inicial'], 0, 10);
 	if ($data_atual != $datanot_prox && $key)
 		$not = true;
@@ -64,15 +64,18 @@ foreach ($eventos as $key => $value):
 	endif;
 ?>
 		<li class="vevent <?=($not ? ' no-border no-margin-b' : '')?>">
-          <h1 class="summary"><a href="/evento.php?cod=<?=$value['cod_conteudo'];?>" title="Ir para a página do evento"><?=$value['titulo'];?></a></h1>
-          <p class="description"><?=(strlen($value['descricao']) > 144 ? substr($value['descricao'], 0, 144):$value['descricao']);?>... <a href="/evento.php?cod=<?=$value['cod_conteudo'];?>" title="Ir para a página do evento">Saiba mais</a></p>
+          <h1 class="summary"><a href="/<?=$value['url_agenda'];?>" title="Ir para a página do evento"><?=$value['titulo'];?></a></h1>
+          <p class="description"><?=(strlen($value['descricao']) > 144 ? substr($value['descricao'], 0, 144):$value['descricao']);?>... <a href="/<?=$value['url_agenda'];?>" title="Ir para a página do evento">Saiba mais</a></p>
           <ul>
             <li><strong>Data:</strong> <span class="dtstart"><?=date('d/m/Y', strtotime($value['data_inicial']));?></span>
 			<?php if ($value['data_final'] != '0000-00-00'): ?>
 			até <span class="dtend"><?=date('d/m/Y', strtotime($value['data_final']));?></span>
 			<?php endif; ?>
 			</li>
-            <li><strong>Horário:</strong> <?=date('H:i', strtotime($value['hora_inicial']));?> às <?=date('H:i', strtotime($value['hora_final']));?></li>
+            <li><strong>Horário:</strong> <?=date('H:i', strtotime($value['hora_inicial']));?>
+                        <?php if (strstr($value['hora_final'], '00:00')): ?>
+                        às <?=date('H:i', strtotime($value['hora_final']));?></li>
+                        <?php endif; ?>
             <li><strong>Local:</strong> <span class="location"><?=$value['local'];?></span></li>
 			<?php if ($value['site']): ?>
 			<li><strong>Site/Hotsite:</strong> <span class="url"><a href="http://<?=$value['site'];?>">http://<?=$value['site'];?></a></span></li>

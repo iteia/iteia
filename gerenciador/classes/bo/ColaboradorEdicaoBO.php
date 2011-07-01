@@ -94,7 +94,7 @@ class ColaboradorEdicaoBO extends UsuarioBO {
 			} elseif (!eregi("^[a-zA-Z0-9]+$", $this->dadosform["finalendereco"])) {
 				$this->erro_mensagens[] = "Final do endereço só pode conter letras e números";
 				$this->erro_campos[] = "finalendereco";
-			} elseif ($this->colaboradordao->existeFinalEndereco('colaboradores/'.$this->dadosform["finalendereco"], $this->dadosform["codcolaborador"])) {
+			} elseif ($this->colaboradordao->existeFinalEndereco($this->dadosform["finalendereco"], $this->dadosform["codcolaborador"])) {
 				$this->erro_mensagens[] = "Final do endereço já existente";
 				$this->erro_campos[] = "finalendereco";
 			}
