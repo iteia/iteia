@@ -1,9 +1,9 @@
-iTEIA: Rede Colaborativa de Arte, Cultura e Informação
+iTEIA: Rede Colaborativa de Arte, Cultura e Informacao
 
 Para contribuir com o projeto iTEIA, voce deve ter instalado os seguintes softwares:
 
 - Sistema operacional Linux
-- Apache Web Server (versão => 2.2)
+- Apache Web Server (versao => 2.2)
 - PHP (versao => 5.2)
 - MySQL (versao => 5.0)
 - Git (versao => 1.6)
