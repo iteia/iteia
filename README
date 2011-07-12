@@ -13,7 +13,7 @@ Para baixar a ultima versao do codigo, siga os procedimentos abaixo:
  1. Torne-se proprietario do diretorio /var/www
     chown usuario.grupo /var/www
     
- 2. Acesso o diretorio
+ 2. Acesse o diretorio
     cd /var/www
   
  3. Faca um clone do projeto
