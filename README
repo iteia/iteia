@@ -1,26 +1,26 @@
 iTEIA: Rede Colaborativa de Arte, Cultura e Informação
 
-Para contribuir com o projeto iTEIA, você deve ter instalado os seguintes softwares:
+Para contribuir com o projeto iTEIA, voce deve ter instalado os seguintes softwares:
 
 - Sistema operacional Linux
 - Apache Web Server (versão => 2.2)
-- PHP (versão => 5.2)
-- MySQL (versão => 5.0)
-- Git (versão => 1.6)
+- PHP (versao => 5.2)
+- MySQL (versao => 5.0)
+- Git (versao => 1.6)
 
-Para baixar a última versão do código, siga os procedimentos abaixo:
+Para baixar a ultima versao do codigo, siga os procedimentos abaixo:
 
- 1. Torne-se proprietário do diretório /var/www
+ 1. Torne-se proprietario do diretorio /var/www
     chown usuario.grupo /var/www
     
- 2. Acesso o diretório
+ 2. Acesso o diretorio
     cd /var/www
   
- 3. Faça um clone do projeto
+ 3. Faca um clone do projeto
     git clone git@github.com:iteia/iteia.git
     
- 4. Acessando o sub-diretório sql do projeto iteia, você encontrará um arquivo compactado no formato bzip2.
-    É o script de criação do banco de dados. Para importá-lo no Mysql, faça o seguinte:
+ 4. Acessando o sub-diretorio sql do projeto iteia, voce encontrara um arquivo compactado no formato bzip2.
+    Eh o script de criacao do banco de dados. Para importa-lo no Mysql, faca o seguinte:
     
     bunzip2 banco_iteia_geral.sql.bz2
     
@@ -28,4 +28,4 @@ Para baixar a última versão do código, siga os procedimentos abaixo:
     
     source banco_iteia_geral.sql;
     
- 5. Altere as constantes do arquivo classes/dao/ConexaoDB.php para o seu usuário e senha de acesso ao MySQL
+ 5. Altere as constantes do arquivo 'classes/dao/ConexaoDB.php' para o seu usuario e senha de acesso ao MySQL
